@@ -164,7 +164,7 @@ type CoverageGapRow = {
 }
 
 const MAX_REQUEST_BYTES = 65_536
-const CURRENT_SCHEMA_MIGRATION = '0012_ordinary_account_lifecycle.sql'
+const CURRENT_SCHEMA_MIGRATION = '0013_international_directory_foundation.sql'
 const REAUTHENTICATION_COOKIE = 'ranger_operator_reauth'
 
 class RequestInputError extends Error {
@@ -361,8 +361,8 @@ function validateAdvancement(record: EditableRecord) {
 
 function validateOutpost(record: EditableRecord) {
   const details = record.details as Partial<OutpostDetails>
-  if (!details.church?.trim() || !details.city?.trim() || !details.jurisdiction?.trim()) {
-    throw new Error('Published outpost facts need a church name, city, and state or territory.')
+  if (!details.church?.trim() || !details.countryCode?.trim() || !details.countryName?.trim() || !details.jurisdiction?.trim()) {
+    throw new Error('Outpost facts need a church name, ISO country, country name, and civil location.')
   }
   if (details.contactUrl && !details.contactUrl.startsWith('https://')) {
     throw new Error('The public church contact route must be an HTTPS URL.')
@@ -387,6 +387,13 @@ function validateOutpost(record: EditableRecord) {
     ['meeting', details.meeting],
     ['contactUrl', details.contactUrl],
   ]
+  if (details.countryCode !== 'US') fields.push(
+    ['countryCode', details.countryCode],
+    ['countryName', details.countryName],
+    ['civilSubdivisionLabel', details.civilSubdivisionLabel],
+    ['fcfAvailability', details.fcfAvailability],
+    ['affiliations', details.affiliations],
+  )
   const sourcedFields = new Set(record.sources.map((source) => source.fieldName))
   const missing = fields
     .filter(([, fieldValue]) => {
@@ -733,7 +740,7 @@ async function handleApi(request: Request, env: Env, requestId: string): Promise
           },
         })
       }
-      return json({ status: 'ok', schema: '0012' })
+      return json({ status: 'ok', schema: '0013' })
     } catch {
       if (request.method === 'HEAD') {
         return new Response(null, {

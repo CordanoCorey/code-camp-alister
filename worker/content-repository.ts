@@ -63,22 +63,34 @@ function nullableText(value: string | number | null) {
 }
 
 function mapOutpost(row: DetailRow): OutpostDetails {
-  const affiliations = parseArray<{ type: string; name: string }>(row.affiliations_json)
+  const affiliations = parseArray<{ type: string; name: string; label: string; scope: 'geographic' | 'language' | 'fcf' }>(row.affiliations_json)
   const affiliation = (kind: string) => affiliations.find((item) => item.type === kind)?.name ?? ''
   return {
     hubOutpostId: text(row.hub_outpost_id),
+    countryCode: text(row.country_code),
+    countryName: text(row.country_name),
+    localUnitLabel: text(row.local_unit_label),
+    identifierRaw: nullableText(row.identifier_raw),
+    displayNameRaw: nullableText(row.display_name_raw),
     outpostNumber: nullableText(row.external_number),
     campusSuffix: nullableText(row.campus_suffix),
     church: text(row.church),
     streetAddress: nullableText(row.street_address),
     city: text(row.city),
     jurisdiction: text(row.jurisdiction),
+    civilSubdivisionLabel: nullableText(row.civil_subdivision_label),
     postalCode: nullableText(row.postal_code),
     district: affiliation('geographic-district'),
     region: affiliation('geographic-region'),
     languageOverlay: affiliation('language-overlay'),
     fcfTerritory: affiliation('fcf-territory'),
     activeFcf: row.fcf_activity_status === 'not-verified' ? null : row.fcf_activity_status === 'yes',
+    fcfAvailability: text(row.fcf_availability || 'not-verified') as OutpostDetails['fcfAvailability'],
+    affiliations: affiliations.map((item) => ({
+      label: item.label || item.type,
+      name: item.name,
+      scope: item.scope === 'language' ? 'language' : item.scope === 'fcf' ? 'fcf' : 'ministry',
+    })),
     programs: parseArray<string>(row.programs_json),
     meeting: nullableText(row.meeting_information),
     contactUrl: nullableText(row.public_contact_url),
@@ -160,6 +172,8 @@ function mapOrganization(row: DetailRow): OrganizationDetails {
   return {
     organizationType: text(row.unit_type) as OrganizationDetails['organizationType'],
     scope: text(row.scope) as OrganizationDetails['scope'],
+    countryCode: text(row.country_code || 'US'),
+    unitLabel: text(row.display_label || 'Organization unit'),
     parent: nullableText(row.parent_name),
     affiliations: parseArray<string>(row.affiliations_json),
     jurisdictions: parseArray<string>(row.jurisdictions_json),
@@ -177,14 +191,17 @@ function mapPage(row: DetailRow): PageDetails {
 async function detailRows(db: D1Database, kind: RecordKind, ids: string[]) {
   const bound = placeholders(ids.length)
   const sql: Record<RecordKind, string> = {
-    outpost: `SELECT o.content_id id, o.*, g.name jurisdiction,
-      COALESCE((SELECT json_group_array(json_object('type', a.affiliation_type, 'name', u.name)) FROM
+    outpost: `SELECT o.content_id id, o.*, g.name jurisdiction, g.display_label civil_subdivision_label,
+      country.code country_code, country.name country_name, program.fcf_availability,
+      COALESCE((SELECT json_group_array(json_object('type', a.affiliation_type, 'name', u.name, 'label', u.display_label, 'scope', u.scope)) FROM
         (SELECT * FROM outpost_affiliations WHERE outpost_id = o.content_id ORDER BY affiliation_type, organization_id) a
         JOIN organization_units u ON u.id = a.organization_id), '[]') affiliations_json,
       COALESCE((SELECT json_group_array(title) FROM
         (SELECT c.title FROM outpost_program_groups p JOIN content_records c ON c.id = p.program_group_id
          WHERE p.outpost_id = o.content_id ORDER BY p.display_order, p.program_group_id)), '[]') programs_json
       FROM outposts o JOIN civil_geographies g ON g.id = o.civil_geography_id
+      JOIN national_programs program ON program.id = o.national_program_id
+      JOIN countries country ON country.code = program.country_code
       WHERE o.content_id IN (${bound})`,
     event: `SELECT e.content_id id, e.*, s.name series_name,
       COALESCE((SELECT json_group_array(json_object('id', referenced_id, 'name', display_name)) FROM
@@ -210,7 +227,7 @@ async function detailRows(db: D1Database, kind: RecordKind, ids: string[]) {
       COALESCE((SELECT json_group_array(json_object('label', label, 'format', format, 'url', url)) FROM
         (SELECT * FROM handbook_purchase_links WHERE advancement_id = a.content_id ORDER BY display_order, id)), '[]') purchase_urls_json
       FROM advancement_items a WHERE a.content_id IN (${bound})`,
-    organization: `SELECT u.id, u.*,
+    organization: `SELECT u.id, u.*, program.country_code,
       (SELECT COALESCE(parent.name, program.name) FROM organization_unit_relationships r
        LEFT JOIN organization_units parent ON parent.id = r.related_unit_id
        LEFT JOIN national_programs program ON program.id = r.related_national_program_id
@@ -222,7 +239,8 @@ async function detailRows(db: D1Database, kind: RecordKind, ids: string[]) {
         (SELECT COALESCE(coverage.display_label, geography.name) label FROM organization_civil_coverage coverage
          JOIN civil_geographies geography ON geography.id = coverage.civil_geography_id
          WHERE coverage.organization_id = u.id ORDER BY geography.display_order, geography.id)), '[]') jurisdictions_json
-      FROM organization_units u WHERE u.id IN (${bound})`,
+      FROM organization_units u LEFT JOIN national_programs program ON program.id = u.national_program_id
+      WHERE u.id IN (${bound})`,
     page: `SELECT p.content_id id, p.*,
       COALESCE((SELECT json_group_array(body_text) FROM
         (SELECT body_text FROM information_page_body_sections WHERE page_id = p.content_id ORDER BY display_order)), '[]') body_json,
@@ -374,14 +392,20 @@ export async function listPublicOutposts(db: D1Database, params: URLSearchParams
   const where = ['1 = 1']
   const bindings: CursorValue[] = []
   const civil = params.get('civil')
+  const country = params.get('country')?.trim().toUpperCase()
   const city = params.get('city')?.trim()
   const affiliation = params.get('organization')
   const program = params.get('program')
   const fcf = accepted(params, 'fcf', ['yes', 'no', 'not-verified'])
   const query = ftsQuery(params.get('q')?.trim() ?? null)
+  if (country) {
+    if (!/^[A-Z]{2}$/.test(country)) throw new Error('Unsupported country filter.')
+    where.push('directory.national_program_id IN (SELECT id FROM national_programs WHERE country_code = ?)')
+    bindings.push(country)
+  }
   if (civil) {
-    where.push("directory.civil_geography_id = (SELECT id FROM civil_geographies WHERE country_code = 'US' AND name = ?)")
-    bindings.push(civil)
+    where.push('directory.civil_geography_id = (SELECT id FROM civil_geographies WHERE country_code = ? AND name = ?)')
+    bindings.push(country || 'US', civil)
   }
   if (city) { where.push('directory.city = ? COLLATE NOCASE'); bindings.push(city.slice(0, 100)) }
   if (fcf) { where.push('directory.fcf_activity_status = ?'); bindings.push(fcf) }

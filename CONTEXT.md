@@ -256,6 +256,26 @@ _Avoid_: Suspended account, restorable account
 
 ## Geography and affiliations
 
+**Country Identity**:
+The ISO 3166-1 alpha-2 code and verified display name that scope a National Program and its local-unit identifiers.
+_Avoid_: Inferred country, continent as identity
+
+**Civil Subdivision**:
+An optional country-defined civil place below Country, displayed with its verified local label such as State, Federal territory, or Home nation.
+_Avoid_: Ministry district, required state
+
+**Ministry Organization Unit**:
+A source-defined unit of a National Program whose display label and relationships are verified facts rather than a universal hierarchy.
+_Avoid_: Universal district column, continent branch
+
+**Affiliation Scope**:
+The ministry, language, or FCF context in which an Outpost is associated with a Ministry Organization Unit; scopes may overlap without implying parentage.
+_Avoid_: Organizational tree, automatic authority
+
+**Source-Native Local Identifier**:
+The local-unit identifier exactly as an official country source publishes it, including meaningful prefixes, punctuation, and country labels.
+_Avoid_: Globally unique outpost number, parsed bare number
+
 **RRI World Region**:
 A Royal Rangers International organizational grouping that may differ from ordinary continental geography.
 _Avoid_: Continent

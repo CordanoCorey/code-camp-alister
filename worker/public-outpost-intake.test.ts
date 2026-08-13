@@ -88,7 +88,7 @@ describe('public Directory Submission HTTP seam', () => {
     expect(Object.keys(await duplicate.json() as object).sort()).toEqual(['referenceCode', 'status'])
     expect(migrated.sqlite.prepare('SELECT COUNT(*) count FROM directory_submissions').get()).toEqual({ count: 1 })
     expect(migrated.sqlite.prepare('SELECT COUNT(*) count FROM directory_submission_events').get()).toEqual({ count: 1 })
-    expect(migrated.sqlite.prepare('SELECT COUNT(*) count FROM public_search_documents').get()).toEqual({ count: 137 })
+    expect(migrated.sqlite.prepare('SELECT COUNT(*) count FROM public_search_documents').get()).toEqual({ count: 140 })
     expect(migrated.sqlite.prepare('SELECT COUNT(*) count FROM public_outpost_directory').get()).toEqual({ count: 4 })
 
     const wrongHost = await jsonRequest('https://hub.example/api/public/outpost-submissions', body, environment)

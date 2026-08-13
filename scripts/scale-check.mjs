@@ -88,6 +88,7 @@ try {
       '0010_automated_data_maintenance.sql',
       '0011_ordinary_adult_accounts.sql',
       '0012_ordinary_account_lifecycle.sql',
+      '0013_international_directory_foundation.sql',
     ][number - 1]}`, import.meta.url)
     if (!migrationUrl.pathname.includes(prefix)) throw new Error(`Migration ordering failed at ${prefix}.`)
     db.exec(await readFile(migrationUrl, 'utf8'))
@@ -416,7 +417,7 @@ try {
   ]
 
   console.log(JSON.stringify({
-    schemaMigration: '0012_ordinary_account_lifecycle.sql',
+    schemaMigration: '0013_international_directory_foundation.sql',
     syntheticOutposts: 20_000,
     syntheticOrdinaryAccounts: ordinaryAccountCount,
     totalOutposts: outpostCount,

@@ -28,18 +28,26 @@ export type ProgramGroup = (typeof programGroups)[number]
 
 export type OutpostDetails = {
   hubOutpostId: string
+  countryCode?: string
+  countryName?: string
+  localUnitLabel?: string
+  identifierRaw?: string | null
+  displayNameRaw?: string | null
   outpostNumber: string | null
   campusSuffix: string | null
   church: string
   streetAddress: string | null
   city: string
   jurisdiction: string
+  civilSubdivisionLabel?: string | null
   postalCode: string | null
   district: string
   region: string
   languageOverlay: string
   fcfTerritory: string
   activeFcf: boolean | null
+  fcfAvailability?: 'available' | 'not-offered' | 'not-verified'
+  affiliations?: Array<{ label: string; name: string; scope: 'ministry' | 'language' | 'fcf' }>
   programs: string[]
   meeting: string | null
   contactUrl: string | null
@@ -190,7 +198,10 @@ export type OrganizationDetails = {
     | 'language-region'
     | 'language-district'
     | 'fcf-territory'
+    | 'country-defined'
   scope: 'geographic' | 'language' | 'fcf'
+  countryCode?: string
+  unitLabel?: string
   parent: string | null
   affiliations: string[]
   jurisdictions: string[]

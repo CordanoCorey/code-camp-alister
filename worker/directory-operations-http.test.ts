@@ -158,7 +158,7 @@ describe('Operator U.S. directory operations HTTP seam', () => {
     expect({ status: converted.status, body: convertedBody }).toEqual({
       status: 201, body: { id: 'outpost-stx-70' },
     })
-    expect(migrated.sqlite.prepare('SELECT COUNT(*) count FROM content_records').get()).toEqual({ count: 139 })
+    expect(migrated.sqlite.prepare('SELECT COUNT(*) count FROM content_records').get()).toEqual({ count: 146 })
     expect(migrated.sqlite.prepare("SELECT status, version FROM content_records WHERE id = 'outpost-stx-70'").get())
       .toEqual({ status: 'draft', version: target.version + 1 })
   })
@@ -302,7 +302,7 @@ describe('Operator U.S. directory operations HTTP seam', () => {
     expect(await replay.json()).toMatchObject({ idempotent: true, candidateCount: 1 })
     expect(migrated.sqlite.prepare('SELECT COUNT(*) count FROM population_batches').get()).toEqual({ count: 1 })
     expect(migrated.sqlite.prepare('SELECT COUNT(*) count FROM staged_outpost_candidates').get()).toEqual({ count: 1 })
-    expect(migrated.sqlite.prepare('SELECT COUNT(*) count FROM content_records').get()).toEqual({ count: 139 })
+    expect(migrated.sqlite.prepare('SELECT COUNT(*) count FROM content_records').get()).toEqual({ count: 146 })
 
     const changedBatch = await call('/api/operator/population/stage', {
       method: 'POST', headers: { 'content-type': 'application/json' },
@@ -335,7 +335,7 @@ describe('Operator U.S. directory operations HTTP seam', () => {
       body: JSON.stringify({ reason: 'A replay must not create another draft.' }),
     })
     expect(repeatedApply.status).toBe(400)
-    expect(migrated.sqlite.prepare('SELECT COUNT(*) count FROM content_records').get()).toEqual({ count: 140 })
+    expect(migrated.sqlite.prepare('SELECT COUNT(*) count FROM content_records').get()).toEqual({ count: 147 })
   })
 
   it('derives complete jurisdiction and region coverage only from eligible public listings', async () => {

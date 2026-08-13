@@ -73,6 +73,7 @@ import {
 import { AddOutpostPage } from './AddOutpostPage'
 import { AccountPages } from './account/AccountPages'
 import { jurisdictions } from './data/jurisdictions'
+import { listInternationalCountries } from '../shared/countries'
 import {
   fetchMoreOperatorRecords,
   fetchMaintenanceWorkspace,
@@ -120,6 +121,23 @@ type Route =
   | '/reset-password'
   | '/account'
 
+const supportedDirectoryCountries = [
+  { code: 'US', name: 'United States' },
+  { code: 'MY', name: 'Malaysia' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'GB', name: 'United Kingdom' },
+]
+
+function formatAffiliations(value: OutpostDetails['affiliations']) {
+  return (value ?? []).map((item) => `${item.label} | ${item.name} | ${item.scope}`).join('\n')
+}
+
+function parseAffiliations(value: string): NonNullable<OutpostDetails['affiliations']> {
+  return value.split('\n').map((line) => line.split('|').map((part) => part.trim()))
+    .filter((parts) => parts.length === 3 && parts[0] && parts[1] && ['ministry', 'language', 'fcf'].includes(parts[2]))
+    .map(([label, name, scope]) => ({ label, name, scope: scope as 'ministry' | 'language' | 'fcf' }))
+}
+
 const navItems: Array<{ href: Route; label: string }> = [
   { href: '/outposts', label: 'Find an Outpost' },
   { href: '/add-your-outpost', label: 'Add Your Outpost' },
@@ -159,7 +177,7 @@ const routeTitles: Record<Route, string> = {
 const navigationEventName = 'ranger-outpost:navigate'
 const locationChangeEventName = 'ranger-outpost:locationchange'
 
-function useCursorRecords(path: string, params: URLSearchParams) {
+function useCursorRecords(path: string, params: URLSearchParams, enabled = true) {
   const queryKey = params.toString()
   const [records, setRecords] = useState<ContentRecord[]>([])
   const [nextCursor, setNextCursor] = useState<string | null>(null)
@@ -168,6 +186,13 @@ function useCursorRecords(path: string, params: URLSearchParams) {
 
   useEffect(() => {
     let active = true
+    if (!enabled) {
+      setRecords([])
+      setNextCursor(null)
+      setLoading(false)
+      setErrorMessage('')
+      return () => { active = false }
+    }
     setLoading(true)
     setErrorMessage('')
     fetchRecordPage(path, new URLSearchParams(queryKey)).then(({ data }) => {
@@ -178,7 +203,7 @@ function useCursorRecords(path: string, params: URLSearchParams) {
       if (active) setErrorMessage(error instanceof Error ? error.message : 'The records could not be loaded.')
     }).finally(() => { if (active) setLoading(false) })
     return () => { active = false }
-  }, [path, queryKey])
+  }, [enabled, path, queryKey])
 
   const loadMore = async () => {
     if (!nextCursor || loading) return
@@ -550,15 +575,16 @@ function OutpostCard({ record }: { record: ContentRecord }) {
       <h2>{details.church}</h2>
       <p className="location">
         {details.streetAddress && <>{details.streetAddress}<br /></>}
-        {details.city}, {details.jurisdiction}{details.postalCode ? ` ${details.postalCode}` : ''}
+        {[details.city, details.jurisdiction !== details.countryName ? details.jurisdiction : null, details.postalCode].filter(Boolean).join(', ')}
+        {details.countryCode !== 'US' && <><br />{details.countryName}</>}
       </p>
-      <dl className="facts">
+      {(details.countryCode ?? 'US') === 'US' ? <dl className="facts">
         <div><dt>District</dt><dd>{details.district || 'Not verified'}</dd></div>
         <div><dt>Region</dt><dd>{details.region || 'Not verified'}</dd></div>
         <div><dt>Language overlay</dt><dd>{details.languageOverlay || 'Not verified'}</dd></div>
         <div><dt>FCF territory</dt><dd>{details.fcfTerritory || 'Not verified'}</dd></div>
         <div><dt>FCF activity</dt><dd>{fcfLabel(details.activeFcf)}</dd></div>
-      </dl>
+      </dl> : (details.affiliations?.length ?? 0) > 0 && <dl className="facts">{details.affiliations?.map((item) => <div key={`${item.scope}:${item.label}:${item.name}`}><dt>{item.label}</dt><dd>{item.name}</dd></div>)}</dl>}
       {details.programs.length > 0 && (
         <div className="tags">{details.programs.map((program) => <span key={program}>{program}</span>)}</div>
       )}
@@ -575,6 +601,9 @@ function OutpostCard({ record }: { record: ContentRecord }) {
 }
 
 function OutpostsPage({ coverage }: { coverage: PublicBootstrap['coverage'] }) {
+  const internationalCountries = listInternationalCountries()
+  const [entryPath, setEntryPath] = useState<'usa' | 'international'>('usa')
+  const [country, setCountry] = useState('')
   const [query, setQuery] = useState('')
   const [jurisdiction, setJurisdiction] = useState('')
   const [affiliation, setAffiliation] = useState('')
@@ -583,13 +612,15 @@ function OutpostsPage({ coverage }: { coverage: PublicBootstrap['coverage'] }) {
   const params = useMemo(() => {
     const next = new URLSearchParams({ limit: '20' })
     if (query.trim()) next.set('q', query.trim())
-    if (jurisdiction) next.set('civil', jurisdiction)
+    if (entryPath === 'usa') next.set('country', 'US')
+    if (entryPath === 'international' && country) next.set('country', country)
+    if (jurisdiction && entryPath === 'usa') next.set('civil', jurisdiction)
     if (affiliation.trim()) next.set('organization', affiliation.trim())
     if (program) next.set('program', program)
     if (fcf) next.set('fcf', fcf)
     return next
-  }, [affiliation, fcf, jurisdiction, program, query])
-  const page = useCursorRecords('/api/public/outposts', params)
+  }, [affiliation, country, entryPath, fcf, jurisdiction, program, query])
+  const page = useCursorRecords('/api/public/outposts', params, entryPath === 'usa' || Boolean(country))
   const selectedPlace = jurisdictions.find((place) => place.name === jurisdiction)
   const selectedCoverage = coverage.jurisdictions.find((place) => place.name === jurisdiction)?.verifiedListingCount ?? 0
   const activeFilters = [
@@ -602,20 +633,22 @@ function OutpostsPage({ coverage }: { coverage: PublicBootstrap['coverage'] }) {
   const reset = () => { setQuery(''); setJurisdiction(''); setAffiliation(''); setProgram(''); setFcf('') }
   return (
     <>
-      <PageIntro eyebrow="U.S. directory" title="Find an Outpost">
-        This independent directory is growing from Operator-verified public sources and is not the official charter system or locator. It remains incomplete; every U.S. jurisdiction stays visible even when no listing has been verified yet.
+      <PageIntro eyebrow={entryPath === 'usa' ? 'U.S. directory' : 'International directory'} title="Find an Outpost">
+        This independent directory contains only Operator-verified public facts and is not an official charter system. International coverage is a tiny model-proof fixture; broad population belongs to Slice 15.
       </PageIntro>
-      <section className="wrap coverage-summary" aria-labelledby="coverage-heading">
+      {entryPath === 'usa' && <section className="wrap coverage-summary" aria-labelledby="coverage-heading">
         <div className="section-heading split"><div><p className="eyebrow">Transparent coverage</p><h2 id="coverage-heading">Verified listings by region</h2></div><p>Counts come only from current, publicly eligible listings. No expected totals are invented.</p></div>
         <div className="coverage-counts">{coverage.regions.map((region) => <div key={region.name}><strong>{region.verifiedListingCount}</strong><span>{region.name}</span></div>)}</div>
         <details><summary>Show every state and territory count</summary><div className="jurisdiction-counts">{coverage.jurisdictions.map((place) => <span key={place.code}><strong>{place.verifiedListingCount}</strong> {place.name}</span>)}</div></details>
-      </section>
+      </section>}
       <section className="wrap directory-layout">
         <aside className="filter-panel" aria-label="Directory filters">
           <h2>Filter outposts</h2>
+          <fieldset><legend>Directory path</legend><label><input type="radio" name="directory-path" checked={entryPath === 'usa'} onChange={() => { setEntryPath('usa'); setCountry(''); setJurisdiction('') }} /> USA</label><label><input type="radio" name="directory-path" checked={entryPath === 'international'} onChange={() => { setEntryPath('international'); setJurisdiction('') }} /> International</label></fieldset>
+          {entryPath === 'international' && <><label htmlFor="country">Country or territory</label><select id="country" value={country} onChange={(event) => setCountry(event.target.value)}><option value="">Choose a country</option>{internationalCountries.map((item) => <option key={item.code} value={item.code}>{item.name}</option>)}</select></>}
           <label htmlFor="outpost-query">Name, city, or number</label>
           <input id="outpost-query" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Try Greenville or 70" />
-          <label htmlFor="jurisdiction">State or U.S. territory</label>
+          {entryPath === 'usa' && <><label htmlFor="jurisdiction">State or U.S. territory</label>
           <select id="jurisdiction" value={jurisdiction} onChange={(event) => setJurisdiction(event.target.value)}>
             <option value="">All jurisdictions</option>
             <optgroup label="States and District of Columbia">
@@ -628,7 +661,7 @@ function OutpostsPage({ coverage }: { coverage: PublicBootstrap['coverage'] }) {
                 <option key={place.abbreviation} value={place.name}>{place.name}</option>
               ))}
             </optgroup>
-          </select>
+          </select></>}
           <label htmlFor="affiliation">District, region, language overlay, or FCF territory</label>
           <input id="affiliation" value={affiliation} onChange={(event) => setAffiliation(event.target.value)} placeholder="Exact organization name" />
           <label htmlFor="program">Program Group</label>
@@ -667,7 +700,7 @@ function OutpostsPage({ coverage }: { coverage: PublicBootstrap['coverage'] }) {
             <AppLink className="button primary" href="/add-your-outpost">Add Your Outpost</AppLink>
           </div>
           {page.errorMessage && <p className="form-error" role="alert">{page.errorMessage}</p>}
-          {page.records.length > 0 ? (
+          {entryPath === 'international' && !country ? <div className="empty-state"><span aria-hidden="true">⌖</span><h2>Choose a country</h2><p>International records are always country-scoped; no global bare-number directory is shown.</p></div> : page.records.length > 0 ? (
             <><div className="outpost-list">{page.records.map((record) => <OutpostCard key={record.id} record={record} />)}</div>
             {page.nextCursor && <button className="button secondary" type="button" onClick={page.loadMore} disabled={page.loading}>{page.loading ? 'Loading…' : 'Load more outposts'}</button>}</>
           ) : (
@@ -1099,13 +1132,13 @@ function DraftPreviewDialog({
 
 function defaultDetails(kind: RecordKind): RecordDetails {
   if (kind === 'outpost') return {
-    hubOutpostId: '', outpostNumber: null, campusSuffix: null, church: '', streetAddress: null,
-    city: '', jurisdiction: '', postalCode: null, district: '', region: '', languageOverlay: '',
-    fcfTerritory: '', activeFcf: null, programs: [], meeting: null, contactUrl: null,
+    hubOutpostId: '', countryCode: 'US', countryName: 'United States', localUnitLabel: 'Outpost', identifierRaw: null, displayNameRaw: null, outpostNumber: null, campusSuffix: null, church: '', streetAddress: null,
+    city: '', jurisdiction: '', civilSubdivisionLabel: 'State', postalCode: null, district: '', region: '', languageOverlay: '',
+    fcfTerritory: '', activeFcf: null, fcfAvailability: 'available', affiliations: [], programs: [], meeting: null, contactUrl: null,
   }
   if (kind === 'event') return defaultEventDetails()
   if (kind === 'advancement') return defaultAdvancementDetails()
-  if (kind === 'organization') return { organizationType: 'district', scope: 'geographic', parent: null, affiliations: [], jurisdictions: [] }
+  if (kind === 'organization') return { organizationType: 'district', scope: 'geographic', countryCode: 'US', unitLabel: 'District', parent: null, affiliations: [], jurisdictions: [] }
   return { section: 'other', body: [], links: [] }
 }
 
@@ -1120,21 +1153,28 @@ function newDraft(kind: RecordKind): ContentRecord {
 function DetailsEditor({ draft, updateDetails }: { draft: ContentRecord; updateDetails: (details: RecordDetails) => void }) {
   if (draft.kind === 'outpost') {
     const details = draft.details as OutpostDetails
+    const countryChoices = supportedDirectoryCountries
     const update = (field: keyof OutpostDetails, value: OutpostDetails[keyof OutpostDetails]) => updateDetails({ ...details, [field]: value })
     return <fieldset><legend>Outpost details</legend><div className="form-grid">
       <label>Hub Outpost ID<input value={details.hubOutpostId || draft.id || 'Assigned when saved'} readOnly /></label>
+      <label>Country<select value={details.countryCode ?? 'US'} onChange={(event) => { const selected = countryChoices.find((item) => item.code === event.target.value); updateDetails({ ...details, countryCode: event.target.value, countryName: selected?.name ?? event.target.value, jurisdiction: event.target.value === 'US' ? '' : selected?.name ?? '', civilSubdivisionLabel: event.target.value === 'US' ? 'State' : null, fcfAvailability: event.target.value === 'US' ? 'available' : 'not-verified', activeFcf: null, affiliations: [] }) }}>{countryChoices.map((item) => <option key={item.code} value={item.code}>{item.name}</option>)}</select></label>
+      <label>Local unit label<input value={details.localUnitLabel ?? 'Outpost'} onChange={(event) => update('localUnitLabel', event.target.value)} /></label>
+      <label>Source-native identifier<input value={details.identifierRaw ?? ''} onChange={(event) => update('identifierRaw', event.target.value || null)} /></label>
+      <label>Source display name<input value={details.displayNameRaw ?? ''} onChange={(event) => update('displayNameRaw', event.target.value || null)} /></label>
       <label>Outpost number<input value={details.outpostNumber ?? ''} onChange={(event) => update('outpostNumber', event.target.value || null)} /></label>
       <label>Campus suffix<input value={details.campusSuffix ?? ''} onChange={(event) => update('campusSuffix', event.target.value || null)} /></label>
       <label>Church<input value={details.church} onChange={(event) => update('church', event.target.value)} /></label>
       <label className="full">Public street address<input value={details.streetAddress ?? ''} onChange={(event) => update('streetAddress', event.target.value || null)} /></label>
-      <label>City<input value={details.city} onChange={(event) => update('city', event.target.value)} /></label>
-      <label>State or territory<select value={details.jurisdiction} onChange={(event) => update('jurisdiction', event.target.value)}><option value="">Choose…</option>{jurisdictions.map((place) => <option key={place.abbreviation} value={place.name}>{place.name}</option>)}</select></label>
+      <label>City / locality (optional outside USA)<input value={details.city} onChange={(event) => update('city', event.target.value)} /></label>
+      {details.countryCode === 'US' ? <label>State or territory<select value={details.jurisdiction} onChange={(event) => update('jurisdiction', event.target.value)}><option value="">Choose…</option>{jurisdictions.map((place) => <option key={place.abbreviation} value={place.name}>{place.name}</option>)}</select></label> : <><label>Civil subdivision name (optional)<input value={details.jurisdiction === details.countryName ? '' : details.jurisdiction} onChange={(event) => update('jurisdiction', event.target.value || details.countryName)} /></label><label>Subdivision label (optional)<input placeholder="State, province, federal territory…" value={details.civilSubdivisionLabel ?? ''} onChange={(event) => update('civilSubdivisionLabel', event.target.value || null)} /></label></>}
       <label>Postal code<input inputMode="numeric" value={details.postalCode ?? ''} onChange={(event) => update('postalCode', event.target.value || null)} /></label>
       <label>District<input value={details.district} onChange={(event) => update('district', event.target.value)} /></label>
       <label>Region<input value={details.region} onChange={(event) => update('region', event.target.value)} /></label>
       <label>Language overlay<input value={details.languageOverlay} onChange={(event) => update('languageOverlay', event.target.value)} /></label>
       <label>FCF territory<input value={details.fcfTerritory} onChange={(event) => update('fcfTerritory', event.target.value)} /></label>
       <label>FCF Activity Status<select value={details.activeFcf === null ? 'unknown' : String(details.activeFcf)} onChange={(event) => update('activeFcf', event.target.value === 'unknown' ? null : event.target.value === 'true')}><option value="unknown">Not verified</option><option value="true">Yes</option><option value="false">No</option></select></label>
+      <label>FCF availability<select value={details.fcfAvailability ?? 'not-verified'} onChange={(event) => update('fcfAvailability', event.target.value as OutpostDetails['fcfAvailability'])}><option value="not-verified">Not verified</option><option value="available">Available</option><option value="not-offered">Not offered</option></select></label>
+      <label className="full">Country-defined affiliations (label | name | ministry/language/fcf)<textarea value={formatAffiliations(details.affiliations)} onChange={(event) => update('affiliations', parseAffiliations(event.target.value))} /></label>
       <label className="full">Program Groups (comma separated)<input value={details.programs.join(', ')} onChange={(event) => update('programs', event.target.value.split(',').map((value) => value.trim()).filter(Boolean))} /></label>
       <label className="full">Meeting information<textarea value={details.meeting ?? ''} onChange={(event) => update('meeting', event.target.value || null)} /></label>
       <label className="full">Public church contact URL<input type="url" value={details.contactUrl ?? ''} onChange={(event) => update('contactUrl', event.target.value || null)} /></label>
@@ -1230,7 +1270,9 @@ function DetailsEditor({ draft, updateDetails }: { draft: ContentRecord; updateD
     const details = draft.details as OrganizationDetails
     const update = (field: keyof OrganizationDetails, value: OrganizationDetails[keyof OrganizationDetails]) => updateDetails({ ...details, [field]: value })
     return <fieldset><legend>Organization details</legend><div className="form-grid">
-      <label>Type<select value={details.organizationType} onChange={(event) => update('organizationType', event.target.value as OrganizationDetails['organizationType'])}><option value="region">U.S. region</option><option value="district">U.S. district</option><option value="language-region">Language region</option><option value="language-district">Language district</option><option value="fcf-territory">FCF territory</option></select></label>
+      <label>Country code<input value={details.countryCode} maxLength={2} onChange={(event) => update('countryCode', event.target.value.toUpperCase())} /></label>
+      <label>Country-defined label<input value={details.unitLabel} onChange={(event) => update('unitLabel', event.target.value)} /></label>
+      <label>Type<select value={details.organizationType} onChange={(event) => update('organizationType', event.target.value as OrganizationDetails['organizationType'])}><option value="region">U.S. region</option><option value="district">U.S. district</option><option value="language-region">Language region</option><option value="language-district">Language district</option><option value="fcf-territory">FCF territory</option><option value="country-defined">Country-defined unit</option></select></label>
       <label>Scope<select value={details.scope} onChange={(event) => update('scope', event.target.value as OrganizationDetails['scope'])}><option value="geographic">Geographic</option><option value="language">Language</option><option value="fcf">FCF</option></select></label>
       <label>Parent<input value={details.parent ?? ''} onChange={(event) => update('parent', event.target.value || null)} /></label>
       <label className="full">Affiliations (one per line)<textarea value={details.affiliations.join('\n')} onChange={(event) => update('affiliations', event.target.value.split('\n').filter(Boolean))} /></label>

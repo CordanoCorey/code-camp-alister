@@ -19,32 +19,51 @@ function deleteAndInsertFacts(db: D1Database, id: string, input: EditableRecord)
   if (input.kind === 'outpost') {
     const details = input.details as OutpostDetails
     statements.push(
+      db.prepare(`INSERT OR IGNORE INTO civil_geographies
+        (id, geography_type, name, code, country_code, parent_id, display_order, display_label)
+        SELECT ?, 'municipality', ?, NULL, ?, 'country-' || lower(?), 1000, ?
+        WHERE ? <> (SELECT name FROM countries WHERE code = ?)
+          AND NOT EXISTS (SELECT 1 FROM civil_geographies WHERE country_code = ? AND name = ?)`)
+        .bind(`civil-${(details.countryCode ?? 'US').toLowerCase()}-${details.jurisdiction.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-')}`,
+          details.jurisdiction, details.countryCode ?? 'US', details.countryCode ?? 'US', details.civilSubdivisionLabel ?? null,
+          details.jurisdiction, details.countryCode ?? 'US', details.countryCode ?? 'US', details.jurisdiction),
       db.prepare(`INSERT INTO outposts
         (content_id, hub_outpost_id, national_program_id, external_number, campus_suffix, church,
          street_address, city, civil_geography_id, postal_code, meeting_information, public_contact_url,
-         fcf_activity_status)
-        SELECT ?, ?, 'rr-usa', ?, ?, ?, ?, ?, geography.id, ?, ?, ?, ?
-        FROM civil_geographies geography WHERE geography.country_code = 'US' AND geography.name = ?
-        ON CONFLICT(content_id) DO UPDATE SET external_number = excluded.external_number,
+         fcf_activity_status, local_unit_label, identifier_raw, display_name_raw)
+        SELECT ?, ?, program.id, ?, ?, ?, ?, ?, geography.id, ?, ?, ?, ?, ?, ?, ?
+        FROM national_programs program
+        JOIN civil_geographies geography ON geography.country_code = program.country_code
+          AND geography.name = ?
+        WHERE program.country_code = ?
+        ON CONFLICT(content_id) DO UPDATE SET national_program_id = excluded.national_program_id,
+          external_number = excluded.external_number,
           campus_suffix = excluded.campus_suffix, church = excluded.church,
           street_address = excluded.street_address, city = excluded.city,
           civil_geography_id = excluded.civil_geography_id, postal_code = excluded.postal_code,
           meeting_information = excluded.meeting_information, public_contact_url = excluded.public_contact_url,
-          fcf_activity_status = excluded.fcf_activity_status`)
+          fcf_activity_status = excluded.fcf_activity_status, local_unit_label = excluded.local_unit_label,
+          identifier_raw = excluded.identifier_raw, display_name_raw = excluded.display_name_raw`)
         .bind(id, id, details.outpostNumber, details.campusSuffix, details.church.trim(), details.streetAddress,
           details.city.trim(), details.postalCode, details.meeting, details.contactUrl,
-          details.activeFcf === null ? 'not-verified' : details.activeFcf ? 'yes' : 'no', details.jurisdiction),
+          details.activeFcf === null ? 'not-verified' : details.activeFcf ? 'yes' : 'no', details.localUnitLabel ?? 'Outpost',
+          details.identifierRaw ?? details.outpostNumber ?? null, details.displayNameRaw ?? null, details.jurisdiction,
+          details.countryCode || 'US'),
       db.prepare('DELETE FROM outpost_affiliations WHERE outpost_id = ?').bind(id),
       db.prepare('DELETE FROM outpost_program_groups WHERE outpost_id = ?').bind(id),
     )
-    for (const [type, name] of [
+    const affiliationFacts: Array<[string, string]> = [
       ['geographic-district', details.district],
       ['geographic-region', details.region],
       ['language-overlay', details.languageOverlay],
       ['fcf-territory', details.fcfTerritory],
-    ]) {
+      ...(details.affiliations ?? []).map((item) => [item.scope === 'language' ? 'language-overlay' : item.scope === 'fcf' ? 'fcf-territory' : 'other', item.name] as [string, string]),
+    ]
+    for (const [type, name] of new Map(affiliationFacts.filter(([, name]) => name).map((item) => [`${item[0]}|${item[1]}`, item])).values()) {
       if (name) statements.push(db.prepare(`INSERT INTO outpost_affiliations (outpost_id, organization_id, affiliation_type)
-        SELECT ?, id, ? FROM organization_units WHERE name = ?`).bind(id, type, name))
+        SELECT ?, id, ? FROM organization_units WHERE name = ? AND national_program_id = (
+          SELECT id FROM national_programs WHERE country_code = ?
+        )`).bind(id, type, name, details.countryCode || 'US'))
     }
     details.programs.forEach((name, order) => statements.push(
       db.prepare(`INSERT INTO outpost_program_groups (outpost_id, program_group_id, display_order)
@@ -158,16 +177,19 @@ function deleteAndInsertFacts(db: D1Database, id: string, input: EditableRecord)
   } else if (input.kind === 'organization') {
     const details = input.details as OrganizationDetails
     statements.push(
-      db.prepare(`INSERT INTO organization_units (id, unit_type, scope, name, national_program_id)
-        VALUES (?, ?, ?, ?, 'rr-usa') ON CONFLICT(id) DO UPDATE SET unit_type = excluded.unit_type,
-          scope = excluded.scope, name = excluded.name`).bind(id, details.organizationType, details.scope, input.title.trim()),
+      db.prepare(`INSERT INTO organization_units (id, unit_type, scope, name, national_program_id, display_label)
+        SELECT ?, ?, ?, ?, id, ? FROM national_programs WHERE country_code = ?
+        ON CONFLICT(id) DO UPDATE SET unit_type = excluded.unit_type,
+          scope = excluded.scope, name = excluded.name, national_program_id = excluded.national_program_id,
+          display_label = excluded.display_label`).bind(id, details.organizationType, details.scope, input.title.trim(), details.unitLabel, details.countryCode),
       db.prepare('DELETE FROM organization_unit_relationships WHERE subject_id = ?').bind(id),
       db.prepare('DELETE FROM organization_civil_coverage WHERE organization_id = ?').bind(id),
     )
     if (details.parent) {
       statements.push(details.parent === 'Royal Rangers USA'
         ? db.prepare(`INSERT INTO organization_unit_relationships
-          (subject_id, relationship_type, related_national_program_id, display_order) VALUES (?, 'part-of', 'rr-usa', 0)`).bind(id)
+          (subject_id, relationship_type, related_national_program_id, display_order)
+          SELECT ?, 'part-of', id, 0 FROM national_programs WHERE country_code = ?`).bind(id, details.countryCode)
         : db.prepare(`INSERT INTO organization_unit_relationships
           (subject_id, relationship_type, related_unit_id, display_order)
           SELECT ?, 'part-of', id, 0 FROM organization_units WHERE name = ?`).bind(id, details.parent))
@@ -180,8 +202,8 @@ function deleteAndInsertFacts(db: D1Database, id: string, input: EditableRecord)
     details.jurisdictions.forEach((label) => statements.push(
       db.prepare(`INSERT INTO organization_civil_coverage
         (organization_id, civil_geography_id, coverage_type, display_label)
-        SELECT ?, id, ?, ? FROM civil_geographies WHERE country_code = 'US' AND name = ?`)
-        .bind(id, label.includes(' (') ? 'partial' : 'source-described', label, label.split(' (')[0]),
+        SELECT ?, id, ?, ? FROM civil_geographies WHERE country_code = ? AND name = ?`)
+        .bind(id, label.includes(' (') ? 'partial' : 'source-described', label, details.countryCode, label.split(' (')[0]),
     ))
   } else {
     const details = input.details as PageDetails
@@ -206,7 +228,8 @@ function deleteAndInsertFacts(db: D1Database, id: string, input: EditableRecord)
 function safeSearchText(input: EditableRecord) {
   if (input.kind === 'outpost') {
     const details = input.details as OutpostDetails
-    return [details.church, details.city, details.jurisdiction, details.outpostNumber].filter(Boolean).join(' ')
+    return [details.church, details.city, details.jurisdiction, details.countryName, details.outpostNumber,
+      ...(details.affiliations ?? []).flatMap((item) => [item.label, item.name])].filter(Boolean).join(' ')
   }
   if (input.kind === 'event') {
     const details = input.details as EventDetails

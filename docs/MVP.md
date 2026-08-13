@@ -1,5 +1,11 @@
 # Ranger Outpost Hub MVP
 
+## International directory foundation (Slice 14)
+
+The public directory now has explicit USA and International entry paths and a country-scoped normalized model. Country, optional Civil Subdivision, country-defined Ministry Organization Units, overlapping ministry/language/FCF affiliations, and source-native identifiers are stored separately with field-level provenance. Missing civil subdivisions and unverified organization or FCF facts are omitted or shown as Not Verified.
+
+The representative Malaysia, Germany, and United Kingdom records prove structurally different source shapes only. Local-unit examples whose sources do not establish current operation remain private Operator drafts and never enter public search. Broad country and outpost verification/population is explicitly deferred to Slice 15; this slice does not claim international completeness.
+
 ## Outcome
 
 Build a locally runnable beta of **Ranger Outpost Hub**, an independent, mobile-friendly Royal Rangers information service. Public visitors can find verified sample outposts, explore advancement and program information, and view sourced events. The project founder privately manages published information through the sole Operator Account.
