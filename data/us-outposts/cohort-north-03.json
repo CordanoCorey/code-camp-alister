@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "batchKey": "us-2026-08-13-north-03",
+  "sourceRegister": "docs/research/us-outpost-cohort-north.md",
+  "sourceVersion": "us-outpost-cohort-north-2026-08-13",
+  "reviewedAt": "2026-08-13",
+  "candidates": [
+    {
+      "candidateKey": "us-nc-wi-bedrock-rio",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Bedrock Church",
+        "city": "Rio",
+        "jurisdiction": "Wisconsin",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Wisconsin–Northern Michigan District",
+        "region": "North Central Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.bedrock-church.org/",
+            "label": "Bedrock Church — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.bedrock-church.org/",
+            "label": "Bedrock Church — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.bedrock-church.org/",
+            "label": "Bedrock Church — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.bedrock-church.org/",
+            "label": "Bedrock Church — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.bedrock-church.org/",
+            "label": "Bedrock Church — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-nc-mn-redeeming-love-maplewood",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Redeeming Love Church",
+        "city": "Maplewood",
+        "jurisdiction": "Minnesota",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Minnesota District",
+        "region": "North Central Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.redeeminglovechurch.com/connect/serve/",
+            "label": "Redeeming Love Church — serve",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.redeeminglovechurch.com/connect/serve/",
+            "label": "Redeeming Love Church — serve",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.redeeminglovechurch.com/connect/serve/",
+            "label": "Redeeming Love Church — serve",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.redeeminglovechurch.com/connect/serve/",
+            "label": "Redeeming Love Church — serve",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.redeeminglovechurch.com/connect/serve/",
+            "label": "Redeeming Love Church — serve",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-nc-mn-casino-assembly-pillager",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Casino Assembly of God",
+        "city": "Pillager",
+        "jurisdiction": "Minnesota",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Minnesota District",
+        "region": "North Central Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.casinoaog.com/ministries.html",
+            "label": "Casino Assembly of God — ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.casinoaog.com/ministries.html",
+            "label": "Casino Assembly of God — ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.casinoaog.com/ministries.html",
+            "label": "Casino Assembly of God — ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.casinoaog.com/ministries.html",
+            "label": "Casino Assembly of God — ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.casinoaog.com/ministries.html",
+            "label": "Casino Assembly of God — ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-nc-wi-portview-port-washington",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Portview Church",
+        "city": "Port Washington",
+        "jurisdiction": "Wisconsin",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Wisconsin–Northern Michigan District",
+        "region": "North Central Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.portviewchurch.com/pv-wednesdays",
+            "label": "Portview Church — PV Wednesdays",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.portviewchurch.com/pv-wednesdays",
+            "label": "Portview Church — PV Wednesdays",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.portviewchurch.com/pv-wednesdays",
+            "label": "Portview Church — PV Wednesdays",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.portviewchurch.com/pv-wednesdays",
+            "label": "Portview Church — PV Wednesdays",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.portviewchurch.com/pv-wednesdays",
+            "label": "Portview Church — PV Wednesdays",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    }
+  ]
+}

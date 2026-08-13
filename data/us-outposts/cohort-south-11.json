@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "batchKey": "us-2026-08-13-south-11",
+  "sourceRegister": "docs/research/us-outpost-cohort-south.md",
+  "sourceVersion": "us-outpost-cohort-south-2026-08-13",
+  "reviewedAt": "2026-08-13",
+  "candidates": [
+    {
+      "candidateKey": "us-gulf-la-family-life-lafayette",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Family Life Church",
+        "city": "Lafayette",
+        "jurisdiction": "Louisiana",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Louisiana District",
+        "region": "Gulf Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.flchurch.net/ministries",
+            "label": "Family Life Church — ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.flchurch.net/ministries",
+            "label": "Family Life Church — ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.flchurch.net/ministries",
+            "label": "Family Life Church — ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.flchurch.net/ministries",
+            "label": "Family Life Church — ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.flchurch.net/ministries",
+            "label": "Family Life Church — ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-gulf-ms-river-three-rivers-moss-point",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "The River at Three Rivers",
+        "city": "Moss Point",
+        "jurisdiction": "Mississippi",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Mississippi District",
+        "region": "Gulf Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.threeriversag.org/",
+            "label": "The River at Three Rivers — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.threeriversag.org/",
+            "label": "The River at Three Rivers — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.threeriversag.org/",
+            "label": "The River at Three Rivers — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.threeriversag.org/",
+            "label": "The River at Three Rivers — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.threeriversag.org/",
+            "label": "The River at Three Rivers — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-se-ga-connect-church-cumming",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Connect Church",
+        "city": "Cumming",
+        "jurisdiction": "Georgia",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Georgia District",
+        "region": "Southeast Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://connectchurchforsyth.com/connect-night",
+            "label": "Connect Church — Connect Night",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://connectchurchforsyth.com/connect-night",
+            "label": "Connect Church — Connect Night",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://connectchurchforsyth.com/connect-night",
+            "label": "Connect Church — Connect Night",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://connectchurchforsyth.com/connect-night",
+            "label": "Connect Church — Connect Night",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://connectchurchforsyth.com/connect-night",
+            "label": "Connect Church — Connect Night",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-se-nc-windsor-assembly",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Windsor Assembly of God",
+        "city": "Windsor",
+        "jurisdiction": "North Carolina",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "North Carolina District",
+        "region": "Southeast Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.windsorassemblyofgod.com/i-m-new",
+            "label": "Windsor Assembly of God — I'm New",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.windsorassemblyofgod.com/i-m-new",
+            "label": "Windsor Assembly of God — I'm New",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.windsorassemblyofgod.com/i-m-new",
+            "label": "Windsor Assembly of God — I'm New",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.windsorassemblyofgod.com/i-m-new",
+            "label": "Windsor Assembly of God — I'm New",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.windsorassemblyofgod.com/i-m-new",
+            "label": "Windsor Assembly of God — I'm New",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    }
+  ]
+}

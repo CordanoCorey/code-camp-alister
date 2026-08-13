@@ -1,0 +1,3 @@
+# Rely on browser page translation instead of custom localization
+
+Ranger Outpost Hub authors one English source interface, marks page language correctly, and relies on built-in Google Chrome page translation rather than implementing language packs, translation editors, stored language preferences, or the paid Google Cloud Translation API. This minimizes language-specific engineering and makes Google's commonly supported languages available where the user's browser offers them; Google controls that catalog, so the project's 700,000-speaker cutoff applies only if curated in-site translations are introduced later and cannot restrict additional languages offered independently by the browser.

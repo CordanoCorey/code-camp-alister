@@ -1,0 +1,11 @@
+# Local loopback preview only. Never configure this variable in production.
+LOCAL_OPERATOR_PREVIEW=true
+
+# Optional exact-loopback-only private intake for local browser testing. Never set this bypass in production.
+LOCAL_PUBLIC_INTAKE_BYPASS=true
+INTAKE_SIGNING_SECRET=replace-with-a-random-local-value-of-at-least-32-characters
+
+# Production uses a public site key plus Worker-only secret and exact hostname allowlist instead.
+# TURNSTILE_SITE_KEY=
+# TURNSTILE_SECRET_KEY=
+# TURNSTILE_EXPECTED_HOSTNAMES=hub.example

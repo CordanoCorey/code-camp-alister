@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ranger-outpost-hub.example/schemas/us-outpost-manifest-v1.json",
+  "title": "Ranger Outpost Hub source-backed population manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "batchKey", "sourceRegister", "sourceVersion", "reviewedAt", "candidates"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "batchKey": { "type": "string", "minLength": 1, "maxLength": 160 },
+    "sourceRegister": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "sourceVersion": { "type": "string", "minLength": 1, "maxLength": 100 },
+    "reviewedAt": { "type": "string", "format": "date" },
+    "candidates": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/candidate" }
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url", "label", "checkedAt", "factKind"],
+      "properties": {
+        "url": { "type": "string", "format": "uri", "pattern": "^https://" },
+        "label": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "checkedAt": { "type": "string", "format": "date" },
+        "factKind": { "enum": ["direct", "derived"] },
+        "mappingSourceUrl": { "type": "string", "format": "uri", "pattern": "^https://" }
+      },
+      "allOf": [{
+        "if": { "properties": { "factKind": { "const": "derived" } } },
+        "then": { "required": ["mappingSourceUrl"] },
+        "else": { "not": { "required": ["mappingSourceUrl"] } }
+      }]
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidateKey", "operation", "targetHubOutpostId", "publicFacts", "fieldSources"],
+      "properties": {
+        "candidateKey": { "type": "string", "pattern": "^us-[a-z0-9-]+$", "maxLength": 160 },
+        "operation": { "enum": ["new-listing", "correction"] },
+        "targetHubOutpostId": { "type": ["string", "null"], "maxLength": 100 },
+        "publicFacts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["church", "city", "jurisdiction", "outpostNumber", "campusSuffix", "district", "region", "fcfTerritory", "programs", "fcfActivityStatus"],
+          "properties": {
+            "church": { "type": "string", "minLength": 1, "maxLength": 160 },
+            "city": { "type": "string", "minLength": 1, "maxLength": 100 },
+            "jurisdiction": { "type": "string", "minLength": 1, "maxLength": 100 },
+            "outpostNumber": { "type": ["string", "null"], "maxLength": 40 },
+            "campusSuffix": { "type": ["string", "null"], "maxLength": 80 },
+            "streetAddress": { "type": ["string", "null"], "maxLength": 200 },
+            "postalCode": { "type": ["string", "null"], "maxLength": 20 },
+            "district": { "type": ["string", "null"], "maxLength": 160 },
+            "region": { "type": ["string", "null"], "maxLength": 160 },
+            "fcfTerritory": { "type": ["string", "null"], "maxLength": 160 },
+            "languageOverlay": { "type": ["string", "null"], "maxLength": 160 },
+            "programs": { "type": "array", "uniqueItems": true, "items": { "enum": ["Ranger Kids", "Discovery Rangers", "Adventure Rangers", "Expedition Rangers"] } },
+            "meeting": { "type": ["string", "null"], "maxLength": 500 },
+            "contactUrl": { "type": ["string", "null"], "format": "uri", "pattern": "^(https://|null$)" },
+            "fcfActivityStatus": { "enum": ["yes", "no", "not-verified"] }
+          }
+        },
+        "fieldSources": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "type": "array", "minItems": 1, "maxItems": 5, "items": { "$ref": "#/$defs/source" } }
+        }
+      }
+    }
+  }
+}

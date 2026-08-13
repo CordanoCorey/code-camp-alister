@@ -1,0 +1,7 @@
+# Enforce one Operator with accepted-tenure transfer
+
+Cloudflare Access proves a verified email identity, while the fixed D1 Operator Account decides whether that identity is the active Operator or the one pending successor allowed only to accept a transfer. The unclaimed singleton can be claimed only after a valid Access sign-in already admitted by the production one-email policy; there is no public signup, seeded personal account, app password, or second standing recovery Operator.
+
+A transfer is staged for a short period and preserves predecessor authority until one atomic successor acceptance closes the old numbered tenure, creates the next tenure, replaces the active private identity, and scrubs pending personal/token material. D1 request-by-request authorization blocks the predecessor immediately after acceptance even if an existing Access token remains valid; manual Access-policy cleanup is defense in depth. Emergency recovery stages this same accepted-successor workflow instead of overwriting or deleting the singleton.
+
+Four-year privilege expiry creates renewal-required mode rather than deletion or reassignment: ordinary editing stops, while renewal, safe transfer, and recovery control remain available. Birth Year is transient request input and is never persisted; only the adult confirmation result, time, and attestation version remain. Privileged and editorial history identifies `Operator tenure N`, never an Operator name or email.

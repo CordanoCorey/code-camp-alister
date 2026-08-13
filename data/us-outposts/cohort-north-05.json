@@ -1,0 +1,287 @@
+{
+  "schemaVersion": 1,
+  "batchKey": "us-2026-08-13-north-05",
+  "sourceRegister": "docs/research/us-outpost-cohort-north.md",
+  "sourceVersion": "us-outpost-cohort-north-2026-08-13",
+  "reviewedAt": "2026-08-13",
+  "candidates": [
+    {
+      "candidateKey": "us-gl-mi-brightmoor-novi",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Brightmoor Christian Church",
+        "city": "Novi",
+        "jurisdiction": "Michigan",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Michigan District",
+        "region": "Great Lakes Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://brightmoorchurch.org/kids/",
+            "label": "Brightmoor Christian Church — kids",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://brightmoorchurch.org/kids/",
+            "label": "Brightmoor Christian Church — kids",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://brightmoorchurch.org/kids/",
+            "label": "Brightmoor Christian Church — kids",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://brightmoorchurch.org/kids/",
+            "label": "Brightmoor Christian Church — kids",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://brightmoorchurch.org/kids/",
+            "label": "Brightmoor Christian Church — kids",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-gl-mi-oakland-rochester",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Oakland Church",
+        "city": "Rochester",
+        "jurisdiction": "Michigan",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Michigan District",
+        "region": "Great Lakes Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.oaklandchurch.me/ministries/kids",
+            "label": "Oakland Church — kids ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.oaklandchurch.me/ministries/kids",
+            "label": "Oakland Church — kids ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.oaklandchurch.me/ministries/kids",
+            "label": "Oakland Church — kids ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.oaklandchurch.me/ministries/kids",
+            "label": "Oakland Church — kids ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.oaklandchurch.me/ministries/kids",
+            "label": "Oakland Church — kids ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-gl-oh-new-life-fellowship-dayton",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "New Life Fellowship",
+        "city": "Dayton",
+        "jurisdiction": "Ohio",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Ohio District",
+        "region": "Great Lakes Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.newlifefellowshipag.org/",
+            "label": "New Life Fellowship — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.newlifefellowshipag.org/",
+            "label": "New Life Fellowship — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.newlifefellowshipag.org/",
+            "label": "New Life Fellowship — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.newlifefellowshipag.org/",
+            "label": "New Life Fellowship — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.newlifefellowshipag.org/",
+            "label": "New Life Fellowship — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-gl-oh-world-harvest-canal-winchester",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "World Harvest Church Royal Rangers",
+        "city": "Canal Winchester",
+        "jurisdiction": "Ohio",
+        "outpostNumber": "207",
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Ohio District",
+        "region": "Great Lakes Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://whcrangers207.weebly.com/",
+            "label": "World Harvest Church Royal Rangers Outpost 207 — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          },
+          {
+            "url": "https://v1.whc.life/Ministries.Youth.aspx",
+            "label": "World Harvest Church — youth ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://v1.whc.life/Ministries.Youth.aspx",
+            "label": "World Harvest Church — youth ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://v1.whc.life/Ministries.Youth.aspx",
+            "label": "World Harvest Church — youth ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://v1.whc.life/Ministries.Youth.aspx",
+            "label": "World Harvest Church — youth ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://v1.whc.life/Ministries.Youth.aspx",
+            "label": "World Harvest Church — youth ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "outpostNumber": [
+          {
+            "url": "https://whcrangers207.weebly.com/",
+            "label": "World Harvest Church Royal Rangers Outpost 207 — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ]
+      }
+    }
+  ]
+}

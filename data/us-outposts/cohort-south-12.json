@@ -1,0 +1,281 @@
+{
+  "schemaVersion": 1,
+  "batchKey": "us-2026-08-13-south-12",
+  "sourceRegister": "docs/research/us-outpost-cohort-south.md",
+  "sourceVersion": "us-outpost-cohort-south-2026-08-13",
+  "reviewedAt": "2026-08-13",
+  "candidates": [
+    {
+      "candidateKey": "us-se-nc-glad-tidings-dunn",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Glad Tidings Church",
+        "city": "Dunn",
+        "jurisdiction": "North Carolina",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "North Carolina District",
+        "region": "Southeast Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.gladtidings.church/keenagers",
+            "label": "Glad Tidings Church — times and location",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.gladtidings.church/keenagers",
+            "label": "Glad Tidings Church — times and location",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.gladtidings.church/keenagers",
+            "label": "Glad Tidings Church — times and location",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.gladtidings.church/keenagers",
+            "label": "Glad Tidings Church — times and location",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.gladtidings.church/keenagers",
+            "label": "Glad Tidings Church — times and location",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-se-al-christian-life-calera",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Christian Life Fellowship",
+        "city": "Calera",
+        "jurisdiction": "Alabama",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Alabama District",
+        "region": "Southeast Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.clfcalera.com/ministries/clf-kidz/pages/royal-rangers",
+            "label": "Christian Life Fellowship — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.clfcalera.com/ministries/clf-kidz/pages/royal-rangers",
+            "label": "Christian Life Fellowship — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.clfcalera.com/ministries/clf-kidz/pages/royal-rangers",
+            "label": "Christian Life Fellowship — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.clfcalera.com/ministries/clf-kidz/pages/royal-rangers",
+            "label": "Christian Life Fellowship — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.clfcalera.com/ministries/clf-kidz/pages/royal-rangers",
+            "label": "Christian Life Fellowship — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-se-fl-navarre-first",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Navarre First Assembly",
+        "city": "Navarre",
+        "jurisdiction": "Florida",
+        "outpostNumber": "89",
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "West Florida District",
+        "region": "Southeast Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.navarre1st.com/royal-rangers",
+            "label": "Navarre First Assembly — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.navarre1st.com/royal-rangers",
+            "label": "Navarre First Assembly — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.navarre1st.com/royal-rangers",
+            "label": "Navarre First Assembly — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.navarre1st.com/royal-rangers",
+            "label": "Navarre First Assembly — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.navarre1st.com/royal-rangers",
+            "label": "Navarre First Assembly — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "outpostNumber": [
+          {
+            "url": "https://www.navarre1st.com/royal-rangers",
+            "label": "Navarre First Assembly — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-se-fl-ivan-assembly-crawfordville",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Ivan Assembly of God",
+        "city": "Crawfordville",
+        "jurisdiction": "Florida",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "West Florida District",
+        "region": "Southeast Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.ivanag.com/ministries/royal-rangers",
+            "label": "Ivan Assembly of God — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.ivanag.com/ministries/royal-rangers",
+            "label": "Ivan Assembly of God — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.ivanag.com/ministries/royal-rangers",
+            "label": "Ivan Assembly of God — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.ivanag.com/ministries/royal-rangers",
+            "label": "Ivan Assembly of God — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.ivanag.com/ministries/royal-rangers",
+            "label": "Ivan Assembly of God — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    }
+  ]
+}

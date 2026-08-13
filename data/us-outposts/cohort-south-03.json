@@ -1,0 +1,301 @@
+{
+  "schemaVersion": 1,
+  "batchKey": "us-2026-08-13-south-03",
+  "sourceRegister": "docs/research/us-outpost-cohort-south.md",
+  "sourceVersion": "us-outpost-cohort-south-2026-08-13",
+  "reviewedAt": "2026-08-13",
+  "candidates": [
+    {
+      "candidateKey": "us-sc-tx-legacy-church-stafford",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Legacy Church",
+        "city": "Stafford",
+        "jurisdiction": "Texas",
+        "outpostNumber": "223",
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "South Texas District",
+        "region": "South Central Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "outpostNumber": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-sc-tx-fountain-of-life-houston",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Fountain of Life Christian Center",
+        "city": "Houston",
+        "jurisdiction": "Texas",
+        "outpostNumber": "240",
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "South Texas District",
+        "region": "South Central Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "outpostNumber": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-sc-tx-north-central-church-spring",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "North Central Church",
+        "city": "Spring",
+        "jurisdiction": "Texas",
+        "outpostNumber": "44",
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "South Texas District",
+        "region": "South Central Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "outpostNumber": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-sc-tx-first-assembly-conroe",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "First Assembly of God",
+        "city": "Conroe",
+        "jurisdiction": "Texas",
+        "outpostNumber": "113",
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "South Texas District",
+        "region": "South Central Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "outpostNumber": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ]
+      }
+    }
+  ]
+}

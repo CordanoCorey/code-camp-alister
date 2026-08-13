@@ -1,0 +1,279 @@
+{
+  "schemaVersion": 1,
+  "batchKey": "us-2026-08-13-north-01",
+  "sourceRegister": "docs/research/us-outpost-cohort-north.md",
+  "sourceVersion": "us-outpost-cohort-north-2026-08-13",
+  "reviewedAt": "2026-08-13",
+  "candidates": [
+    {
+      "candidateKey": "us-nw-id-idaho-city-christian-center",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Idaho City Christian Center",
+        "city": "Idaho City",
+        "jurisdiction": "Idaho",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Southern Idaho District",
+        "region": "Northwest Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.idahocitychristiancenter.org/",
+            "label": "Idaho City Christian Center — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.idahocitychristiancenter.org/",
+            "label": "Idaho City Christian Center — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.idahocitychristiancenter.org/",
+            "label": "Idaho City Christian Center — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.idahocitychristiancenter.org/",
+            "label": "Idaho City Christian Center — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.idahocitychristiancenter.org/",
+            "label": "Idaho City Christian Center — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-nw-wa-faith-fellowship-silverdale",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Faith Fellowship Church",
+        "city": "Silverdale",
+        "jurisdiction": "Washington",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Northwest District",
+        "region": "Northwest Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://faithfellowshipchurch.net/rangersandgirls",
+            "label": "Faith Fellowship Church — Rangers and Girls",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://faithfellowshipchurch.net/rangersandgirls",
+            "label": "Faith Fellowship Church — Rangers and Girls",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://faithfellowshipchurch.net/rangersandgirls",
+            "label": "Faith Fellowship Church — Rangers and Girls",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://faithfellowshipchurch.net/rangersandgirls",
+            "label": "Faith Fellowship Church — Rangers and Girls",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://faithfellowshipchurch.net/rangersandgirls",
+            "label": "Faith Fellowship Church — Rangers and Girls",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-nw-wa-mount-rainier-enumclaw",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Mount Rainier Christian Center",
+        "city": "Enumclaw",
+        "jurisdiction": "Washington",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Northwest District",
+        "region": "Northwest Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.mrccnow.org/royal-rangers",
+            "label": "Mount Rainier Christian Center — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.mrccnow.org/royal-rangers",
+            "label": "Mount Rainier Christian Center — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.mrccnow.org/royal-rangers",
+            "label": "Mount Rainier Christian Center — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.mrccnow.org/royal-rangers",
+            "label": "Mount Rainier Christian Center — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.mrccnow.org/royal-rangers",
+            "label": "Mount Rainier Christian Center — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-nw-mt-hamilton-assembly",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Hamilton Assembly of God",
+        "city": "Hamilton",
+        "jurisdiction": "Montana",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Montana District",
+        "region": "Northwest Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.hamiltonag.org/connect/",
+            "label": "Hamilton Assembly of God — connect",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          },
+          {
+            "url": "https://www.hamiltonag.org/",
+            "label": "Hamilton Assembly of God — home",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.hamiltonag.org/connect/",
+            "label": "Hamilton Assembly of God — connect",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.hamiltonag.org/connect/",
+            "label": "Hamilton Assembly of God — connect",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.hamiltonag.org/connect/",
+            "label": "Hamilton Assembly of God — connect",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.hamiltonag.org/connect/",
+            "label": "Hamilton Assembly of God — connect",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    }
+  ]
+}

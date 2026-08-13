@@ -1,0 +1,281 @@
+{
+  "schemaVersion": 1,
+  "batchKey": "us-2026-08-13-south-13",
+  "sourceRegister": "docs/research/us-outpost-cohort-south.md",
+  "sourceVersion": "us-outpost-cohort-south-2026-08-13",
+  "reviewedAt": "2026-08-13",
+  "candidates": [
+    {
+      "candidateKey": "us-se-fl-cocoa-first",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Cocoa First Assembly",
+        "city": "Cocoa",
+        "jurisdiction": "Florida",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Peninsular Florida District",
+        "region": "Southeast Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://cocoafirstassembly.com/royal-rangers",
+            "label": "Cocoa First Assembly — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://cocoafirstassembly.com/royal-rangers",
+            "label": "Cocoa First Assembly — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://cocoafirstassembly.com/royal-rangers",
+            "label": "Cocoa First Assembly — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://cocoafirstassembly.com/royal-rangers",
+            "label": "Cocoa First Assembly — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://cocoafirstassembly.com/royal-rangers",
+            "label": "Cocoa First Assembly — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-se-fl-willow-oak-mulberry",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Willow Oak Assembly of God",
+        "city": "Mulberry",
+        "jurisdiction": "Florida",
+        "outpostNumber": "145",
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Peninsular Florida District",
+        "region": "Southeast Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.woag.org/royal-rangers",
+            "label": "Willow Oak Assembly of God — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.woag.org/royal-rangers",
+            "label": "Willow Oak Assembly of God — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.woag.org/royal-rangers",
+            "label": "Willow Oak Assembly of God — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.woag.org/royal-rangers",
+            "label": "Willow Oak Assembly of God — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.woag.org/royal-rangers",
+            "label": "Willow Oak Assembly of God — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "outpostNumber": [
+          {
+            "url": "https://www.woag.org/royal-rangers",
+            "label": "Willow Oak Assembly of God — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-se-fl-southside-assembly-lakeland",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Southside Assembly of God",
+        "city": "Lakeland",
+        "jurisdiction": "Florida",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Peninsular Florida District",
+        "region": "Southeast Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.southsideag.com/royalrangers",
+            "label": "Southside Assembly of God — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.southsideag.com/royalrangers",
+            "label": "Southside Assembly of God — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.southsideag.com/royalrangers",
+            "label": "Southside Assembly of God — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.southsideag.com/royalrangers",
+            "label": "Southside Assembly of God — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.southsideag.com/royalrangers",
+            "label": "Southside Assembly of God — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-se-fl-gt-church-st-petersburg",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "GT Church Assembly of God",
+        "city": "St. Petersburg",
+        "jurisdiction": "Florida",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Peninsular Florida District",
+        "region": "Southeast Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://gtchurchfl.com/childrens-and-youth-minitries/",
+            "label": "GT Church Assembly of God — Children's and Youth Ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://gtchurchfl.com/childrens-and-youth-minitries/",
+            "label": "GT Church Assembly of God — Children's and Youth Ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://gtchurchfl.com/childrens-and-youth-minitries/",
+            "label": "GT Church Assembly of God — Children's and Youth Ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://gtchurchfl.com/childrens-and-youth-minitries/",
+            "label": "GT Church Assembly of God — Children's and Youth Ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://gtchurchfl.com/childrens-and-youth-minitries/",
+            "label": "GT Church Assembly of God — Children's and Youth Ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    }
+  ]
+}

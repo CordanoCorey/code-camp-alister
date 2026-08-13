@@ -1,0 +1,3 @@
+# Launch public and read-only without permission-gated features
+
+The Initial Public Release exposes verified original information, manually curated directory and event facts, and clearly identified official links, with the project founder as the sole private Operator. Because the project will not pursue special permissions or public-account legal documentation for launch, ordinary registration, member calendars, outside editors, donations, uploads, bulk locator imports, full handbooks, copied curriculum, protected artwork, and other permission-gated material remain disabled even though some future account behavior is documented.

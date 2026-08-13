@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "batchKey": "us-2026-08-13-north-06",
+  "sourceRegister": "docs/research/us-outpost-cohort-north.md",
+  "sourceVersion": "us-outpost-cohort-north-2026-08-13",
+  "reviewedAt": "2026-08-13",
+  "candidates": [
+    {
+      "candidateKey": "us-gl-oh-springfield-assembly-akron",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Springfield Assembly of God",
+        "city": "Akron",
+        "jurisdiction": "Ohio",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Ohio District",
+        "region": "Great Lakes Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.springfieldassembly.net/kids/",
+            "label": "Springfield Assembly of God — kids",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.springfieldassembly.net/kids/",
+            "label": "Springfield Assembly of God — kids",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.springfieldassembly.net/kids/",
+            "label": "Springfield Assembly of God — kids",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.springfieldassembly.net/kids/",
+            "label": "Springfield Assembly of God — kids",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.springfieldassembly.net/kids/",
+            "label": "Springfield Assembly of God — kids",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-gl-oh-new-life-assembly-geneva",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "New Life Assembly of God",
+        "city": "Geneva",
+        "jurisdiction": "Ohio",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Ohio District",
+        "region": "Great Lakes Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://newlifegeneva.com/weekly-services/",
+            "label": "New Life Assembly of God — weekly services",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://newlifegeneva.com/weekly-services/",
+            "label": "New Life Assembly of God — weekly services",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://newlifegeneva.com/weekly-services/",
+            "label": "New Life Assembly of God — weekly services",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://newlifegeneva.com/weekly-services/",
+            "label": "New Life Assembly of God — weekly services",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://newlifegeneva.com/weekly-services/",
+            "label": "New Life Assembly of God — weekly services",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-gl-in-full-gospel-temple-muncie",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Full Gospel Temple / Legacy Church",
+        "city": "Muncie",
+        "jurisdiction": "Indiana",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Indiana District",
+        "region": "Great Lakes Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.fullgospeltemple.com/ministries/",
+            "label": "Full Gospel Temple / Legacy Church — ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.fullgospeltemple.com/ministries/",
+            "label": "Full Gospel Temple / Legacy Church — ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.fullgospeltemple.com/ministries/",
+            "label": "Full Gospel Temple / Legacy Church — ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.fullgospeltemple.com/ministries/",
+            "label": "Full Gospel Temple / Legacy Church — ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.fullgospeltemple.com/ministries/",
+            "label": "Full Gospel Temple / Legacy Church — ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-gl-in-world-harvest-elkhart",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "World Harvest Church",
+        "city": "Elkhart",
+        "jurisdiction": "Indiana",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Indiana District",
+        "region": "Great Lakes Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.whcelkhart.com/pages/719-kid-harvest-clubhouse",
+            "label": "World Harvest Church Elkhart — Kid Harvest Clubhouse",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.whcelkhart.com/pages/719-kid-harvest-clubhouse",
+            "label": "World Harvest Church Elkhart — Kid Harvest Clubhouse",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.whcelkhart.com/pages/719-kid-harvest-clubhouse",
+            "label": "World Harvest Church Elkhart — Kid Harvest Clubhouse",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.whcelkhart.com/pages/719-kid-harvest-clubhouse",
+            "label": "World Harvest Church Elkhart — Kid Harvest Clubhouse",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.whcelkhart.com/pages/719-kid-harvest-clubhouse",
+            "label": "World Harvest Church Elkhart — Kid Harvest Clubhouse",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    }
+  ]
+}

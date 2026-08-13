@@ -1,48 +1,44 @@
 :root {
-  font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
-  color: #1b1f2a;
-  background: #f5f2ea;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #17241f;
+  background: #f8f5ed;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --forest-950: #0b251c;
+  --forest-900: #10382a;
+  --forest-800: #16503c;
+  --forest-700: #1b674d;
+  --forest-100: #dcebe2;
+  --cream: #f8f5ed;
+  --paper: #fffdf8;
+  --gold: #d6a139;
+  --gold-dark: #83570c;
+  --rust: #b84f32;
+  --ink: #17241f;
+  --muted: #607069;
+  --line: #d8ded8;
+  --shadow: 0 18px 48px rgba(16, 56, 42, 0.1);
 }
 
-* {
-  box-sizing: border-box;
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; background: var(--cream); }
+body { min-height: 100vh; margin: 0; }
+body, button, input, select, textarea { font: inherit; }
+button, input, select, textarea { color: inherit; }
+button, select { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: .65; }
+a { color: inherit; }
+img { max-width: 100%; }
+h1, h2, h3, p { margin-top: 0; }
+h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; line-height: 1.08; }
+input, select, textarea {
+  width: 100%; border: 1px solid #bdc9c1; border-radius: .55rem; background: #fff;
+  padding: .78rem .85rem; outline: none;
 }
-
-html {
-  min-width: 320px;
-  background: #f5f2ea;
+input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible {
+  outline: 3px solid #fff; outline-offset: 2px; box-shadow: 0 0 0 6px #6b4200;
 }
-
-body {
-  min-width: 320px;
-  min-height: 100vh;
-  margin: 0;
-}
-
-button,
-input {
-  font: inherit;
-}
-
-button {
-  cursor: pointer;
-}
-
-button:disabled {
-  cursor: not-allowed;
-}
-
-code {
-  padding: 0.15rem 0.4rem;
-  border: 1px solid rgba(27, 31, 42, 0.14);
-  border-radius: 0.35rem;
-  background: rgba(255, 255, 255, 0.6);
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-  font-size: 0.9em;
-}
+main:focus { outline: none; }
+section[id], article[id], [tabindex="-1"] { scroll-margin-top: 9rem; }
+textarea { min-height: 7rem; resize: vertical; }

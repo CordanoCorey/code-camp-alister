@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "batchKey": "us-2026-08-13-north-11",
+  "sourceRegister": "docs/research/us-outpost-cohort-north.md",
+  "sourceVersion": "us-outpost-cohort-north-2026-08-13",
+  "reviewedAt": "2026-08-13",
+  "candidates": [
+    {
+      "candidateKey": "us-ne-me-emmanuel-livermore-falls",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Emmanuel Assembly of God",
+        "city": "Livermore Falls",
+        "jurisdiction": "Maine",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Northern New England District",
+        "region": "Northeast Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.emmanuelassembly.com/ministries/royal-rangers",
+            "label": "Emmanuel Assembly of God — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.emmanuelassembly.com/ministries/royal-rangers",
+            "label": "Emmanuel Assembly of God — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.emmanuelassembly.com/ministries/royal-rangers",
+            "label": "Emmanuel Assembly of God — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.emmanuelassembly.com/ministries/royal-rangers",
+            "label": "Emmanuel Assembly of God — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.emmanuelassembly.com/ministries/royal-rangers",
+            "label": "Emmanuel Assembly of God — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-ne-nh-christian-bible-nashua",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Christian Bible Church",
+        "city": "Nashua",
+        "jurisdiction": "New Hampshire",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Northern New England District",
+        "region": "Northeast Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://cbcnashua.com/ministries/royal-rangers",
+            "label": "Christian Bible Church — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://cbcnashua.com/ministries/royal-rangers",
+            "label": "Christian Bible Church — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://cbcnashua.com/ministries/royal-rangers",
+            "label": "Christian Bible Church — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://cbcnashua.com/ministries/royal-rangers",
+            "label": "Christian Bible Church — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://cbcnashua.com/ministries/royal-rangers",
+            "label": "Christian Bible Church — Royal Rangers",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-ne-ct-cornerstone-oxford",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Cornerstone Church",
+        "city": "Oxford",
+        "jurisdiction": "Connecticut",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Southern New England District",
+        "region": "Northeast Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://cornerstonect.org/next-gen-ministries",
+            "label": "Cornerstone Church — Next Gen ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://cornerstonect.org/next-gen-ministries",
+            "label": "Cornerstone Church — Next Gen ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://cornerstonect.org/next-gen-ministries",
+            "label": "Cornerstone Church — Next Gen ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://cornerstonect.org/next-gen-ministries",
+            "label": "Cornerstone Church — Next Gen ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://cornerstonect.org/next-gen-ministries",
+            "label": "Cornerstone Church — Next Gen ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-ne-ma-iglesia-hispana-lawrence",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Iglesia Hispana Asambleas de Dios",
+        "city": "Lawrence",
+        "jurisdiction": "Massachusetts",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Southern New England District",
+        "region": "Northeast Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.iglesiavinead.org/ministries",
+            "label": "Iglesia Hispana Asambleas de Dios — ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.iglesiavinead.org/ministries",
+            "label": "Iglesia Hispana Asambleas de Dios — ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.iglesiavinead.org/ministries",
+            "label": "Iglesia Hispana Asambleas de Dios — ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.iglesiavinead.org/ministries",
+            "label": "Iglesia Hispana Asambleas de Dios — ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.iglesiavinead.org/ministries",
+            "label": "Iglesia Hispana Asambleas de Dios — ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    }
+  ]
+}

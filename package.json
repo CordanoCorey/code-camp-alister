@@ -1,5 +1,5 @@
 {
-  "name": "code-camp-starter",
+  "name": "ranger-outpost-hub",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -7,23 +7,47 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "vite",
+    "db:setup": "wrangler d1 migrations apply ranger-outpost-hub --local",
+    "db:verify": "node scripts/verify-migrations.mjs",
+    "db:migrations:production:list": "wrangler d1 migrations list ranger-outpost-hub-production --config wrangler.jsonc --env production --remote",
+    "db:migrate:production": "wrangler d1 migrations apply ranger-outpost-hub-production --config wrangler.jsonc --env production --remote",
+    "db:integrity:production": "wrangler d1 execute ranger-outpost-hub-production --config wrangler.jsonc --env production --remote --file scripts/production-integrity.sql",
+    "db:bookmark:production": "wrangler d1 time-travel info ranger-outpost-hub-production --config wrangler.jsonc --env production",
+    "operator:recovery:production": "node scripts/operator-recovery.mjs",
+    "outposts:manifests:build": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/build-us-outpost-manifests.mjs",
+    "outposts:validate": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/outpost-manifest-cli.mjs validate",
+    "outposts:stage": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/outpost-manifest-cli.mjs stage",
+    "outposts:stage:production": "npm run config:production:check && node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/outpost-manifest-cli.mjs stage --production",
+    "outposts:report": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/outpost-manifest-cli.mjs report",
+    "dev": "npm run db:setup && vite",
     "build": "tsc -b && vite build",
+    "config:production:check": "node scripts/production-config.mjs",
+    "deploy:production": "node scripts/production-deploy.mjs",
     "lint": "oxlint",
     "preview": "vite preview",
-    "check": "npm run lint && npm run build"
+    "smoke:production": "node scripts/production-smoke.mjs",
+    "test": "vitest run",
+    "test:integration": "vitest run worker/index.test.ts tests/sw-policy.test.js src/lib/preview.test.ts scripts/production-config.test.js scripts/production-smoke.test.js",
+    "check": "npm run lint && npm run test && npm run build",
+    "scale:check": "node scripts/scale-check.mjs"
   },
   "dependencies": {
+    "jose": "^6.2.8",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.52.0",
+    "@cloudflare/workers-types": "^5.20260812.1",
     "@types/node": "24.13.3",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",
     "@vitejs/plugin-react": "6.0.5",
+    "axe-core": "^4.13.0",
     "oxlint": "1.76.0",
     "typescript": "6.0.2",
-    "vite": "8.2.0"
+    "vite": "8.2.0",
+    "vitest": "^4.1.10",
+    "wrangler": "^4.122.0"
   }
 }

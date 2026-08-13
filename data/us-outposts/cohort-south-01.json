@@ -1,0 +1,301 @@
+{
+  "schemaVersion": 1,
+  "batchKey": "us-2026-08-13-south-01",
+  "sourceRegister": "docs/research/us-outpost-cohort-south.md",
+  "sourceVersion": "us-outpost-cohort-south-2026-08-13",
+  "reviewedAt": "2026-08-13",
+  "candidates": [
+    {
+      "candidateKey": "us-sc-tx-mauriceville-assembly-orange",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Mauriceville Assembly of God",
+        "city": "Orange",
+        "jurisdiction": "Texas",
+        "outpostNumber": "342",
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "South Texas District",
+        "region": "South Central Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "outpostNumber": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-sc-tx-first-assembly-angleton",
+      "operation": "correction",
+      "targetHubOutpostId": "outpost-stx-70",
+      "publicFacts": {
+        "church": "First Assembly of God",
+        "city": "Angleton",
+        "jurisdiction": "Texas",
+        "outpostNumber": "70",
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "South Texas District",
+        "region": "South Central Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "outpostNumber": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-sc-tx-central-assembly-angleton",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Central Assembly of God",
+        "city": "Angleton",
+        "jurisdiction": "Texas",
+        "outpostNumber": "71",
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "South Texas District",
+        "region": "South Central Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "outpostNumber": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-sc-tx-shady-oaks-lake-jackson",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Shady Oaks Assembly of God",
+        "city": "Lake Jackson",
+        "jurisdiction": "Texas",
+        "outpostNumber": "157",
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "South Texas District",
+        "region": "South Central Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "outpostNumber": [
+          {
+            "url": "https://www.stxroyalrangers.com/outpost-locator/",
+            "label": "South Texas Royal Rangers — Outpost Locator",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ]
+      }
+    }
+  ]
+}

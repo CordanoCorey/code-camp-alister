@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "batchKey": "us-2026-08-13-north-04",
+  "sourceRegister": "docs/research/us-outpost-cohort-north.md",
+  "sourceVersion": "us-outpost-cohort-north-2026-08-13",
+  "reviewedAt": "2026-08-13",
+  "candidates": [
+    {
+      "candidateKey": "us-nc-mn-vibrant-life-ellendale",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Vibrant Life Church",
+        "city": "Ellendale",
+        "jurisdiction": "Minnesota",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Minnesota District",
+        "region": "North Central Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.vibrantlifeag.com/youth-and-children-ministries",
+            "label": "Vibrant Life Church — youth and children ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.vibrantlifeag.com/youth-and-children-ministries",
+            "label": "Vibrant Life Church — youth and children ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.vibrantlifeag.com/youth-and-children-ministries",
+            "label": "Vibrant Life Church — youth and children ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.vibrantlifeag.com/youth-and-children-ministries",
+            "label": "Vibrant Life Church — youth and children ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.vibrantlifeag.com/youth-and-children-ministries",
+            "label": "Vibrant Life Church — youth and children ministries",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-nc-wi-hillside-gillett",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Hillside Assembly of God",
+        "city": "Gillett",
+        "jurisdiction": "Wisconsin",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Wisconsin–Northern Michigan District",
+        "region": "North Central Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://hillsidenorth.org/events/family-night/",
+            "label": "Hillside Assembly of God — Family Night",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://hillsidenorth.org/events/family-night/",
+            "label": "Hillside Assembly of God — Family Night",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://hillsidenorth.org/events/family-night/",
+            "label": "Hillside Assembly of God — Family Night",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://hillsidenorth.org/events/family-night/",
+            "label": "Hillside Assembly of God — Family Night",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://hillsidenorth.org/events/family-night/",
+            "label": "Hillside Assembly of God — Family Night",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-nc-ia-sanctuary-jefferson",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "The Sanctuary",
+        "city": "Jefferson",
+        "jurisdiction": "Iowa",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Iowa District",
+        "region": "North Central Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.thesanctuaryjefferson.org/events",
+            "label": "The Sanctuary — events",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.thesanctuaryjefferson.org/events",
+            "label": "The Sanctuary — events",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.thesanctuaryjefferson.org/events",
+            "label": "The Sanctuary — events",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.thesanctuaryjefferson.org/events",
+            "label": "The Sanctuary — events",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.thesanctuaryjefferson.org/events",
+            "label": "The Sanctuary — events",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    },
+    {
+      "candidateKey": "us-nc-mo-northland-cathedral-kansas-city",
+      "operation": "new-listing",
+      "targetHubOutpostId": null,
+      "publicFacts": {
+        "church": "Northland Cathedral",
+        "city": "Kansas City",
+        "jurisdiction": "Missouri",
+        "outpostNumber": null,
+        "campusSuffix": null,
+        "streetAddress": null,
+        "postalCode": null,
+        "district": "Northern Missouri District",
+        "region": "North Central Region",
+        "fcfTerritory": null,
+        "languageOverlay": null,
+        "programs": [],
+        "meeting": null,
+        "contactUrl": null,
+        "fcfActivityStatus": "not-verified"
+      },
+      "fieldSources": {
+        "church": [
+          {
+            "url": "https://www.nckc.org/get-involved/detail/northern-missouri-district-youth-camp/44150-1716958800/",
+            "label": "Northland Cathedral — Northern Missouri District youth camp event",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "city": [
+          {
+            "url": "https://www.nckc.org/get-involved/detail/northern-missouri-district-youth-camp/44150-1716958800/",
+            "label": "Northland Cathedral — Northern Missouri District youth camp event",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "jurisdiction": [
+          {
+            "url": "https://www.nckc.org/get-involved/detail/northern-missouri-district-youth-camp/44150-1716958800/",
+            "label": "Northland Cathedral — Northern Missouri District youth camp event",
+            "checkedAt": "2026-08-13",
+            "factKind": "direct"
+          }
+        ],
+        "region": [
+          {
+            "url": "https://www.nckc.org/get-involved/detail/northern-missouri-district-youth-camp/44150-1716958800/",
+            "label": "Northland Cathedral — Northern Missouri District youth camp event",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ],
+        "district": [
+          {
+            "url": "https://www.nckc.org/get-involved/detail/northern-missouri-district-youth-camp/44150-1716958800/",
+            "label": "Northland Cathedral — Northern Missouri District youth camp event",
+            "checkedAt": "2026-08-13",
+            "factKind": "derived",
+            "mappingSourceUrl": "https://royalrangers.com/~/-/media/F5F81CB2C829419A82139A817D8073A2.ashx"
+          }
+        ]
+      }
+    }
+  ]
+}
