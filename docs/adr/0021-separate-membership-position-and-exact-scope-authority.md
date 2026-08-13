@@ -1,0 +1,5 @@
+# Separate membership, position, and exact-scope authority
+
+Ranger Outpost Hub records Outpost Membership, Position Verification, and Permission Grants independently because a self-selected profile claim or ministry affiliation is not safe authorization evidence. Every ordinary-account write requires an active named capability for the exact scope, scopes never inherit from one another, and conflict routing stores durable office/scope labels rather than changing officeholders' personal identities; the sole Service Operator may use an explicitly audited bootstrap or recovery path without pretending to hold ministry authority.
+
+The Pastor exception removes only a second evidence workflow: an authorized approver must still appoint a verified Outpost Member, the database permits only one active appointment per Outpost, and self-selection never creates the appointment. This costs additional private state and explicit grants, but makes membership, appointments, and authority independently revocable and prevents claims or organizational relationships from silently amplifying privileges.

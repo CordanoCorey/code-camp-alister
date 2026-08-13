@@ -140,10 +140,12 @@ Slice 10 extends the historical Initial Public Release with local ordinary adult
 
 Slice 11 adds a one-calendar-year Ordinary Access Term, a one-calendar-month Renewal Notice, explicit pre-expiry one-year Renewal, exact expiry enforcement, and bounded irreversible deletion six calendar months after confirmed warning-provider acceptance. It does not change anonymous public browsing, Operator lifecycle, membership, verification, permissions, editors, workspaces, calendars, or youth-account scope. Dated local evidence and limitations are recorded in [`docs/qa/ordinary-account-lifecycle.md`](qa/ordinary-account-lifecycle.md).
 
+Slice 17 adds one private, exact-scope Outpost Workspace and group-owned Calendar for verified adult Members. A separate `manage-outpost-calendar` grant controls timezone and entry writes; no position name grants authority. Entries contain group plans only, never rosters, RSVPs, attendance, youth progress, or individual data. Dated evidence and limitations are recorded in [`docs/qa/outpost-workspace-calendar.md`](qa/outpost-workspace-calendar.md).
+
 ## Explicitly deferred
 
 - Youth accounts
-- Private Outpost Calendars and Meeting Plans
+- Meeting-plan builders and Reference Calendar linking
 - Membership, claimed-position, and delegated editor workflows
 - Donations and payments
 - User uploads, messaging, profiles, attendance, RSVPs, and advancement tracking

@@ -89,20 +89,44 @@ The adult Royal Rangers relationship an Account holder selects: Parent/Guardian,
 _Avoid_: Permission, verified office
 
 **Permission Grant**:
-Verified authority for an Account to perform specified actions within specified Organizational Scopes. A Permission Grant is separate from a Claimed Position and never implies authority above or below its stated scope.
+Revocable authority for an Account to perform one named capability within one exact Organizational Scope. It is separate from Membership and Position Verification and never implies authority above, below, adjacent to, or merely affiliated with its stated scope.
 _Avoid_: Selected position, account type
 
-**Membership Verification**:
-Private confirmation that an Account holder belongs to a specified Outpost. Knowing an outpost number or selecting a position is not verification.
-_Avoid_: Public roster, self-attestation
+**Membership Request**:
+A private request by one active ordinary Account to join one published Outpost. An unmatched textual outpost claim cannot be a Membership Request.
+_Avoid_: Membership, outpost claim
+
+**Outpost Membership**:
+A private verified, rejected, withdrawn, revoked, or ended relationship between one Account and one Outpost. Only a verified active Outpost Membership unlocks member-only access.
+_Avoid_: Public roster, self-attestation, Current Outpost
 
 **Position Verification**:
-Evidence supporting a Claimed Position before any related Permission Grant is issued. Verification follows the position's applicable Organizational Scope rather than granting authority throughout the service.
-_Avoid_: Position selection
+A private record that an adult ministry position was verified for one exact Organizational Scope. It can be revoked independently and never grants a capability by itself.
+_Avoid_: Position selection, Permission Grant
+
+**Permission Event**:
+An append-only sanitized record that a Permission Grant was granted, revoked, or expired. It contains durable non-identifying labels rather than public names or email.
+_Avoid_: Public roster, profile history
+
+**Conflict Assignment**:
+The exact Organizational Scope, durable office label, and resolver capability required for one conflict. It routes responsibility without searching through or inheriting from an organization tree.
+_Avoid_: Escalation hierarchy, named officeholder
 
 **Outpost Member**:
 An Account holder whose relationship to a particular Outpost has been privately verified. An Outpost Member may view that Outpost's member-only information; membership is never exposed as a public roster.
 _Avoid_: Public member, directory member
+
+**Reference Event Plan**:
+A private Outpost-owned decision to consider, plan for, or attend one public Reference Calendar occurrence. It is not an RSVP, registration, attendance record, or organizer confirmation.
+_Avoid_: RSVP, attendance, registration
+
+**Reference Event Snapshot**:
+A bounded private copy of the specific public event facts an Outpost planned against when a Reference Event Plan was created or explicitly refreshed.
+_Avoid_: Event revision copy, source archive
+
+**Plan Review State**:
+A private indication that material public facts changed, public eligibility ended, or a required-fact conflict changed and an authorized Outpost editor should review the Reference Event Plan.
+_Avoid_: Automatic plan update, organizer decision
 
 **Current Outpost**:
 The single verified public Outpost Listing an Account holder presently identifies with, an unmatched private Outpost Claim, or No Current Outpost. For ordinary and Operator Accounts it is optional context that establishes neither membership nor authority; membership is verified separately.
@@ -361,6 +385,20 @@ _Avoid_: Public status incident, factual correction
 **Freshness Queue**:
 The Operator's private worklist of facts approaching verification expiry, broken source links, conflicting Event facts, completed Events, and geographic coverage gaps. Automation adds drafts and reminders, while the Operator controls publication in the Initial Public Release.
 _Avoid_: Automatic publication queue
+
+## Private Outpost planning
+
+**Outpost Workspace**:
+One private collaboration boundary owned by one canonical Outpost and available only to that exact Outpost's verified adult Members.
+_Avoid_: Member portal, private roster
+
+**Outpost Calendar Entry**:
+One group-owned planned activity with explicit local date/time, timezone, and group-plan status; it never represents an individual's intent, RSVP, attendance, or progress.
+_Avoid_: Personal event, attendance record
+
+**Calendar Entry Event**:
+An immutable sanitized record that an Outpost Calendar Entry was created, updated, or cancelled, identifying its actor only as Verified Outpost Editor, Service Operator, or Deleted Account.
+_Avoid_: Member activity log, named audit actor
 
 ## Data-use boundaries
 

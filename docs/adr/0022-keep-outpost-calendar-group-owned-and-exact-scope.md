@@ -1,0 +1,3 @@
+# Keep the Outpost Calendar group-owned and exact-scope
+
+The private Outpost Workspace belongs to exactly one canonical Outpost, and its Calendar Entries describe only that Outpost's group plans. Reads require the finalized Slice 16 exact-Outpost Membership plus `view-outpost-private`; writes additionally require the independent exact-scope `manage-outpost-calendar` grant. This deliberately rejects role-name authority, inherited district or national access, rosters, attendance, personal calendars, and identity-bearing audit history so account deletion and editor turnover do not erase or expose the group's plans.

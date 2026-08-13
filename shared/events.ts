@@ -12,7 +12,7 @@ import {
   type EventDetails,
   type EventLifecycleStatus,
   type FreshnessQueueItem,
-} from './domain'
+} from './domain.ts'
 
 // Beta policy: event facts are rechecked every 60 days and enter the queue 14 days early.
 // The queue is deterministic and never writes or publishes on its own.

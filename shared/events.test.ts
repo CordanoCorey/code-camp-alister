@@ -3,8 +3,10 @@ import type { ContentRecord, CoverageGap, EventConflict, EventDetails } from './
 import {
   buildFreshnessQueue,
   displayedEventLifecycle,
+  eventViewFor,
   filterEventRecords,
   formatEventDateRange,
+  formatEventLocalDate,
   serializePublicEvent,
   sortEventRecords,
   validateEventDetails,
@@ -90,6 +92,12 @@ describe('event validation and local schedule formatting', () => {
     expect(formatEventDateRange(details)).toBe('Jul 6, 2026 – Jul 10, 2026 · All day · America/Chicago')
     expect(formatEventDateRange({ ...details, allDay: false, startTime: '18:30', endTime: '20:00' })).toContain('6:30 PM – 8:00 PM · America/Chicago')
   })
+
+  it('keeps date-only occurrences stable across extreme browser timezone boundaries', () => {
+    const dateOnly = { ...details, startDate: '2027-01-01', endDate: null }
+    expect(formatEventDateRange(dateOnly)).toBe('Jan 1, 2027 · All day · America/Chicago')
+    expect(formatEventLocalDate(dateOnly.startDate)).toBe('Jan 1, 2027')
+  })
 })
 
 describe('event lifecycle, views, and filters', () => {
@@ -97,6 +105,19 @@ describe('event lifecycle, views, and filters', () => {
     expect(displayedEventLifecycle(details, '2026-08-12')).toBe('completed')
     expect(displayedEventLifecycle({ ...details, lifecycleStatus: 'cancelled' }, '2026-08-12')).toBe('cancelled')
     expect(displayedEventLifecycle({ ...details, lifecycleStatus: 'postponed' }, '2026-08-12')).toBe('postponed')
+  })
+
+  it('keeps cancelled and postponed future occurrences upcoming while completed occurrences are history', () => {
+    expect(eventViewFor({ ...details, startDate: '2027-01-01', endDate: null, lifecycleStatus: 'cancelled' }, '2026-08-13')).toBe('upcoming')
+    expect(eventViewFor({ ...details, startDate: '2027-01-01', endDate: null, lifecycleStatus: 'postponed' }, '2026-08-13')).toBe('upcoming')
+    expect(eventViewFor({ ...details, startDate: '2027-01-01', endDate: null, lifecycleStatus: 'completed' }, '2026-08-13')).toBe('past')
+  })
+
+  it('retains separate occurrence identities for records in one recurring series', () => {
+    const first = event({ id: 'event-series-2026' }, { occurrenceId: 'event-series-2026' })
+    const second = event({ id: 'event-series-2030' }, { occurrenceId: 'event-series-2030', startDate: '2030-07-01', endDate: null })
+    expect(first.details).toMatchObject({ occurrenceId: 'event-series-2026', series: details.series })
+    expect(second.details).toMatchObject({ occurrenceId: 'event-series-2030', series: details.series })
   })
 
   it('sorts upcoming forward and past in reverse chronology', () => {

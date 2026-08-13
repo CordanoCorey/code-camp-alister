@@ -30,6 +30,7 @@ export function assetPathsFromShell(html) {
 export function classifyRequest(request, origin) {
   const url = new URL(request.url)
   if (request.method !== 'GET' || url.origin !== origin) return 'ignore'
+  if (url.pathname === '/workspace' || url.pathname.startsWith('/workspace/')) return 'ignore'
   if (url.pathname === '/api/public/outpost-submissions/config' || url.pathname === '/api/public/outpost-submissions') return 'ignore'
   if (url.pathname === '/api/public' || url.pathname.startsWith('/api/public/') || url.pathname === '/api/search') return 'public-data'
   if (url.pathname.startsWith('/api/') || url.pathname === '/operator' || url.pathname.startsWith('/operator/')) return 'ignore'

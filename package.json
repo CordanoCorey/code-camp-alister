@@ -23,6 +23,8 @@
     "international:validate": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/international-manifest-cli.mjs validate",
     "international:stage": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/international-manifest-cli.mjs stage",
     "international:report": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/international-manifest-cli.mjs report",
+    "events:validate": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/event-candidate-cli.mjs validate",
+    "events:stage": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/event-candidate-cli.mjs stage",
     "international:coverage:report": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/rri-coverage-report.mjs",
     "maintenance:local:run": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/maintenance-local.mjs run",
     "maintenance:local:status": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/maintenance-local.mjs status",
@@ -35,7 +37,7 @@
     "preview": "vite preview",
     "smoke:production": "node scripts/production-smoke.mjs",
     "test": "vitest run",
-    "test:integration": "vitest run worker/index.test.ts worker/maintenance-http.test.ts worker/scheduled.test.ts tests/sw-policy.test.js src/lib/preview.test.ts scripts/production-config.test.js scripts/production-smoke.test.js",
+    "test:integration": "vitest run worker/index.test.ts worker/maintenance-http.test.ts worker/scheduled.test.ts worker/outpost-workspace-calendar-http.test.ts worker/outpost-workspace-calendar-repository.test.ts worker/reference-event-plan-repository.test.ts tests/sw-policy.test.js src/lib/preview.test.ts scripts/production-config.test.js scripts/production-smoke.test.js",
     "check": "npm run lint && npm run test && npm run build",
     "scale:check": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/scale-check.mjs"
   },

@@ -192,16 +192,16 @@ The burden cannot be converted into an exact staff-hours estimate from public ev
 
 ## 2026 event and seed recheck
 
-**Verification date:** 2026-08-12  
+**Verification date:** 2026-08-13 (initial pass 2026-08-12; volatile statuses rechecked 2026-08-13)
 **Purpose:** A focused recheck of the three original event seeds and a small set of national, regional, district, and FCF candidates for the Reference Calendar. Live organizer pages were preferred over downloadable snapshots. Third-party registration pages linked by an organizer are links for users, not event authorities.
 
 ### Original national-training seeds
 
 The live [Royal Rangers USA National Training Schedule](https://royalrangers.com/training/events) still supports all three original 2026 occurrences. Each is a national training occurrence organized by the Royal Rangers USA national training office, not a region-scoped event merely because it is held in a particular region.
 
-| Existing occurrence | Organizer-supported facts on 2026-08-12 | Publication note |
+| Existing occurrence | Organizer-supported facts through 2026-08-13 | Publication note |
 |---|---|---|
-| National Elementary Education Conference (NEEC), Eagle Rock, Missouri | September 11-12, 2026; Camp Eagle Rock, Eagle Rock, Missouri; live status `Accepting Registrations`; discount and minimum-registration deadlines both August 11, 2026. The official [NEEC event-information PDF](https://royalrangers.com/-/media/RoyalRangers/Schedule-Component/PDFs/NEEC/2026/NEEC-SMO-Event-Information.pdf) describes a Friday-through-Saturday leader-training conference focused on early-elementary ministry and Ranger Kids. | Keep the occurrence. The live page continued to say `Accepting Registrations` one day after the two displayed deadlines, so registration status and deadline are separate facts; do not derive one from the other. |
+| National Elementary Education Conference (NEEC), Eagle Rock, Missouri | September 11-12, 2026; Camp Eagle Rock, Eagle Rock, Missouri; live status `Camp has been Cancelled`; discount and minimum-registration deadlines both August 11, 2026. The official [NEEC event-information PDF](https://royalrangers.com/-/media/RoyalRangers/Schedule-Component/PDFs/NEEC/2026/NEEC-SMO-Event-Information.pdf) describes a Friday-through-Saturday leader-training conference focused on early-elementary ministry and Ranger Kids. | Keep the occurrence as cancelled. The live national schedule changed from `Accepting Registrations` on August 12 to cancelled on August 13, demonstrating why lifecycle status needs its own checked date and why a source change must enter review rather than silently mutate facts. |
 | National Rangers Ministry Conference (NRMC), Susquehanna, Pennsylvania | September 18-20, 2026; Rock Mountain Bible Camp, Susquehanna, Pennsylvania; live status `Accepting Registrations`; discount and minimum-registration deadlines both August 16, 2026. The official [NRMC event-information PDF](https://royalrangers.com/-/media/RoyalRangers/Schedule-Component/PDFs/NRMC/2026/NRMC-NY-Event-Information.pdf) gives the public venue address as 1156 Rock Mountain Dr, Susquehanna, PA 18847 and identifies the event as adult-leader training. | Keep the occurrence. The live schedule is the status authority; the PDF is useful for venue and format details but is a revisioned attachment. |
 | Johnnie Barnes Excellence Initiative (JBEI), Waupaca, Wisconsin | September 25-26, 2026; Camp Wilderness, Waupaca, Wisconsin; live status `Accepting Registrations`; discount and minimum-registration deadlines both August 26, 2026. The live schedule describes the intended audience as people who hold or hope to hold district-, regional-, or national-level service positions. | Keep the occurrence. The linked [JBEI information and schedule PDF](https://royalrangers.com/-/media/RoyalRangers/Schedule-Component/PDFs/JBEI/2026/JBEI-NC-Region-Event-Information-and-Schedule.pdf) conflicts with itself about Saturday dismissal (`5:00 pm` in the overview and `4:15 pm` in the detailed schedule), so no end time should be treated as verified without organizer clarification. |
 
@@ -224,5 +224,23 @@ No organizer-controlled region page in the reviewed sample currently supports a 
 2. The Kentucky district calendar lists the Camp BaYoCa NRMC as October 23-26, 2026, while the live national organizer schedule lists October 23-25, 2026 at the same venue and city. Prefer the national live end date, retain the district assertion, and record the end-date conflict.
 3. The 2026 Camporama microsite still uses future-tense copy and advertises registration after the event, while the North Texas organizer site says Camporama has ended. The dated occurrence is deterministically completed as of this verification date, but the still-live pre-event pages should produce a freshness task rather than a registration call to action.
 4. The JBEI information PDF's two dismissal times conflict as noted above. Until resolved, publish the verified local dates but omit the disputed end time or show a neutral details-under-verification state for that field.
+5. The Kentucky Pow-Wow detail page displays `5:00 pm`, while its linked organizer packet describes Friday arrivals/registration from 3:00-6:30 pm. These may describe different boundaries, but the source does not label them clearly enough to choose an occurrence start time silently; preserve the assertions for review. The packet supports an August 9 registration close, walk-in pricing, and other cost categories.
+6. For North Texas FCF Family Camp, October 6 is a **price-change cutoff**, not a registration deadline: the packet says prices increase by $5 after that date. The homepage simultaneously says the Brushfire link will be available soon and displays a live `Online Registration Here` link. Open registration is supported by the live link and packet, but the stale prose merits a freshness review; no registration deadline was found.
 
 These findings reinforce that event scope, lifecycle, registration status, deadlines, and source freshness are independent fields. A region or district page repeating a national event is corroboration, not authority to relabel its scope.
+
+### Recheck ledger and bounded cohort counts
+
+The focused recheck reviewed **12 first-party source documents/endpoints**: two national Royal Rangers pages, two Camporama documents, two Kentucky district pages, two North Texas district/FCF documents, three region organizer pages/endpoints, and one New York district calendar. Organizer-controlled detail pages were preferred where available; linked registration vendors were not counted as authorities. All were checked on 2026-08-12 and the volatile HTML status/calendar pages were checked again on 2026-08-13.
+
+The bounded representative cohort above contains **8 occurrence records in 7 series** across **3 supported scopes**:
+
+| Supported scope | Occurrences | Series | Lifecycle represented |
+| --- | ---: | ---: | --- |
+| National | 5 | 4 | 2 completed Camporama occurrences (2022 and 2026), 2 future training occurrences, and 1 future-dated cancelled NEEC occurrence |
+| District | 2 | 2 | 1 future Kentucky Pow-Wow and 1 future-dated cancelled Kentucky PathFinders occurrence |
+| FCF chapter | 1 | 1 | 1 future North Texas Shawnee Trail Chapter Family Camp |
+| Region | 0 | 0 | Explicit coverage gap; no reviewed region-organizer source supports a genuinely region-scoped occurrence with complete dates |
+| **Total** | **8** | **7** | **4 future active, 2 future-dated cancelled, 2 completed** |
+
+Counts describe the deliberately bounded candidate cohort, not national completeness. Field provenance must retain the source and the 2026-08-13 checked date separately for dates, status, venue/location, audience, registration, deadlines, costs, host/related organization, and any derived time zone. No reviewed organizer supplied an IANA time-zone identifier. The principal unresolved coverage gaps remain all eight regions, most U.S. districts/networks, the complete FCF territory/chapter roster, Spanish-language districts, and sources whose current event information exists only in social posts, images, private calendars, or inaccessible pages.
