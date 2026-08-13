@@ -72,6 +72,7 @@ import {
 } from '../shared/events'
 import { AddOutpostPage } from './AddOutpostPage'
 import { AccountPages } from './account/AccountPages'
+import { OutpostWorkspacePage } from './workspace/OutpostWorkspacePage'
 import { jurisdictions } from './data/jurisdictions'
 import { listInternationalCountries } from '../shared/countries'
 import {
@@ -120,6 +121,7 @@ type Route =
   | '/forgot-password'
   | '/reset-password'
   | '/account'
+  | '/workspace'
 
 const supportedDirectoryCountries = [
   { code: 'US', name: 'United States' },
@@ -172,6 +174,7 @@ const routeTitles: Record<Route, string> = {
   '/forgot-password': 'Reset Password',
   '/reset-password': 'Choose a New Password',
   '/account': 'Account',
+  '/workspace': 'Outpost Workspace',
 }
 
 const navigationEventName = 'ranger-outpost:navigate'
@@ -277,6 +280,7 @@ function useRoute() {
     '/forgot-password',
     '/reset-password',
     '/account',
+    '/workspace',
   ].includes(parsed.pathname)
     ? (parsed.pathname as Route)
     : '/'
@@ -392,6 +396,7 @@ function Shell({
           </form>
           <div className="account-header-actions">
             {ordinarySession.authenticated ? <>
+              <AppLink href="/workspace">Workspace</AppLink>
               <AppLink href="/account">Account{ordinarySession.displayName ? ` · ${ordinarySession.displayName}` : ''}</AppLink>
               <button className="link-button" type="button" onClick={() => void signOut()}>Sign out</button>
             </> : <AppLink href="/sign-in">Sign in</AppLink>}
@@ -2323,6 +2328,7 @@ function App() {
 
   let content: ReactNode
   if (route === '/operator') content = <OperatorPage />
+  else if (route === '/workspace') content = <OutpostWorkspacePage />
   else if (route === '/signup' || route === '/sign-in' || route === '/forgot-password'
     || route === '/reset-password' || route === '/account') {
     content = <AccountPages route={route} navigate={navigate} />

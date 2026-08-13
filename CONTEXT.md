@@ -374,6 +374,20 @@ _Avoid_: Public status incident, factual correction
 The Operator's private worklist of facts approaching verification expiry, broken source links, conflicting Event facts, completed Events, and geographic coverage gaps. Automation adds drafts and reminders, while the Operator controls publication in the Initial Public Release.
 _Avoid_: Automatic publication queue
 
+## Private Outpost planning
+
+**Outpost Workspace**:
+One private collaboration boundary owned by one canonical Outpost and available only to that exact Outpost's verified adult Members.
+_Avoid_: Member portal, private roster
+
+**Outpost Calendar Entry**:
+One group-owned planned activity with explicit local date/time, timezone, and group-plan status; it never represents an individual's intent, RSVP, attendance, or progress.
+_Avoid_: Personal event, attendance record
+
+**Calendar Entry Event**:
+An immutable sanitized record that an Outpost Calendar Entry was created, updated, or cancelled, identifying its actor only as Verified Outpost Editor, Service Operator, or Deleted Account.
+_Avoid_: Member activity log, named audit actor
+
 ## Data-use boundaries
 
 **Operational Analytics**:

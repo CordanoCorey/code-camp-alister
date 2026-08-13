@@ -41,6 +41,8 @@ describe('service-worker cache policy', () => {
     expect(classify('/signup', { mode: 'navigate', destination: 'document' })).toBe('ignore')
     expect(classify('/sign-in', { mode: 'navigate', destination: 'document' })).toBe('ignore')
     expect(classify('/account', { mode: 'navigate', destination: 'document' })).toBe('ignore')
+    expect(classify('/workspace', { mode: 'navigate', destination: 'document' })).toBe('ignore')
+    expect(classify('/api/workspace/calendar')).toBe('ignore')
     expect(classify('/reset-password?token=sensitive', { mode: 'navigate', destination: 'document' })).toBe('ignore')
     expect(classify('/api/private')).toBe('ignore')
     expect(classify('/api/public/outpost-submissions/config')).toBe('ignore')

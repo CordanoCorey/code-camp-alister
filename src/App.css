@@ -544,3 +544,16 @@ fieldset.account-panel { display: grid; gap: 1rem; }
   .outpost-account-search > div, .account-summary { grid-template-columns: 1fr; }
   .outpost-account-search button { inline-size: 100%; }
 }
+
+.workspace-page { padding-block: clamp(2rem,6vw,5rem); min-block-size:60vh; }
+.workspace-toolbar,.workspace-range,.workspace-links,.workspace-dates { display:flex; flex-wrap:wrap; gap:1rem; align-items:center; }
+.workspace-toolbar { justify-content:space-between; padding:1rem; border:1px solid var(--line); border-radius:.7rem; background:#fff; }
+.workspace-range { margin-block:1.5rem; }
+.workspace-range label,.workspace-dates label { display:grid; gap:.35rem; font-weight:750; flex:1 1 10rem; }
+.workspace-agenda { display:grid; gap:1rem; padding:0; list-style:none; }
+.workspace-agenda article { padding:1rem; border:1px solid var(--line); border-radius:.7rem; background:#fff; }
+.workspace-agenda h3 { margin-block:.25rem; }
+.privacy-warning { padding:.8rem; border-inline-start:4px solid #b87900; background:#fff8df; }
+.workspace-links { margin-block:2rem; }
+.timezone-change { max-inline-size:30rem; margin-block:2rem; }
+@media (max-width:390px){.workspace-toolbar,.workspace-dates,.workspace-range{align-items:stretch;flex-direction:column}.workspace-toolbar>*{inline-size:100%}.workspace-page button{min-block-size:2.75rem}}

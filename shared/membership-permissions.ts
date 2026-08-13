@@ -7,13 +7,14 @@ export const outpostCapabilities = [
   'publish-outpost-facts',
   'edit-scope-conflicts',
   'resolve-scope-conflicts',
+  'manage-outpost-calendar',
 ] as const
 
 export type OutpostCapability = (typeof outpostCapabilities)[number]
 export type ExactScope = { type: 'outpost' | 'district' | 'region' | 'national' | 'international' | 'fcf' | 'country-defined'; id: string }
 export type ActiveGrant = { capability: OutpostCapability; scope: ExactScope; endsAt: string | null }
 export type VerifiedOperatorAuthority = { kind: 'verified-operator-authority'; action: 'bootstrap' | 'recovery'; auditEventId: string }
-const outpostOnly = new Set<OutpostCapability>(['view-outpost-private','review-outpost-membership','manage-outpost-permissions','edit-outpost-draft','verify-outpost-facts','publish-outpost-facts'])
+const outpostOnly = new Set<OutpostCapability>(['view-outpost-private','review-outpost-membership','manage-outpost-permissions','edit-outpost-draft','verify-outpost-facts','publish-outpost-facts','manage-outpost-calendar'])
 export function capabilitySupportsScope(capability: OutpostCapability, scope: ExactScope) {
   return !outpostOnly.has(capability) || scope.type === 'outpost'
 }

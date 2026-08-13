@@ -21,6 +21,7 @@ const migrationNames = [
   '0012_ordinary_account_lifecycle.sql',
   '0013_international_directory_foundation.sql',
   '0014_membership_and_permissions.sql',
+  '0015_outpost_workspace_calendar.sql',
 ]
 const temporary = await mkdtemp(join(tmpdir(), 'ranger-outpost-migrations-'))
 const npx = process.platform === 'win32' ? 'npx.cmd' : 'npx'
@@ -58,6 +59,7 @@ function assertDatabase(path, scenario) {
     const failedOrdinaryLifecycleAssertions = db.prepare('SELECT name FROM migration_0012_assertions WHERE passed <> 1').all()
     const failedInternationalAssertions = db.prepare('SELECT name FROM migration_0013_assertions WHERE passed <> 1').all()
     const failedMembershipAssertions = db.prepare('SELECT name FROM migration_0014_assertions WHERE passed <> 1').all()
+    const failedWorkspaceAssertions = db.prepare('SELECT name FROM migration_0015_assertions WHERE passed <> 1').all()
     const foreignKeys = db.prepare('PRAGMA foreign_key_check').all()
     const duplicateSlugs = Number(db.prepare('SELECT COUNT(*) count FROM (SELECT slug FROM content_records GROUP BY slug HAVING COUNT(*) > 1)').get().count)
     const parity = db.prepare(`SELECT
@@ -134,8 +136,8 @@ function assertDatabase(path, scenario) {
       accountFailures.push(...Object.entries(preservedMaintenance)
         .filter(([, preserved]) => preserved !== 1).map(([name]) => `maintenance_${name}_not_preserved`))
     }
-    if (failedAssertions.length || failedLifecycleAssertions.length || failedDirectoryAssertions.length || failedMaintenanceAssertions.length || failedAccountAssertions.length || failedOrdinaryLifecycleAssertions.length || failedInternationalAssertions.length || failedMembershipAssertions.length || foreignKeys.length || duplicateSlugs || failures.length || operatorFailures.length || accountFailures.length) {
-      throw new Error(`${scenario} integrity failed: ${JSON.stringify({ failedAssertions, failedLifecycleAssertions, failedDirectoryAssertions, failedMaintenanceAssertions, failedAccountAssertions, failedOrdinaryLifecycleAssertions, failedInternationalAssertions, failedMembershipAssertions, foreignKeys, duplicateSlugs, failures, operatorFailures, accountFailures })}`)
+    if (failedAssertions.length || failedLifecycleAssertions.length || failedDirectoryAssertions.length || failedMaintenanceAssertions.length || failedAccountAssertions.length || failedOrdinaryLifecycleAssertions.length || failedInternationalAssertions.length || failedMembershipAssertions.length || failedWorkspaceAssertions.length || foreignKeys.length || duplicateSlugs || failures.length || operatorFailures.length || accountFailures.length) {
+      throw new Error(`${scenario} integrity failed: ${JSON.stringify({ failedAssertions, failedLifecycleAssertions, failedDirectoryAssertions, failedMaintenanceAssertions, failedAccountAssertions, failedOrdinaryLifecycleAssertions, failedInternationalAssertions, failedMembershipAssertions, failedWorkspaceAssertions, foreignKeys, duplicateSlugs, failures, operatorFailures, accountFailures })}`)
     }
     return {
       scenario,
@@ -149,6 +151,7 @@ function assertDatabase(path, scenario) {
       ordinaryLifecycleAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0012_assertions').get().count),
       internationalAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0013_assertions').get().count),
       membershipAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0014_assertions').get().count),
+      workspaceAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0015_assertions').get().count),
     }
   } finally {
     db.close()
@@ -168,7 +171,7 @@ async function scenario(name, staged) {
     compatibility_date: '2026-08-12',
     d1_databases: [{ binding: 'DB', database_name: 'ranger-outpost-hub', database_id: '00000000-0000-0000-0000-000000000000', migrations_dir: './migrations' }],
   }))
-  const initial = staged ? migrationNames.slice(0, 13) : migrationNames
+  const initial = staged ? migrationNames.slice(0, 14) : migrationNames
   for (const name of initial) await copyFile(join(root, 'migrations', name), join(migrations, basename(name)))
   apply(config, state)
   if (staged) {
@@ -181,7 +184,7 @@ async function scenario(name, staged) {
         candidate.close()
       }
     })
-    if (!stagedDatabase) throw new Error(`${name} could not locate the staged 0013 database.`)
+    if (!stagedDatabase) throw new Error(`${name} could not locate the staged 0014 database.`)
     const db = new DatabaseSync(stagedDatabase)
     try {
       db.exec(`INSERT INTO maintenance_runs
@@ -208,7 +211,7 @@ async function scenario(name, staged) {
     } finally {
       db.close()
     }
-    for (const migrationName of migrationNames.slice(13)) {
+    for (const migrationName of migrationNames.slice(14)) {
       await copyFile(join(root, 'migrations', migrationName), join(migrations, migrationName))
     }
     apply(config, state)
@@ -228,8 +231,8 @@ async function scenario(name, staged) {
 
 try {
   const results = [
-    await scenario('upgrade-from-0013', true),
-    await scenario('fresh-through-0014', false),
+    await scenario('upgrade-from-0014', true),
+    await scenario('fresh-through-0015', false),
   ]
   console.log(JSON.stringify({ isolated: true, results }, null, 2))
 } finally {

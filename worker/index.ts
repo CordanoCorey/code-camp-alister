@@ -52,6 +52,7 @@ import {
   type OrdinaryAuthEnv,
 } from './ordinary-auth'
 import { handleOrdinaryAccount } from './ordinary-account-http'
+import { handleOutpostWorkspaceCalendar } from './outpost-workspace-calendar-http'
 import {
   applyStagedOutpostCandidate,
   getPopulationReport,
@@ -164,7 +165,7 @@ type CoverageGapRow = {
 }
 
 const MAX_REQUEST_BYTES = 65_536
-const CURRENT_SCHEMA_MIGRATION = '0013_international_directory_foundation.sql'
+const CURRENT_SCHEMA_MIGRATION = '0015_outpost_workspace_calendar.sql'
 const REAUTHENTICATION_COOKIE = 'ranger_operator_reauth'
 
 class RequestInputError extends Error {
@@ -740,7 +741,7 @@ async function handleApi(request: Request, env: Env, requestId: string): Promise
           },
         })
       }
-      return json({ status: 'ok', schema: '0013' })
+      return json({ status: 'ok', schema: '0015' })
     } catch {
       if (request.method === 'HEAD') {
         return new Response(null, {
@@ -761,6 +762,10 @@ async function handleApi(request: Request, env: Env, requestId: string): Promise
 
   if (path.startsWith('/api/account/')) {
     return handleOrdinaryAccount(request, env)
+  }
+
+  if (path === '/api/workspace' || path.startsWith('/api/workspace/')) {
+    return handleOutpostWorkspaceCalendar(request, env)
   }
 
   if (request.method === 'GET' && path === '/api/public') {
@@ -1446,11 +1451,12 @@ function withSecurityHeaders(request: Request, response: Response) {
 }
 
 const ordinaryAccountPageRoutes = new Set([
-  '/signup', '/sign-in', '/forgot-password', '/reset-password', '/account',
+  '/signup', '/sign-in', '/forgot-password', '/reset-password', '/account', '/workspace',
 ])
 
 function isOrdinaryAccountRoute(path: string) {
   return path.startsWith('/api/auth/') || path.startsWith('/api/account/')
+    || path === '/api/workspace' || path.startsWith('/api/workspace/')
     || ordinaryAccountPageRoutes.has(path)
 }
 

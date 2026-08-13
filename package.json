@@ -33,7 +33,7 @@
     "preview": "vite preview",
     "smoke:production": "node scripts/production-smoke.mjs",
     "test": "vitest run",
-    "test:integration": "vitest run worker/index.test.ts worker/maintenance-http.test.ts worker/scheduled.test.ts tests/sw-policy.test.js src/lib/preview.test.ts scripts/production-config.test.js scripts/production-smoke.test.js",
+    "test:integration": "vitest run worker/index.test.ts worker/maintenance-http.test.ts worker/scheduled.test.ts worker/outpost-workspace-calendar-http.test.ts worker/outpost-workspace-calendar-repository.test.ts tests/sw-policy.test.js src/lib/preview.test.ts scripts/production-config.test.js scripts/production-smoke.test.js",
     "check": "npm run lint && npm run test && npm run build",
     "scale:check": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/scale-check.mjs"
   },

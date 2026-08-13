@@ -12,6 +12,16 @@ async function requestJson<T>(path: string, init?: RequestInit, fallbackMessage 
   return { data, fromCache: response.headers.get('x-ranger-data-source') === 'cache' }
 }
 
+export type WorkspaceSummary = { workspace: null | { outpostId: string; timeZone: string; state: 'active'|'read-only'; version: number }; canManage: boolean }
+export type WorkspaceCalendarEntry = { id:string; title:string; description:string|null; category:string; startDate:string; endDate:string; startTime:string|null; endTime:string|null; allDay:number; timeZone:string; location:string|null; status:string; version:number }
+const workspaceMutation = <T>(path:string, method:string, body:unknown) => requestJson<T>(path,{method,headers:{'content-type':'application/json'},body:JSON.stringify(body)})
+export const fetchWorkspace = () => requestJson<WorkspaceSummary>('/api/workspace')
+export const setWorkspaceTimezone = (timeZone:string, expectedVersion:number|null) => workspaceMutation<WorkspaceSummary>('/api/workspace/timezone','PUT',{timeZone,expectedVersion})
+export const fetchWorkspaceCalendar = (from:string,to:string) => requestJson<{items:WorkspaceCalendarEntry[];hasMore:boolean}>(`/api/workspace/calendar?from=${from}&to=${to}&limit=100`)
+export const createWorkspaceCalendarEntry = (entry:unknown) => workspaceMutation<{entry:WorkspaceCalendarEntry}>('/api/workspace/calendar','POST',entry)
+export const updateWorkspaceCalendarEntry = (id:string,entry:unknown,expectedVersion:number) => workspaceMutation<{entry:WorkspaceCalendarEntry}>(`/api/workspace/calendar/${encodeURIComponent(id)}`,'PUT',{entry,expectedVersion})
+export const cancelWorkspaceCalendarEntry = (id:string,expectedVersion:number) => workspaceMutation<{entry:WorkspaceCalendarEntry}>(`/api/workspace/calendar/${encodeURIComponent(id)}/cancel`,'POST',{expectedVersion})
+
 function getJson<T>(path: string) {
   return requestJson<T>(path)
 }
