@@ -71,6 +71,20 @@ CREATE TABLE staged_international_matches (
   UNIQUE(candidate_id, outpost_id, match_kind)
 );
 
+CREATE TABLE staged_international_conflicts (
+  id TEXT PRIMARY KEY,
+  batch_id TEXT NOT NULL REFERENCES international_population_batches(id),
+  conflict_key TEXT NOT NULL UNIQUE,
+  country_code TEXT NOT NULL,
+  identifier_raw TEXT NOT NULL,
+  description TEXT NOT NULL,
+  sources_json TEXT NOT NULL CHECK (json_valid(sources_json)),
+  state TEXT NOT NULL DEFAULT 'open' CHECK (state IN ('open', 'resolved', 'dismissed')),
+  resolution_reason TEXT,
+  resolved_at TEXT,
+  operator_tenure_id INTEGER REFERENCES operator_tenures(tenure_number)
+);
+
 CREATE TABLE international_coverage_reviews (
   country_code TEXT PRIMARY KEY REFERENCES countries(code),
   coverage_state TEXT NOT NULL,

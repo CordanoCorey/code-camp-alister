@@ -352,6 +352,12 @@ describe('Operator U.S. directory operations HTTP seam', () => {
     expect(await replay.json()).toMatchObject({ idempotent: true, candidateCount: 3 })
     expect(migrated.sqlite.prepare("SELECT COUNT(*) count FROM countries WHERE code = 'ZA'").get()).toEqual({ count: 0 })
     expect(migrated.sqlite.prepare('SELECT COUNT(*) count FROM staged_international_candidates').get()).toEqual({ count: 3 })
+    expect(migrated.sqlite.prepare('SELECT conflict_key, state FROM staged_international_conflicts').get())
+      .toEqual({ conflict_key: 'intl-conflict-za-wp9-split-entries', state: 'open' })
+
+    const unfilteredQueue = await call('/api/operator/international-population/candidates')
+    expect(unfilteredQueue.status).toBe(200)
+    expect((await unfilteredQueue.json() as { items: unknown[] }).items).toHaveLength(3)
 
     const queue = await call('/api/operator/international-population/candidates?country=ZA&state=staged')
     const body = await queue.json() as { items: Array<{ id: string; church: string | null }> }

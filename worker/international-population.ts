@@ -17,6 +17,11 @@ export async function stageInternationalManifest(db: D1Database, raw: unknown, a
      candidate_count, operator_tenure_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
     .bind(batchId, manifest.batchKey, manifest.sourceRegister, checksum, manifest.reviewedAt,
       manifest.coverage.countryCode, manifest.coverage.state, manifest.candidates.length, actor.tenureNumber, now)]
+  for (const conflict of manifest.conflicts ?? []) statements.push(db.prepare(`INSERT INTO staged_international_conflicts
+    (id, batch_id, conflict_key, country_code, identifier_raw, description, sources_json)
+    VALUES (?, ?, ?, ?, ?, ?, ?)`)
+    .bind(`${batchId}:${conflict.conflictKey}`, batchId, conflict.conflictKey, manifest.coverage.countryCode,
+      conflict.identifierRaw, conflict.description, JSON.stringify(conflict.sources)))
   for (const candidate of manifest.candidates) {
     const id = `${batchId}:${candidate.candidateKey}`
     statements.push(db.prepare(`INSERT INTO staged_international_candidates
@@ -57,7 +62,7 @@ export async function stageInternationalManifest(db: D1Database, raw: unknown, a
 }
 
 export async function listInternationalCandidates(db: D1Database, params: URLSearchParams) {
-  const state = params.get('state'); const country = params.get('country')?.toUpperCase()
+  const state = params.get('state') ?? null; const country = params.get('country')?.toUpperCase() ?? null
   const rows = await db.prepare(`SELECT candidate.*, batch.coverage_state FROM staged_international_candidates candidate
     JOIN international_population_batches batch ON batch.id = candidate.batch_id
     WHERE (? IS NULL OR candidate.state = ?) AND (? IS NULL OR candidate.country_code = ?)
@@ -110,7 +115,9 @@ export async function applyInternationalCandidate(db: D1Database, input: { candi
 
 export async function getInternationalPopulationReport(db: D1Database) {
   const rows = await db.prepare(`SELECT country_code, rri_grouping, state, COUNT(*) count FROM staged_international_candidates GROUP BY country_code, rri_grouping, state`).all<{ country_code: string; rri_grouping: string | null; state: string; count: number }>()
-  const conflicts = await db.prepare("SELECT COUNT(*) count FROM staged_international_matches WHERE state = 'candidate'").first<{ count: number }>()
+  const conflicts = await db.prepare(`SELECT
+    (SELECT COUNT(*) FROM staged_international_matches WHERE state = 'candidate') +
+    (SELECT COUNT(*) FROM staged_international_conflicts WHERE state = 'open') count`).first<{ count: number }>()
   const gaps = await db.prepare("SELECT COUNT(*) count FROM international_population_batches WHERE coverage_state <> 'verified-directory-maintained-by-local-editors'").first<{ count: number }>()
   return { rows: rows.results, conflicts: conflicts?.count ?? 0, coverageGaps: gaps?.count ?? 0 }
 }

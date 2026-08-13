@@ -9,6 +9,7 @@ npm run international:manifests:build
 npm run international:validate
 npm run international:stage -- --origin http://127.0.0.1:5173
 npm run international:report
+npm run international:coverage:report
 ```
 
 Build, validation, and reporting are read-only. `international:stage` submits the validated manifests to the authenticated Operator endpoint. Staging is checksum-idempotent and writes only private international batch, candidate, field-evidence, and scoped-match rows. It cannot convert or publish.

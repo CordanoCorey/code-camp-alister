@@ -469,7 +469,7 @@ describe('public API privacy contract at the Worker request seam', () => {
     expect(publicRecords[0].id).toBe('published-event')
     expect((publicRecords[0].details as Record<string, unknown>).location).toBeNull()
     expect(serialized).not.toMatch(/draft-page|archived-page|person@example|operator@example|private source|private place|private resolution|private note|private audit|private broken|private coverage|auditActor|submitter|brokenSource/i)
-    expect(database.queries.map((query) => query.sql).join('\n')).not.toMatch(/audit_events|broken_source_observations|coverage_gaps/i)
+    expect(database.queries.map((query) => query.sql).join('\n')).not.toMatch(/audit_events|broken_source_observations|coverage_gaps|staged_international|international_population_batches/i)
     expect(response.headers.get('cache-control')).toMatch(/^public,/)
   })
 

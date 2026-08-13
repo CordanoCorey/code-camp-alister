@@ -37,6 +37,7 @@ export type InternationalManifest = {
   sourceRegister: string
   reviewedAt: string
   coverage: { countryCode: string; state: CoverageState; namedLocalEditors: string | null; sources: Source[] }
+  conflicts?: Array<{ conflictKey: string; identifierRaw: string; description: string; sources: Source[] }>
   candidates: InternationalCandidate[]
 }
 
@@ -87,7 +88,7 @@ function findProhibited(value: unknown, path = 'manifest'): string | null {
 export function parseInternationalManifest(value: unknown): InternationalManifest {
   const forbidden = findProhibited(value); if (forbidden) throw new Error(`Manifest contains prohibited field ${forbidden}.`)
   const raw = record(value, 'Manifest')
-  onlyKeys(raw, ['schemaVersion', 'batchKey', 'sourceRegister', 'reviewedAt', 'coverage', 'candidates'], 'Manifest')
+  onlyKeys(raw, ['schemaVersion', 'batchKey', 'sourceRegister', 'reviewedAt', 'coverage', 'conflicts', 'candidates'], 'Manifest')
   if (raw.schemaVersion !== 1) throw new Error('Manifest schemaVersion must be 1.')
   const reviewedAt = isoDate(raw.reviewedAt, 'reviewedAt')
   const coverageRaw = record(raw.coverage, 'coverage')
@@ -99,6 +100,16 @@ export function parseInternationalManifest(value: unknown): InternationalManifes
   if ((coverageRaw.state === 'verified-directory-maintained-by-local-editors') !== Boolean(editors)) throw new Error('Named local editors are required only for a locally maintained verified directory.')
   if (!Array.isArray(coverageRaw.sources) || coverageRaw.sources.length < 1 || coverageRaw.sources.length > 5) throw new Error('Coverage needs one to five sources.')
   if (!Array.isArray(raw.candidates) || raw.candidates.length < 1 || raw.candidates.length > 4) throw new Error('Each international batch must contain one to four candidates.')
+  const conflicts = raw.conflicts === undefined ? [] : raw.conflicts
+  if (!Array.isArray(conflicts) || conflicts.length > 8) throw new Error('International conflicts must be a bounded array.')
+  const parsedConflicts = conflicts.map((item, index) => {
+    const conflict = record(item, `conflict ${index + 1}`)
+    onlyKeys(conflict, ['conflictKey', 'identifierRaw', 'description', 'sources'], `conflict ${index + 1}`)
+    const conflictKey = text(conflict.conflictKey, 160, 'conflictKey') as string
+    if (!/^intl-conflict-[a-z0-9-]+$/.test(conflictKey)) throw new Error(`${conflictKey} is not a stable conflict key.`)
+    if (!Array.isArray(conflict.sources) || conflict.sources.length < 1 || conflict.sources.length > 5) throw new Error(`${conflictKey} needs one to five sources.`)
+    return { conflictKey, identifierRaw: text(conflict.identifierRaw, 80, `${conflictKey} identifierRaw`) as string, description: text(conflict.description, 500, `${conflictKey} description`) as string, sources: conflict.sources.map((entry, sourceIndex) => source(entry, reviewedAt, `${conflictKey}.sources[${sourceIndex}]`)) }
+  })
   const candidates = raw.candidates.map((item, index) => {
     const candidate = record(item, `candidate ${index + 1}`)
     onlyKeys(candidate, ['candidateKey', 'countryCode', 'countryName', 'nationalProgramId', 'nationalProgramName', 'rriGrouping', 'localUnitLabel', 'identifierRaw', 'displayNameRaw', 'church', 'civilSubdivision', 'city', 'streetAddress', 'contactUrl', 'affiliations', 'fcfAvailability', 'activeFcf', 'fieldSources'], `candidate ${index + 1}`)
@@ -130,7 +141,7 @@ export function parseInternationalManifest(value: unknown): InternationalManifes
       civilSubdivision: subdivisionRaw ? { label: text(subdivisionRaw.label, 80, `${key} subdivision label`) as string, name: text(subdivisionRaw.name, 100, `${key} subdivision name`) as string } : null,
       city: text(candidate.city, 100, `${key} city`, true), streetAddress: text(candidate.streetAddress, 200, `${key} streetAddress`, true),
       contactUrl: candidate.contactUrl ? url(candidate.contactUrl, `${key} contactUrl`) : null,
-      affiliations: affiliationsRaw.map((entry, affiliationIndex) => { const affiliation = record(entry, `${key} affiliation ${affiliationIndex + 1}`); onlyKeys(affiliation, ['label', 'name', 'scope'], `${key} affiliation ${affiliationIndex + 1}`); return { label: text(affiliation.label, 80, 'affiliation label') as string, name: text(affiliation.name, 160, 'affiliation name') as string, scope: text(affiliation.scope, 80, 'affiliation scope') as string } }),
+      affiliations: affiliationsRaw.map((entry, affiliationIndex) => { const affiliation = record(entry, `${key} affiliation ${affiliationIndex + 1}`); onlyKeys(affiliation, ['label', 'name', 'scope'], `${key} affiliation ${affiliationIndex + 1}`); const scope = text(affiliation.scope, 80, 'affiliation scope') as string; if (!['ministry', 'language', 'fcf'].includes(scope)) throw new Error(`${key} affiliation scope is unsupported.`); return { label: text(affiliation.label, 80, 'affiliation label') as string, name: text(affiliation.name, 160, 'affiliation name') as string, scope } }),
       fcfAvailability: fcfAvailability as InternationalCandidate['fcfAvailability'], activeFcf: activeFcf as boolean | null, fieldSources,
     }
     for (const field of sourcedFields) {
@@ -143,7 +154,7 @@ export function parseInternationalManifest(value: unknown): InternationalManifes
   if (new Set(candidates.map((candidate) => candidate.candidateKey)).size !== candidates.length) throw new Error('Candidate keys must be unique in a batch.')
   const identities = new Set<string>()
   for (const candidate of candidates) { if (!candidate.identifierRaw) continue; const identity = `${candidate.countryCode}|${candidate.nationalProgramId}|${candidate.identifierRaw}`.toLocaleLowerCase(); if (identities.has(identity)) throw new Error('Source-native identifiers must be unique within country and National Program scope.'); identities.add(identity) }
-  return { schemaVersion: 1, batchKey: text(raw.batchKey, 160, 'batchKey') as string, sourceRegister: text(raw.sourceRegister, 200, 'sourceRegister') as string, reviewedAt, coverage: { countryCode: coverageCountry, state: coverageRaw.state as CoverageState, namedLocalEditors: editors, sources: (coverageRaw.sources as unknown[]).map((entry, index) => source(entry, reviewedAt, `coverage source ${index + 1}`)) }, candidates }
+  return { schemaVersion: 1, batchKey: text(raw.batchKey, 160, 'batchKey') as string, sourceRegister: text(raw.sourceRegister, 200, 'sourceRegister') as string, reviewedAt, coverage: { countryCode: coverageCountry, state: coverageRaw.state as CoverageState, namedLocalEditors: editors, sources: (coverageRaw.sources as unknown[]).map((entry, index) => source(entry, reviewedAt, `coverage source ${index + 1}`)) }, conflicts: parsedConflicts, candidates }
 }
 
 function canonical(value: unknown): string {
