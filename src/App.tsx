@@ -92,6 +92,8 @@ import {
   saveOperatorRecord,
   searchOperatorOutposts,
   signOutOrdinaryAccount,
+  fetchReferenceEligibility,
+  addReferencePlan,
 } from './data/client'
 import { captureInitialTransferToken } from './lib/transfer-fragment'
 import {
@@ -890,7 +892,10 @@ function AdvancementPage({ navigation, initialGroup }: { navigation: ContentReco
 }
 
 function EventCard({ record }: { record: ContentRecord }) {
+  const [privateAction,setPrivateAction]=useState<{canManage:boolean;planned:boolean}|null>(null)
+  const [planStatus,setPlanStatus]=useState('planning-to-attend'),[planNote,setPlanNote]=useState(''),[planMessage,setPlanMessage]=useState('')
   const details = eventDetails(record)
+  useEffect(()=>{let active=true;fetchReferenceEligibility(record.id,details.occurrenceId).then(({data})=>{if(active)setPrivateAction({canManage:data.canManage,planned:Boolean(data.plan)})}).catch(()=>{});return()=>{active=false}},[record.id,details.occurrenceId])
   const [month, day] = formatEventLocalDate(details.startDate, false).split(' ')
   const lifecycle = displayedEventLifecycle(details, new Date().toISOString().slice(0, 10))
   const locationLabels = {
@@ -931,6 +936,13 @@ function EventCard({ record }: { record: ContentRecord }) {
           {details.registrationUrl && !['completed', 'cancelled'].includes(lifecycle) && <a href={details.registrationUrl} target="_blank" rel="noreferrer">Open organizer registration ↗</a>}
           <a href={details.officialUrl} target="_blank" rel="noreferrer">Confirm before travel, registration, or payment ↗</a>
         </div>
+        {privateAction?.canManage&&<div className="reference-plan-action">
+          {privateAction.planned?<><strong>Already on your Outpost Calendar</strong><a href="/workspace">Open private plan</a></>:<form onSubmit={async(event)=>{event.preventDefault();setPlanMessage('');try{await addReferencePlan({contentId:record.id,occurrenceId:details.occurrenceId,status:planStatus,note:planNote||null,requestKey:crypto.randomUUID()});setPrivateAction({canManage:true,planned:true});setPlanMessage('Added to your private Outpost Calendar.')}catch(reason){setPlanMessage(reason instanceof Error?reason.message:'Could not add this plan.')}}}>
+            <strong>Add to Outpost Calendar</strong><p className="field-note">Creates a private group plan, not an RSVP or organizer registration.</p>
+            <label>Plan status<select value={planStatus} onChange={event=>setPlanStatus(event.target.value)}><option value="considering">Considering</option><option value="planning-to-attend">Planning to attend</option><option value="confirmed-by-outpost">Confirmed by Outpost</option></select></label>
+            <label>Optional Outpost-only note<textarea maxLength={300} value={planNote} onChange={event=>setPlanNote(event.target.value)} /></label><p className="privacy-warning"><strong>No personal data.</strong> Do not enter names, attendance, contacts, medical details, transport, lodging, or registration credentials.</p><button type="submit">Add private plan</button>
+          </form>}{planMessage&&<p role="status">{planMessage}</p>}
+        </div>}
         <p className="source-heading">Field-relevant organizer sources</p>
         <SourceLinks sources={record.sources} />
       </div>

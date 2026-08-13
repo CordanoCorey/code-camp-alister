@@ -22,6 +22,7 @@ const migrationNames = [
   '0013_international_directory_foundation.sql',
   '0014_membership_and_permissions.sql',
   '0015_outpost_workspace_calendar.sql',
+  '0016_reference_event_outpost_plans.sql',
 ]
 const temporary = await mkdtemp(join(tmpdir(), 'ranger-outpost-migrations-'))
 const npx = process.platform === 'win32' ? 'npx.cmd' : 'npx'
@@ -60,6 +61,7 @@ function assertDatabase(path, scenario) {
     const failedInternationalAssertions = db.prepare('SELECT name FROM migration_0013_assertions WHERE passed <> 1').all()
     const failedMembershipAssertions = db.prepare('SELECT name FROM migration_0014_assertions WHERE passed <> 1').all()
     const failedWorkspaceAssertions = db.prepare('SELECT name FROM migration_0015_assertions WHERE passed <> 1').all()
+    const failedReferencePlanAssertions = db.prepare('SELECT name FROM migration_0016_assertions WHERE passed <> 1').all()
     const foreignKeys = db.prepare('PRAGMA foreign_key_check').all()
     const duplicateSlugs = Number(db.prepare('SELECT COUNT(*) count FROM (SELECT slug FROM content_records GROUP BY slug HAVING COUNT(*) > 1)').get().count)
     const parity = db.prepare(`SELECT
@@ -136,8 +138,8 @@ function assertDatabase(path, scenario) {
       accountFailures.push(...Object.entries(preservedMaintenance)
         .filter(([, preserved]) => preserved !== 1).map(([name]) => `maintenance_${name}_not_preserved`))
     }
-    if (failedAssertions.length || failedLifecycleAssertions.length || failedDirectoryAssertions.length || failedMaintenanceAssertions.length || failedAccountAssertions.length || failedOrdinaryLifecycleAssertions.length || failedInternationalAssertions.length || failedMembershipAssertions.length || failedWorkspaceAssertions.length || foreignKeys.length || duplicateSlugs || failures.length || operatorFailures.length || accountFailures.length) {
-      throw new Error(`${scenario} integrity failed: ${JSON.stringify({ failedAssertions, failedLifecycleAssertions, failedDirectoryAssertions, failedMaintenanceAssertions, failedAccountAssertions, failedOrdinaryLifecycleAssertions, failedInternationalAssertions, failedMembershipAssertions, failedWorkspaceAssertions, foreignKeys, duplicateSlugs, failures, operatorFailures, accountFailures })}`)
+    if (failedAssertions.length || failedLifecycleAssertions.length || failedDirectoryAssertions.length || failedMaintenanceAssertions.length || failedAccountAssertions.length || failedOrdinaryLifecycleAssertions.length || failedInternationalAssertions.length || failedMembershipAssertions.length || failedWorkspaceAssertions.length || failedReferencePlanAssertions.length || foreignKeys.length || duplicateSlugs || failures.length || operatorFailures.length || accountFailures.length) {
+      throw new Error(`${scenario} integrity failed: ${JSON.stringify({ failedAssertions, failedLifecycleAssertions, failedDirectoryAssertions, failedMaintenanceAssertions, failedAccountAssertions, failedOrdinaryLifecycleAssertions, failedInternationalAssertions, failedMembershipAssertions, failedWorkspaceAssertions, failedReferencePlanAssertions, foreignKeys, duplicateSlugs, failures, operatorFailures, accountFailures })}`)
     }
     return {
       scenario,
@@ -152,6 +154,7 @@ function assertDatabase(path, scenario) {
       internationalAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0013_assertions').get().count),
       membershipAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0014_assertions').get().count),
       workspaceAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0015_assertions').get().count),
+      referencePlanAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0016_assertions').get().count),
     }
   } finally {
     db.close()
@@ -232,7 +235,7 @@ async function scenario(name, staged) {
 try {
   const results = [
     await scenario('upgrade-from-0014', true),
-    await scenario('fresh-through-0015', false),
+    await scenario('fresh-through-0016', false),
   ]
   console.log(JSON.stringify({ isolated: true, results }, null, 2))
 } finally {

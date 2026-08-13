@@ -514,7 +514,7 @@ describe('production readiness at the Worker request seam', () => {
     expect(response.headers.get('x-content-type-options')).toBe('nosniff')
     expect(database.queries).toHaveLength(1)
     expect(database.queries[0].sql).toContain('FROM d1_migrations')
-    expect(database.queries[0].bindings).toEqual(['0015_outpost_workspace_calendar.sql'])
+    expect(database.queries[0].bindings).toEqual(['0016_reference_event_outpost_plans.sql'])
     if (method === 'HEAD') expect(await response.text()).toBe('')
     else expect(await response.json()).toEqual({ status: 'ok', schema: '0015' })
   })

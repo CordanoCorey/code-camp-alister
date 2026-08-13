@@ -13,7 +13,8 @@ async function requestJson<T>(path: string, init?: RequestInit, fallbackMessage 
 }
 
 export type WorkspaceSummary = { workspace: null | { outpostId: string; timeZone: string; state: 'active'|'read-only'; version: number }; canManage: boolean }
-export type WorkspaceCalendarEntry = { id:string; title:string; description:string|null; category:string; startDate:string; endDate:string; startTime:string|null; endTime:string|null; allDay:number; timeZone:string; location:string|null; status:string; version:number }
+export type WorkspaceCalendarEntry = { id:string; title:string; description:string|null; category:string; startDate:string; endDate:string; startTime:string|null; endTime:string|null; allDay:number; timeZone:string; location:string|null; status:string; version:number; referencePlanId?:string|null;referenceContentId?:string|null;referencePlanStatus?:string|null;referenceReviewState?:string|null;referenceReviewReason?:string|null;referenceCheckedAt?:string|null;referenceLifecycleStatus?:string|null;referenceOfficialUrl?:string|null;referencePlanVersion?:number|null }
+export type ReferencePlan={id:string;calendarEntryId:string;referenceContentId:string;occurrenceId:string;status:string;note:string|null;reviewState:'current'|'review-required';reviewReason:string|null;referenceCheckedAt:string;version:number;snapshot:{title:string;startDate:string;lifecycleStatus:string;officialUrl:string};current:Record<string,unknown>|null;reasons:string[];detachedAt:string|null}
 const workspaceMutation = <T>(path:string, method:string, body:unknown) => requestJson<T>(path,{method,headers:{'content-type':'application/json'},body:JSON.stringify(body)})
 export const fetchWorkspace = () => requestJson<WorkspaceSummary>('/api/workspace')
 export const setWorkspaceTimezone = (timeZone:string, expectedVersion:number|null) => workspaceMutation<WorkspaceSummary>('/api/workspace/timezone','PUT',{timeZone,expectedVersion})
@@ -21,6 +22,13 @@ export const fetchWorkspaceCalendar = (from:string,to:string) => requestJson<{it
 export const createWorkspaceCalendarEntry = (entry:unknown) => workspaceMutation<{entry:WorkspaceCalendarEntry}>('/api/workspace/calendar','POST',entry)
 export const updateWorkspaceCalendarEntry = (id:string,entry:unknown,expectedVersion:number) => workspaceMutation<{entry:WorkspaceCalendarEntry}>(`/api/workspace/calendar/${encodeURIComponent(id)}`,'PUT',{entry,expectedVersion})
 export const cancelWorkspaceCalendarEntry = (id:string,expectedVersion:number) => workspaceMutation<{entry:WorkspaceCalendarEntry}>(`/api/workspace/calendar/${encodeURIComponent(id)}/cancel`,'POST',{expectedVersion})
+export const fetchReferenceEligibility=(contentId:string,occurrenceId:string)=>requestJson<{canManage:boolean;plan:ReferencePlan|null}>(`/api/workspace/reference-events/${encodeURIComponent(contentId)}/${encodeURIComponent(occurrenceId)}`)
+export const fetchReferencePlan=(id:string)=>requestJson<{plan:ReferencePlan}>(`/api/workspace/reference-plans/${encodeURIComponent(id)}`)
+export const fetchReferenceReviewQueue=()=>requestJson<{items:ReferencePlan[];hasMore:boolean}>('/api/workspace/reference-plans/review?limit=100')
+export const addReferencePlan=(input:unknown)=>workspaceMutation<{plan:ReferencePlan}>('/api/workspace/reference-plans','POST',input)
+export const updateReferencePlanStatus=(id:string,status:string,expectedVersion:number)=>workspaceMutation<{plan:ReferencePlan}>(`/api/workspace/reference-plans/${encodeURIComponent(id)}/status`,'PATCH',{status,expectedVersion})
+export const refreshReferencePlan=(id:string,expectedVersion:number)=>workspaceMutation<{plan:ReferencePlan}>(`/api/workspace/reference-plans/${encodeURIComponent(id)}/refresh`,'POST',{expectedVersion})
+export const detachReferencePlan=(id:string,expectedVersion:number,keepEntry=false)=>workspaceMutation<{plan:ReferencePlan}>(`/api/workspace/reference-plans/${encodeURIComponent(id)}/detach`,'POST',{expectedVersion,keepEntry})
 
 function getJson<T>(path: string) {
   return requestJson<T>(path)

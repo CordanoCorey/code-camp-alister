@@ -165,7 +165,7 @@ type CoverageGapRow = {
 }
 
 const MAX_REQUEST_BYTES = 65_536
-const CURRENT_SCHEMA_MIGRATION = '0015_outpost_workspace_calendar.sql'
+const CURRENT_SCHEMA_MIGRATION = '0016_reference_event_outpost_plans.sql'
 const REAUTHENTICATION_COOKIE = 'ranger_operator_reauth'
 
 class RequestInputError extends Error {

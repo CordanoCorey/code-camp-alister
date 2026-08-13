@@ -73,7 +73,7 @@ function timed(name, sql, bindings, maximumRows, requiredPlan) {
 
 try {
   db.exec('PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;')
-  for (let number = 1; number <= 15; number += 1) {
+  for (let number = 1; number <= 16; number += 1) {
     const prefix = String(number).padStart(4, '0')
     const migrationUrl = new URL(`../migrations/${[
       '0001_initial.sql',
@@ -91,6 +91,7 @@ try {
       '0013_international_directory_foundation.sql',
       '0014_membership_and_permissions.sql',
       '0015_outpost_workspace_calendar.sql',
+      '0016_reference_event_outpost_plans.sql',
     ][number - 1]}`, import.meta.url)
     if (!migrationUrl.pathname.includes(prefix)) throw new Error(`Migration ordering failed at ${prefix}.`)
     db.exec(await readFile(migrationUrl, 'utf8'))
@@ -245,6 +246,12 @@ try {
   const grantInsert=db.prepare(`INSERT INTO permission_grants (id,auth_user_id,capability,scope_type,scope_id,source_membership_id,state,reason,created_at,version) VALUES (?,?,?,'outpost',?,?,'active','Synthetic scale fixture',?,1)`)
   const workspaceInsert=db.prepare(`INSERT INTO outpost_workspaces (outpost_id,time_zone,state,created_at,updated_at,version) VALUES (?,'America/Chicago','active',?,?,1)`)
   const calendarInsert=db.prepare(`INSERT INTO outpost_calendar_entries (id,outpost_id,request_key,title,category,start_date,end_date,all_day,time_zone,status,created_at,updated_at,version) VALUES (?,?,?,?,?,?,?,1,'America/Chicago','planned',?,?,1)`)
+  const referencePlanInsert=db.prepare(`INSERT INTO reference_event_plans(id,calendar_entry_id,outpost_id,reference_content_id,occurrence_id,request_key,reference_version,reference_checked_at,plan_status,
+    snapshot_title,snapshot_start_date,snapshot_end_date,snapshot_start_time,snapshot_end_time,snapshot_all_day,snapshot_time_zone,snapshot_location,snapshot_location_status,snapshot_host,snapshot_scope,
+    snapshot_lifecycle_status,snapshot_registration_status,snapshot_registration_deadline,snapshot_registration_url,snapshot_official_url,snapshot_required_conflict,review_state,created_at,updated_at,version)
+    SELECT ?,?,?,content.id,event.occurrence_id,?,content.version,content.updated_at,'considering',content.title,event.start_date,event.end_date,event.start_time,event.end_time,event.all_day,event.time_zone,
+      event.location,event.location_status,event.host,event.scope,event.lifecycle_status,event.registration_status,event.registration_deadline,event.registration_url,event.official_url,0,'current',?,?,1
+    FROM content_records content JOIN event_occurrences event ON event.content_id=content.id WHERE content.status='published' ORDER BY content.id LIMIT 1`)
   db.exec('BEGIN IMMEDIATE')
   for(let index=0;index<10_000;index+=1){
     const suffix=String(index).padStart(5,'0'), userId=`scale-user-${suffix}`, outpostId=`scale-outpost-${suffix}`, membershipId=`scale-membership-${suffix}`
@@ -253,6 +260,7 @@ try {
     grantInsert.run(`scale-calendar-editor-${suffix}`,userId,'manage-outpost-calendar',outpostId,membershipId,accountClock)
     workspaceInsert.run(outpostId,accountClock,accountClock)
     for(let occurrence=0;occurrence<10;occurrence+=1){const day=String((occurrence%28)+1).padStart(2,'0');calendarInsert.run(`scale-calendar-${suffix}-${occurrence}`,outpostId,`scale-request-${suffix}-${occurrence}`,`Synthetic group plan ${occurrence}`,'meeting',`2027-08-${day}`,`2027-08-${day}`,accountClock,accountClock)}
+    referencePlanInsert.run(`scale-reference-plan-${suffix}`,`scale-calendar-${suffix}-0`,outpostId,`scale-reference-request-${suffix}`,accountClock,accountClock)
   }
   db.exec('COMMIT; PRAGMA optimize;')
 
@@ -338,6 +346,7 @@ try {
   const ordinaryAccountCount = Number(db.prepare('SELECT COUNT(*) count FROM ordinary_account_profiles').get().count)
   const workspaceCount = Number(db.prepare('SELECT COUNT(*) count FROM outpost_workspaces').get().count)
   const calendarEntryCount = Number(db.prepare('SELECT COUNT(*) count FROM outpost_calendar_entries').get().count)
+  const referencePlanCount = Number(db.prepare('SELECT COUNT(*) count FROM reference_event_plans').get().count)
   const foreignKeyProblems = db.prepare('PRAGMA foreign_key_check').all()
   const sourceDocumentSupportingFields = Number(db.prepare(`SELECT COUNT(*) count FROM field_provenance
     WHERE source_document_id = ?`).get(sourceDocument).count)
@@ -348,7 +357,7 @@ try {
   const oldRun = db.prepare("SELECT outcome_json FROM maintenance_runs WHERE id = 'scale-old-run'").get()
   if (outpostCount < 20_000) throw new Error(`Expected at least 20,000 outposts, found ${outpostCount}.`)
   if (ordinaryAccountCount !== 50_000) throw new Error(`Expected 50,000 isolated ordinary accounts, found ${ordinaryAccountCount}.`)
-  if (workspaceCount !== 10_000 || calendarEntryCount !== 100_000) throw new Error('Workspace calendar scale fixtures are incomplete.')
+  if (workspaceCount !== 10_000 || calendarEntryCount !== 100_000 || referencePlanCount !== 10_000) throw new Error('Workspace calendar/reference-plan scale fixtures are incomplete.')
   if (foreignKeyProblems.length !== 0) throw new Error(`Foreign-key check found ${foreignKeyProblems.length} problem(s).`)
   if (claimedListingPass.actionsApplied !== 50 || listingPass.jobsClaimed + overlappingPass.jobsClaimed !== 1
     || listingEvents.count !== 50 || listingEvents.distinct_count !== 50) {
@@ -455,14 +464,19 @@ try {
     timed('workspace editor authorization', `SELECT id FROM permission_grants WHERE auth_user_id=? AND scope_type='outpost'
       AND scope_id=? AND capability='manage-outpost-calendar' AND state='active' AND (ends_at IS NULL OR ends_at>?) LIMIT 1`,
       ['scale-user-09999','scale-outpost-09999',maintenanceNow], 1, 'permission_grants_authorization'),
+    timed('exact Outpost reference-plan lookup', `SELECT id,plan_status FROM reference_event_plans WHERE outpost_id=? AND reference_content_id=? AND occurrence_id=? AND detached_at IS NULL LIMIT 1`,
+      ['scale-outpost-09999','event-jbei-wi-2026','event-jbei-wi-2026'],1,'reference_event_plans_one_active_occurrence'),
+    timed('bounded material-change review queue', `SELECT id FROM reference_event_plans WHERE outpost_id=? AND review_state='review-required' ORDER BY updated_at,id LIMIT 101`,
+      ['scale-outpost-09999'],101,'reference_event_plans_review_queue'),
   ]
 
   console.log(JSON.stringify({
-    schemaMigration: '0015_outpost_workspace_calendar.sql',
+    schemaMigration: '0016_reference_event_outpost_plans.sql',
     syntheticOutposts: 20_000,
     syntheticOrdinaryAccounts: ordinaryAccountCount,
     syntheticWorkspaces: workspaceCount,
     syntheticCalendarEntries: calendarEntryCount,
+    syntheticReferencePlans: referencePlanCount,
     totalOutposts: outpostCount,
     foreignKeyProblems: 0,
     isolatedDatabase: true,

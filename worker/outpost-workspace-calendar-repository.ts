@@ -7,7 +7,7 @@ export class WorkspaceCalendarError extends Error {
 
 type Access = { outpostId: string; canManage: boolean }
 
-async function access(db: D1Database, authUserId: string, now: string): Promise<Access> {
+export async function workspaceAccess(db: D1Database, authUserId: string, now: string): Promise<Access> {
   const row = await db.prepare(`SELECT membership.outpost_id outpostId,
       EXISTS(SELECT 1 FROM permission_grants editor
         WHERE editor.auth_user_id = membership.auth_user_id AND editor.scope_type = 'outpost'
@@ -24,14 +24,14 @@ async function access(db: D1Database, authUserId: string, now: string): Promise<
   return { outpostId: row.outpostId, canManage: row.canManage === 1 }
 }
 
-async function requireEditor(db: D1Database, authUserId: string, now: string) {
-  const result = await access(db, authUserId, now)
+export async function requireWorkspaceEditor(db: D1Database, authUserId: string, now: string) {
+  const result = await workspaceAccess(db, authUserId, now)
   if (!result.canManage) throw new WorkspaceCalendarError('Workspace unavailable.', 404)
   return result
 }
 
 export async function getWorkspaceSummary(db: D1Database, authUserId: string, now: string) {
-  const allowed = await access(db, authUserId, now)
+  const allowed = await workspaceAccess(db, authUserId, now)
   const workspace = await db.prepare(`SELECT workspace.outpost_id outpostId, workspace.time_zone timeZone,
       CASE WHEN content.status = 'archived' THEN 'read-only' ELSE workspace.state END state,
       workspace.created_at createdAt, workspace.updated_at updatedAt, workspace.version
@@ -42,7 +42,7 @@ export async function getWorkspaceSummary(db: D1Database, authUserId: string, no
 }
 
 export async function setWorkspaceTimezone(db: D1Database, authUserId: string, input: { timeZone: unknown; expectedVersion: unknown }, now: string) {
-  const allowed = await requireEditor(db, authUserId, now)
+  const allowed = await requireWorkspaceEditor(db, authUserId, now)
   const timeZone = validateWorkspaceTimezone(input.timeZone)
   const outpost = await db.prepare('SELECT status FROM content_records WHERE id = ?').bind(allowed.outpostId).first<{ status: string }>()
   if (outpost?.status === 'archived') throw new WorkspaceCalendarError('Workspace is read-only.', 423)
@@ -74,18 +74,22 @@ function range(params: URLSearchParams) {
 }
 
 export async function listCalendarEntries(db: D1Database, authUserId: string, params: URLSearchParams, now: string) {
-  const allowed = await access(db, authUserId, now)
+  const allowed = await workspaceAccess(db, authUserId, now)
   const input = range(params)
-  const { results } = await db.prepare(`SELECT id,title,description,category,start_date startDate,end_date endDate,
-      start_time startTime,end_time endTime,all_day allDay,time_zone timeZone,location,status,
-      created_at createdAt,updated_at updatedAt,cancelled_at cancelledAt,version
-    FROM outpost_calendar_entries WHERE outpost_id=? AND start_date<=? AND end_date>=?
-    ORDER BY start_date,start_time,id LIMIT ?`).bind(allowed.outpostId, input.to, input.from, input.limit + 1).all<Record<string, unknown>>()
+  const { results } = await db.prepare(`SELECT entry.id,entry.title,entry.description,entry.category,entry.start_date startDate,entry.end_date endDate,
+      entry.start_time startTime,entry.end_time endTime,entry.all_day allDay,entry.time_zone timeZone,entry.location,entry.status,
+      entry.created_at createdAt,entry.updated_at updatedAt,entry.cancelled_at cancelledAt,entry.version,
+      plan.id referencePlanId,plan.reference_content_id referenceContentId,plan.plan_status referencePlanStatus,plan.review_state referenceReviewState,
+      plan.review_reason_code referenceReviewReason,plan.reference_checked_at referenceCheckedAt,
+      plan.snapshot_lifecycle_status referenceLifecycleStatus,plan.snapshot_official_url referenceOfficialUrl,plan.version referencePlanVersion
+    FROM outpost_calendar_entries entry LEFT JOIN reference_event_plans plan ON plan.calendar_entry_id=entry.id AND plan.detached_at IS NULL
+    WHERE entry.outpost_id=? AND entry.start_date<=? AND entry.end_date>=?
+    ORDER BY entry.start_date,entry.start_time,entry.id LIMIT ?`).bind(allowed.outpostId, input.to, input.from, input.limit + 1).all<Record<string, unknown>>()
   return { items: results.slice(0, input.limit), hasMore: results.length > input.limit }
 }
 
 export async function getCalendarEntry(db: D1Database, authUserId: string, entryId: string, now: string) {
-  const allowed = await access(db, authUserId, now)
+  const allowed = await workspaceAccess(db, authUserId, now)
   const entry = await db.prepare(`SELECT id,title,description,category,start_date startDate,end_date endDate,start_time startTime,
       end_time endTime,all_day allDay,time_zone timeZone,location,status,created_at createdAt,updated_at updatedAt,
       cancelled_at cancelledAt,version FROM outpost_calendar_entries WHERE id=? AND outpost_id=?`)
@@ -94,7 +98,7 @@ export async function getCalendarEntry(db: D1Database, authUserId: string, entry
   return entry
 }
 
-async function activeWorkspace(db: D1Database, outpostId: string) {
+export async function activeWorkspace(db: D1Database, outpostId: string) {
   const workspace = await db.prepare(`SELECT workspace.time_zone timeZone,
       CASE WHEN content.status = 'archived' THEN 'read-only' ELSE workspace.state END state
     FROM outpost_workspaces workspace JOIN content_records content ON content.id=workspace.outpost_id
@@ -106,7 +110,7 @@ async function activeWorkspace(db: D1Database, outpostId: string) {
 }
 
 export async function createCalendarEntry(db: D1Database, authUserId: string, value: unknown, now: string) {
-  const allowed = await requireEditor(db, authUserId, now)
+  const allowed = await requireWorkspaceEditor(db, authUserId, now)
   const workspace = await activeWorkspace(db, allowed.outpostId)
   const input = validateCalendarEntryInput(value)
   const id = crypto.randomUUID()
@@ -122,7 +126,7 @@ export async function createCalendarEntry(db: D1Database, authUserId: string, va
 }
 
 export async function updateCalendarEntry(db: D1Database, authUserId: string, entryId: string, value: unknown, expectedVersion: unknown, now: string) {
-  const allowed = await requireEditor(db, authUserId, now)
+  const allowed = await requireWorkspaceEditor(db, authUserId, now)
   const workspace = await activeWorkspace(db, allowed.outpostId)
   const input = validateCalendarEntryInput(value)
   if (!Number.isInteger(expectedVersion)) throw new WorkspaceCalendarError('Calendar entry changed.', 409)
@@ -140,7 +144,7 @@ export async function updateCalendarEntry(db: D1Database, authUserId: string, en
 }
 
 export async function cancelCalendarEntry(db: D1Database, authUserId: string, entryId: string, expectedVersion: unknown, now: string) {
-  const allowed = await requireEditor(db, authUserId, now)
+  const allowed = await requireWorkspaceEditor(db, authUserId, now)
   await activeWorkspace(db, allowed.outpostId)
   if (!Number.isInteger(expectedVersion)) throw new WorkspaceCalendarError('Calendar entry changed.', 409)
   const eventId = crypto.randomUUID()
@@ -157,7 +161,7 @@ export async function cancelCalendarEntry(db: D1Database, authUserId: string, en
 }
 
 export async function listCalendarHistory(db: D1Database, authUserId: string, entryId: string, now: string) {
-  const allowed = await access(db, authUserId, now)
+  const allowed = await workspaceAccess(db, authUserId, now)
   const { results } = await db.prepare(`SELECT event_type eventType,actor_label actorLabel,summary,entry_version entryVersion,created_at createdAt
     FROM calendar_entry_events WHERE outpost_id=? AND entry_id=? ORDER BY created_at,id LIMIT 100`)
     .bind(allowed.outpostId,entryId).all()

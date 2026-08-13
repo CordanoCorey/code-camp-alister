@@ -116,6 +116,18 @@ _Avoid_: Escalation hierarchy, named officeholder
 An Account holder whose relationship to a particular Outpost has been privately verified. An Outpost Member may view that Outpost's member-only information; membership is never exposed as a public roster.
 _Avoid_: Public member, directory member
 
+**Reference Event Plan**:
+A private Outpost-owned decision to consider, plan for, or attend one public Reference Calendar occurrence. It is not an RSVP, registration, attendance record, or organizer confirmation.
+_Avoid_: RSVP, attendance, registration
+
+**Reference Event Snapshot**:
+A bounded private copy of the specific public event facts an Outpost planned against when a Reference Event Plan was created or explicitly refreshed.
+_Avoid_: Event revision copy, source archive
+
+**Plan Review State**:
+A private indication that material public facts changed, public eligibility ended, or a required-fact conflict changed and an authorized Outpost editor should review the Reference Event Plan.
+_Avoid_: Automatic plan update, organizer decision
+
 **Current Outpost**:
 The single verified public Outpost Listing an Account holder presently identifies with, an unmatched private Outpost Claim, or No Current Outpost. For ordinary and Operator Accounts it is optional context that establishes neither membership nor authority; membership is verified separately.
 _Avoid_: Permanent outpost, multiple home outposts

@@ -3,6 +3,7 @@ import {
   WorkspaceCalendarError, cancelCalendarEntry, createCalendarEntry, getCalendarEntry, getWorkspaceSummary,
   listCalendarEntries, listCalendarHistory, setWorkspaceTimezone, updateCalendarEntry,
 } from './outpost-workspace-calendar-repository'
+import { addReferencePlan, detachReferencePlan, getReferenceEligibility, getReferencePlan, listReferenceReviewQueue, refreshReferencePlan, updateReferencePlanStatus } from './reference-event-plan-repository'
 
 const MAX_BODY_BYTES = 16_384
 const headers = { 'cache-control': 'private, no-store', pragma: 'no-cache', 'referrer-policy': 'no-referrer' }
@@ -44,6 +45,17 @@ export async function handleOutpostWorkspaceCalendar(request: Request, env: Ordi
     }
     if (request.method === 'GET' && url.pathname === '/api/workspace/calendar') return json(await listCalendarEntries(env.DB, authUserId, url.searchParams, now))
     if (request.method === 'POST' && url.pathname === '/api/workspace/calendar') return json({ entry: await createCalendarEntry(env.DB, authUserId, await body(request), now) }, 201)
+    if (request.method === 'POST' && url.pathname === '/api/workspace/reference-plans') return json({ plan: await addReferencePlan(env.DB,authUserId,await body(request),now) },201)
+    if (request.method === 'GET' && url.pathname === '/api/workspace/reference-plans/review') return json(await listReferenceReviewQueue(env.DB,authUserId,url.searchParams.get('limit'),now))
+    const eligibility=url.pathname.match(/^\/api\/workspace\/reference-events\/([^/]+)\/([^/]+)$/)
+    if(request.method==='GET'&&eligibility)return json(await getReferenceEligibility(env.DB,authUserId,decodeURIComponent(eligibility[1]),decodeURIComponent(eligibility[2]),now))
+    const planMatch=url.pathname.match(/^\/api\/workspace\/reference-plans\/([^/]+)(?:\/(status|refresh|detach))?$/)
+    if(planMatch){const planId=decodeURIComponent(planMatch[1])
+      if(request.method==='GET'&&!planMatch[2])return json({plan:await getReferencePlan(env.DB,authUserId,planId,now)})
+      if(request.method==='PATCH'&&planMatch[2]==='status'){const input=await body(request);return json({plan:await updateReferencePlanStatus(env.DB,authUserId,planId,input.status,input.expectedVersion,now)})}
+      if(request.method==='POST'&&planMatch[2]==='refresh'){const input=await body(request);return json({plan:await refreshReferencePlan(env.DB,authUserId,planId,input.expectedVersion,now)})}
+      if(request.method==='POST'&&planMatch[2]==='detach'){const input=await body(request);return json({plan:await detachReferencePlan(env.DB,authUserId,planId,input.expectedVersion,input.keepEntry===true,now)})}
+    }
     const match = url.pathname.match(/^\/api\/workspace\/calendar\/([^/]+)(?:\/(history|cancel))?$/)
     if (match) {
       const entryId = decodeURIComponent(match[1])
@@ -62,7 +74,7 @@ export async function handleOutpostWorkspaceCalendar(request: Request, env: Ordi
   } catch (error) {
     if (error instanceof WorkspaceCalendarError) return json({ error: error.message }, error.status)
     const message = error instanceof Error ? error.message : ''
-    if (/^(Choose|Title|Description|Location|Start|End|The end|An all-day|A timed|Calendar entry|Request key)/.test(message)) return json({ error: message }, 400)
+    if (/^(Choose|Title|Description|Location|Start|End|The end|An all-day|A timed|Calendar entry|Reference plan|Private note|Request key|Review queue)/.test(message)) return json({ error: message }, 400)
     return json({ error: 'Workspace unavailable.' }, 404)
   }
 }
