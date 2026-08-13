@@ -73,7 +73,7 @@ function timed(name, sql, bindings, maximumRows, requiredPlan) {
 
 try {
   db.exec('PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;')
-  for (let number = 1; number <= 12; number += 1) {
+  for (let number = 1; number <= 14; number += 1) {
     const prefix = String(number).padStart(4, '0')
     const migrationUrl = new URL(`../migrations/${[
       '0001_initial.sql',
@@ -89,6 +89,7 @@ try {
       '0011_ordinary_adult_accounts.sql',
       '0012_ordinary_account_lifecycle.sql',
       '0013_international_directory_foundation.sql',
+      '0014_membership_and_permissions.sql',
     ][number - 1]}`, import.meta.url)
     if (!migrationUrl.pathname.includes(prefix)) throw new Error(`Migration ordering failed at ${prefix}.`)
     db.exec(await readFile(migrationUrl, 'utf8'))
@@ -414,10 +415,20 @@ try {
     timed('international scoped private outpost claim', `SELECT auth_user_id FROM ordinary_account_profiles
       WHERE onboarding_path = 'international' AND current_outpost_id IS NULL
         AND country_code = ? AND outpost_claim = ? LIMIT 51`, ['CA', 'Synthetic Outpost 71'], 51, 'ordinary_profiles_international_claim'),
+    timed('exact outpost authorization', `SELECT id FROM permission_grants
+      WHERE auth_user_id = ? AND scope_type = ? AND scope_id = ? AND capability = ?
+        AND state = 'active' AND (ends_at IS NULL OR ends_at > ?) LIMIT 1`,
+      ['scale-user-49999', 'outpost', 'scale-outpost-19999', 'edit-outpost-draft', maintenanceNow], 1, 'permission_grants_authorization'),
+    timed('bounded membership review queue', `SELECT id FROM membership_requests
+      WHERE outpost_id = ? AND state = 'pending' ORDER BY created_at, id LIMIT 51`,
+      ['scale-outpost-19999'], 51, 'membership_requests_review_queue'),
+    timed('bounded conflict resolver queue', `SELECT id FROM conflict_assignments
+      WHERE scope_type = ? AND scope_id = ? AND review_state = 'assigned'
+      ORDER BY created_at, id LIMIT 51`, ['outpost', 'scale-outpost-19999'], 51, 'conflict_assignments_resolver_queue'),
   ]
 
   console.log(JSON.stringify({
-    schemaMigration: '0013_international_directory_foundation.sql',
+    schemaMigration: '0014_membership_and_permissions.sql',
     syntheticOutposts: 20_000,
     syntheticOrdinaryAccounts: ordinaryAccountCount,
     totalOutposts: outpostCount,

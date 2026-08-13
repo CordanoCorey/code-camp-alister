@@ -186,7 +186,12 @@ export async function updateOrdinaryProfile(
 ) {
   const profile = validateOrdinaryProfileInput(value)
   if (!Number.isInteger(expectedVersion) || Number(expectedVersion) < 1) throw new Error('Reload the Account page before saving.')
-  const result = await db.prepare(`UPDATE ordinary_account_profiles SET
+  const current = await db.prepare(`SELECT current_outpost_id FROM ordinary_account_profiles
+    WHERE auth_user_id = ? AND activation_state = 'active' AND version = ?`)
+    .bind(authUserId, expectedVersion).first<{ current_outpost_id: string | null }>()
+  if (!current) throw new Error('This private profile changed after you opened it. Reload it before saving.')
+  const outpostChanged = current.current_outpost_id !== profile.currentOutpostId
+  const update = db.prepare(`UPDATE ordinary_account_profiles SET
       display_name = ?, onboarding_path = ?, claimed_position = ?, claimed_position_other = ?,
       current_outpost_id = ?, outpost_claim = ?, usa_jurisdiction_id = ?, country_code = ?,
       international_subdivision = ?, updated_at = ?, version = version + 1
@@ -204,8 +209,21 @@ export async function updateOrdinaryProfile(
       now,
       authUserId,
       expectedVersion,
-    ).run()
-  if ((result.meta.changes ?? 0) !== 1) throw new Error('This private profile changed after you opened it. Reload it before saving.')
+    )
+  const results = outpostChanged
+    ? await db.batch([
+      db.prepare(`UPDATE permission_grants SET state = 'revoked', ended_at = ?, version = version + 1
+        WHERE auth_user_id = ? AND state = 'active' AND source_membership_id IN
+          (SELECT id FROM outpost_memberships WHERE auth_user_id = ? AND state = 'verified')`)
+        .bind(now, authUserId, authUserId),
+      db.prepare(`UPDATE outpost_memberships SET state = 'ended', ended_at = ?, version = version + 1
+        WHERE auth_user_id = ? AND state = 'verified'`).bind(now, authUserId),
+      db.prepare(`UPDATE membership_requests SET state = 'withdrawn', ended_at = ?, version = version + 1
+        WHERE auth_user_id = ? AND state = 'pending'`).bind(now, authUserId),
+      update,
+    ])
+    : [await update.run()]
+  if ((results.at(-1)?.meta.changes ?? 0) !== 1) throw new Error('This private profile changed after you opened it. Reload it before saving.')
   return getOrdinaryProfile(db, authUserId)
 }
 

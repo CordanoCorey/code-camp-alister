@@ -25,6 +25,7 @@ export function createMigratedD1() {
     '0011_ordinary_adult_accounts.sql',
     '0012_ordinary_account_lifecycle.sql',
     '0013_international_directory_foundation.sql',
+    '0014_membership_and_permissions.sql',
   ]) {
     sqlite.exec(readFileSync(new URL(`../migrations/${name}`, import.meta.url), 'utf8'))
   }

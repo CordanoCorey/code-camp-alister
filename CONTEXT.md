@@ -89,16 +89,28 @@ The adult Royal Rangers relationship an Account holder selects: Parent/Guardian,
 _Avoid_: Permission, verified office
 
 **Permission Grant**:
-Verified authority for an Account to perform specified actions within specified Organizational Scopes. A Permission Grant is separate from a Claimed Position and never implies authority above or below its stated scope.
+Revocable authority for an Account to perform one named capability within one exact Organizational Scope. It is separate from Membership and Position Verification and never implies authority above, below, adjacent to, or merely affiliated with its stated scope.
 _Avoid_: Selected position, account type
 
-**Membership Verification**:
-Private confirmation that an Account holder belongs to a specified Outpost. Knowing an outpost number or selecting a position is not verification.
-_Avoid_: Public roster, self-attestation
+**Membership Request**:
+A private request by one active ordinary Account to join one published Outpost. An unmatched textual outpost claim cannot be a Membership Request.
+_Avoid_: Membership, outpost claim
+
+**Outpost Membership**:
+A private verified, rejected, withdrawn, revoked, or ended relationship between one Account and one Outpost. Only a verified active Outpost Membership unlocks member-only access.
+_Avoid_: Public roster, self-attestation, Current Outpost
 
 **Position Verification**:
-Evidence supporting a Claimed Position before any related Permission Grant is issued. Verification follows the position's applicable Organizational Scope rather than granting authority throughout the service.
-_Avoid_: Position selection
+A private record that an adult ministry position was verified for one exact Organizational Scope. It can be revoked independently and never grants a capability by itself.
+_Avoid_: Position selection, Permission Grant
+
+**Permission Event**:
+An append-only sanitized record that a Permission Grant was granted, revoked, or expired. It contains durable non-identifying labels rather than public names or email.
+_Avoid_: Public roster, profile history
+
+**Conflict Assignment**:
+The exact Organizational Scope, durable office label, and resolver capability required for one conflict. It routes responsibility without searching through or inheriting from an organization tree.
+_Avoid_: Escalation hierarchy, named officeholder
 
 **Outpost Member**:
 An Account holder whose relationship to a particular Outpost has been privately verified. An Outpost Member may view that Outpost's member-only information; membership is never exposed as a public roster.

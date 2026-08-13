@@ -81,7 +81,7 @@ describe('ordinary account profile repository', () => {
     expect(changed).toMatchObject({ displayName: 'Alexis', onboardingPath: 'international', version: 3 })
     await expect(updateOrdinaryProfile(migrated.db, 'auth-user-1', changed, 2, '2026-08-13T14:00:00.000Z'))
       .rejects.toThrow('changed')
-    expect(migrated.sqlite.prepare("SELECT COUNT(*) count FROM sqlite_schema WHERE type = 'table' AND name LIKE '%permission%'").get())
+    expect(migrated.sqlite.prepare('SELECT COUNT(*) count FROM permission_grants').get())
       .toEqual({ count: 0 })
     expect(migrated.sqlite.prepare('SELECT COUNT(*) count FROM operator_tenures').get()).toEqual({ count: 0 })
   })
