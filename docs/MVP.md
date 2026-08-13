@@ -1,5 +1,11 @@
 # Ranger Outpost Hub MVP
 
+## International directory foundation (Slice 14)
+
+The public directory now has explicit USA and International entry paths and a country-scoped normalized model. Country, optional Civil Subdivision, country-defined Ministry Organization Units, overlapping ministry/language/FCF affiliations, and source-native identifiers are stored separately with field-level provenance. Missing civil subdivisions and unverified organization or FCF facts are omitted or shown as Not Verified.
+
+The representative Malaysia, Germany, and United Kingdom records prove structurally different source shapes only. Local-unit examples whose sources do not establish current operation remain private Operator drafts and never enter public search. Broad country and outpost verification/population is explicitly deferred to Slice 15; this slice does not claim international completeness.
+
 ## Outcome
 
 Build a locally runnable beta of **Ranger Outpost Hub**, an independent, mobile-friendly Royal Rangers information service. Public visitors can find verified sample outposts, explore advancement and program information, and view sourced events. The project founder privately manages published information through the sole Operator Account.
@@ -128,9 +134,15 @@ Slice 4 beta-hardening evidence is recorded in [`docs/qa/beta-readiness.md`](qa/
 
 Slice 5 normalized-model, migration-parity, and isolated 20,000-Outpost query evidence is recorded in [`docs/qa/production-scale-model.md`](qa/production-scale-model.md). It establishes bounded local architecture behavior without claiming deployed performance or production readiness.
 
+## Account-enabled beta addendum
+
+Slice 10 extends the historical Initial Public Release with local ordinary adult Accounts while preserving anonymous public browsing. It adds provider-owned email/password identity, email verification and recovery, separate USA and International onboarding, a transient neutral Birth Year check, and one private non-authoritative profile per Account. Claimed Position and Current Outpost remain unverified context and grant no membership, Permission Grant, editing access, or Operator authority. Dated local evidence and limitations are recorded in [`docs/qa/adult-account-authentication.md`](qa/adult-account-authentication.md).
+
+Slice 11 adds a one-calendar-year Ordinary Access Term, a one-calendar-month Renewal Notice, explicit pre-expiry one-year Renewal, exact expiry enforcement, and bounded irreversible deletion six calendar months after confirmed warning-provider acceptance. It does not change anonymous public browsing, Operator lifecycle, membership, verification, permissions, editors, workspaces, calendars, or youth-account scope. Dated local evidence and limitations are recorded in [`docs/qa/ordinary-account-lifecycle.md`](qa/ordinary-account-lifecycle.md).
+
 ## Explicitly deferred
 
-- Ordinary adult accounts and all youth accounts
+- Youth accounts
 - Private Outpost Calendars and Meeting Plans
 - Membership, claimed-position, and delegated editor workflows
 - Donations and payments

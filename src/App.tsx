@@ -20,6 +20,7 @@ import type {
   EventDetails,
   EventLifecycleStatus,
   FreshnessItemType,
+  MaintenanceWorkspace,
   OperatorSession,
   OperatorSnapshot,
   OrganizationDetails,
@@ -31,7 +32,9 @@ import type {
   RecordKind,
   SourceRecord,
   StagedOutpostCandidate,
+  StagedInternationalCandidate,
 } from '../shared/domain'
+import { maintenanceJobPolicy, sourceMonitorPolicy } from '../shared/maintenance-policy'
 import {
   advancementSubtypes,
   eventCategories,
@@ -69,21 +72,27 @@ import {
   type EventView,
 } from '../shared/events'
 import { AddOutpostPage } from './AddOutpostPage'
+import { AccountPages } from './account/AccountPages'
 import { jurisdictions } from './data/jurisdictions'
+import { listInternationalCountries } from '../shared/countries'
 import {
   fetchMoreOperatorRecords,
+  fetchMaintenanceWorkspace,
   fetchOperatorRecord,
   fetchOperatorSession,
   fetchOperatorSnapshot,
   fetchOperatorSubmission,
   fetchOperatorSubmissions,
   fetchStagedOutpostCandidates,
+  fetchStagedInternationalCandidates,
   fetchPublicBootstrap,
+  fetchOrdinarySession,
   fetchRecordPage,
   runOperatorAction,
   runOperatorAccountAction,
   saveOperatorRecord,
   searchOperatorOutposts,
+  signOutOrdinaryAccount,
 } from './data/client'
 import { captureInitialTransferToken } from './lib/transfer-fragment'
 import {
@@ -108,6 +117,28 @@ type Route =
   | '/other'
   | '/help'
   | '/operator'
+  | '/signup'
+  | '/sign-in'
+  | '/forgot-password'
+  | '/reset-password'
+  | '/account'
+
+const supportedDirectoryCountries = [
+  { code: 'US', name: 'United States' },
+  { code: 'MY', name: 'Malaysia' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'GB', name: 'United Kingdom' },
+]
+
+function formatAffiliations(value: OutpostDetails['affiliations']) {
+  return (value ?? []).map((item) => `${item.label} | ${item.name} | ${item.scope}`).join('\n')
+}
+
+function parseAffiliations(value: string): NonNullable<OutpostDetails['affiliations']> {
+  return value.split('\n').map((line) => line.split('|').map((part) => part.trim()))
+    .filter((parts) => parts.length === 3 && parts[0] && parts[1] && ['ministry', 'language', 'fcf'].includes(parts[2]))
+    .map(([label, name, scope]) => ({ label, name, scope: scope as 'ministry' | 'language' | 'fcf' }))
+}
 
 const navItems: Array<{ href: Route; label: string }> = [
   { href: '/outposts', label: 'Find an Outpost' },
@@ -138,12 +169,17 @@ const routeTitles: Record<Route, string> = {
   '/other': 'Other Resources',
   '/help': 'Help & Sources',
   '/operator': 'Operator Console',
+  '/signup': 'Create an Account',
+  '/sign-in': 'Sign In',
+  '/forgot-password': 'Reset Password',
+  '/reset-password': 'Choose a New Password',
+  '/account': 'Account',
 }
 
 const navigationEventName = 'ranger-outpost:navigate'
 const locationChangeEventName = 'ranger-outpost:locationchange'
 
-function useCursorRecords(path: string, params: URLSearchParams) {
+function useCursorRecords(path: string, params: URLSearchParams, enabled = true) {
   const queryKey = params.toString()
   const [records, setRecords] = useState<ContentRecord[]>([])
   const [nextCursor, setNextCursor] = useState<string | null>(null)
@@ -152,6 +188,13 @@ function useCursorRecords(path: string, params: URLSearchParams) {
 
   useEffect(() => {
     let active = true
+    if (!enabled) {
+      setRecords([])
+      setNextCursor(null)
+      setLoading(false)
+      setErrorMessage('')
+      return () => { active = false }
+    }
     setLoading(true)
     setErrorMessage('')
     fetchRecordPage(path, new URLSearchParams(queryKey)).then(({ data }) => {
@@ -162,7 +205,7 @@ function useCursorRecords(path: string, params: URLSearchParams) {
       if (active) setErrorMessage(error instanceof Error ? error.message : 'The records could not be loaded.')
     }).finally(() => { if (active) setLoading(false) })
     return () => { active = false }
-  }, [path, queryKey])
+  }, [enabled, path, queryKey])
 
   const loadMore = async () => {
     if (!nextCursor || loading) return
@@ -231,6 +274,11 @@ function useRoute() {
     '/other',
     '/help',
     '/operator',
+    '/signup',
+    '/sign-in',
+    '/forgot-password',
+    '/reset-password',
+    '/account',
   ].includes(parsed.pathname)
     ? (parsed.pathname as Route)
     : '/'
@@ -302,7 +350,25 @@ function Shell({
   routeAnnouncement: string
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [ordinarySession, setOrdinarySession] = useState<{ authenticated: boolean; displayName?: string }>({ authenticated: false })
   useEffect(() => setMenuOpen(false), [location])
+  useEffect(() => {
+    let active = true
+    const refresh = () => {
+      fetchOrdinarySession()
+        .then(({ data }) => { if (active) setOrdinarySession(data) })
+        .catch(() => { if (active) setOrdinarySession({ authenticated: false }) })
+    }
+    refresh()
+    window.addEventListener('ranger-outpost:sessionchange', refresh)
+    return () => { active = false; window.removeEventListener('ranger-outpost:sessionchange', refresh) }
+  }, [location])
+  const signOut = async () => {
+    try { await signOutOrdinaryAccount() } finally {
+      setOrdinarySession({ authenticated: false })
+      navigateTo('/sign-in')
+    }
+  }
   return (
     <>
       <a className="skip-link" href="#main-content">Skip to content</a>
@@ -326,6 +392,12 @@ function Shell({
             />
             <button type="submit">Search</button>
           </form>
+          <div className="account-header-actions">
+            {ordinarySession.authenticated ? <>
+              <AppLink href="/account">Account{ordinarySession.displayName ? ` · ${ordinarySession.displayName}` : ''}</AppLink>
+              <button className="link-button" type="button" onClick={() => void signOut()}>Sign out</button>
+            </> : <AppLink href="/sign-in">Sign in</AppLink>}
+          </div>
           <button
             className="menu-button"
             type="button"
@@ -505,15 +577,16 @@ function OutpostCard({ record }: { record: ContentRecord }) {
       <h2>{details.church}</h2>
       <p className="location">
         {details.streetAddress && <>{details.streetAddress}<br /></>}
-        {details.city}, {details.jurisdiction}{details.postalCode ? ` ${details.postalCode}` : ''}
+        {[details.city, details.jurisdiction !== details.countryName ? details.jurisdiction : null, details.postalCode].filter(Boolean).join(', ')}
+        {details.countryCode !== 'US' && <><br />{details.countryName}</>}
       </p>
-      <dl className="facts">
+      {(details.countryCode ?? 'US') === 'US' ? <dl className="facts">
         <div><dt>District</dt><dd>{details.district || 'Not verified'}</dd></div>
         <div><dt>Region</dt><dd>{details.region || 'Not verified'}</dd></div>
         <div><dt>Language overlay</dt><dd>{details.languageOverlay || 'Not verified'}</dd></div>
         <div><dt>FCF territory</dt><dd>{details.fcfTerritory || 'Not verified'}</dd></div>
         <div><dt>FCF activity</dt><dd>{fcfLabel(details.activeFcf)}</dd></div>
-      </dl>
+      </dl> : (details.affiliations?.length ?? 0) > 0 && <dl className="facts">{details.affiliations?.map((item) => <div key={`${item.scope}:${item.label}:${item.name}`}><dt>{item.label}</dt><dd>{item.name}</dd></div>)}</dl>}
       {details.programs.length > 0 && (
         <div className="tags">{details.programs.map((program) => <span key={program}>{program}</span>)}</div>
       )}
@@ -530,6 +603,9 @@ function OutpostCard({ record }: { record: ContentRecord }) {
 }
 
 function OutpostsPage({ coverage }: { coverage: PublicBootstrap['coverage'] }) {
+  const internationalCountries = listInternationalCountries()
+  const [entryPath, setEntryPath] = useState<'usa' | 'international'>('usa')
+  const [country, setCountry] = useState('')
   const [query, setQuery] = useState('')
   const [jurisdiction, setJurisdiction] = useState('')
   const [affiliation, setAffiliation] = useState('')
@@ -538,13 +614,15 @@ function OutpostsPage({ coverage }: { coverage: PublicBootstrap['coverage'] }) {
   const params = useMemo(() => {
     const next = new URLSearchParams({ limit: '20' })
     if (query.trim()) next.set('q', query.trim())
-    if (jurisdiction) next.set('civil', jurisdiction)
+    if (entryPath === 'usa') next.set('country', 'US')
+    if (entryPath === 'international' && country) next.set('country', country)
+    if (jurisdiction && entryPath === 'usa') next.set('civil', jurisdiction)
     if (affiliation.trim()) next.set('organization', affiliation.trim())
     if (program) next.set('program', program)
     if (fcf) next.set('fcf', fcf)
     return next
-  }, [affiliation, fcf, jurisdiction, program, query])
-  const page = useCursorRecords('/api/public/outposts', params)
+  }, [affiliation, country, entryPath, fcf, jurisdiction, program, query])
+  const page = useCursorRecords('/api/public/outposts', params, entryPath === 'usa' || Boolean(country))
   const selectedPlace = jurisdictions.find((place) => place.name === jurisdiction)
   const selectedCoverage = coverage.jurisdictions.find((place) => place.name === jurisdiction)?.verifiedListingCount ?? 0
   const activeFilters = [
@@ -557,20 +635,22 @@ function OutpostsPage({ coverage }: { coverage: PublicBootstrap['coverage'] }) {
   const reset = () => { setQuery(''); setJurisdiction(''); setAffiliation(''); setProgram(''); setFcf('') }
   return (
     <>
-      <PageIntro eyebrow="U.S. directory" title="Find an Outpost">
-        This independent directory is growing from Operator-verified public sources and is not the official charter system or locator. It remains incomplete; every U.S. jurisdiction stays visible even when no listing has been verified yet.
+      <PageIntro eyebrow={entryPath === 'usa' ? 'U.S. directory' : 'International directory'} title="Find an Outpost">
+        This independent directory contains only Operator-verified public facts and is not an official charter system. International coverage is a tiny model-proof fixture; broad population belongs to Slice 15.
       </PageIntro>
-      <section className="wrap coverage-summary" aria-labelledby="coverage-heading">
+      {entryPath === 'usa' && <section className="wrap coverage-summary" aria-labelledby="coverage-heading">
         <div className="section-heading split"><div><p className="eyebrow">Transparent coverage</p><h2 id="coverage-heading">Verified listings by region</h2></div><p>Counts come only from current, publicly eligible listings. No expected totals are invented.</p></div>
         <div className="coverage-counts">{coverage.regions.map((region) => <div key={region.name}><strong>{region.verifiedListingCount}</strong><span>{region.name}</span></div>)}</div>
         <details><summary>Show every state and territory count</summary><div className="jurisdiction-counts">{coverage.jurisdictions.map((place) => <span key={place.code}><strong>{place.verifiedListingCount}</strong> {place.name}</span>)}</div></details>
-      </section>
+      </section>}
       <section className="wrap directory-layout">
         <aside className="filter-panel" aria-label="Directory filters">
           <h2>Filter outposts</h2>
+          <fieldset><legend>Directory path</legend><label><input type="radio" name="directory-path" checked={entryPath === 'usa'} onChange={() => { setEntryPath('usa'); setCountry(''); setJurisdiction('') }} /> USA</label><label><input type="radio" name="directory-path" checked={entryPath === 'international'} onChange={() => { setEntryPath('international'); setJurisdiction('') }} /> International</label></fieldset>
+          {entryPath === 'international' && <><label htmlFor="country">Country or territory</label><select id="country" value={country} onChange={(event) => setCountry(event.target.value)}><option value="">Choose a country</option>{internationalCountries.map((item) => <option key={item.code} value={item.code}>{item.name}</option>)}</select></>}
           <label htmlFor="outpost-query">Name, city, or number</label>
           <input id="outpost-query" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Try Greenville or 70" />
-          <label htmlFor="jurisdiction">State or U.S. territory</label>
+          {entryPath === 'usa' && <><label htmlFor="jurisdiction">State or U.S. territory</label>
           <select id="jurisdiction" value={jurisdiction} onChange={(event) => setJurisdiction(event.target.value)}>
             <option value="">All jurisdictions</option>
             <optgroup label="States and District of Columbia">
@@ -583,7 +663,7 @@ function OutpostsPage({ coverage }: { coverage: PublicBootstrap['coverage'] }) {
                 <option key={place.abbreviation} value={place.name}>{place.name}</option>
               ))}
             </optgroup>
-          </select>
+          </select></>}
           <label htmlFor="affiliation">District, region, language overlay, or FCF territory</label>
           <input id="affiliation" value={affiliation} onChange={(event) => setAffiliation(event.target.value)} placeholder="Exact organization name" />
           <label htmlFor="program">Program Group</label>
@@ -622,7 +702,7 @@ function OutpostsPage({ coverage }: { coverage: PublicBootstrap['coverage'] }) {
             <AppLink className="button primary" href="/add-your-outpost">Add Your Outpost</AppLink>
           </div>
           {page.errorMessage && <p className="form-error" role="alert">{page.errorMessage}</p>}
-          {page.records.length > 0 ? (
+          {entryPath === 'international' && !country ? <div className="empty-state"><span aria-hidden="true">⌖</span><h2>Choose a country</h2><p>International records are always country-scoped; no global bare-number directory is shown.</p></div> : page.records.length > 0 ? (
             <><div className="outpost-list">{page.records.map((record) => <OutpostCard key={record.id} record={record} />)}</div>
             {page.nextCursor && <button className="button secondary" type="button" onClick={page.loadMore} disabled={page.loading}>{page.loading ? 'Loading…' : 'Load more outposts'}</button>}</>
           ) : (
@@ -1054,13 +1134,13 @@ function DraftPreviewDialog({
 
 function defaultDetails(kind: RecordKind): RecordDetails {
   if (kind === 'outpost') return {
-    hubOutpostId: '', outpostNumber: null, campusSuffix: null, church: '', streetAddress: null,
-    city: '', jurisdiction: '', postalCode: null, district: '', region: '', languageOverlay: '',
-    fcfTerritory: '', activeFcf: null, programs: [], meeting: null, contactUrl: null,
+    hubOutpostId: '', countryCode: 'US', countryName: 'United States', localUnitLabel: 'Outpost', identifierRaw: null, displayNameRaw: null, outpostNumber: null, campusSuffix: null, church: '', streetAddress: null,
+    city: '', jurisdiction: '', civilSubdivisionLabel: 'State', postalCode: null, district: '', region: '', languageOverlay: '',
+    fcfTerritory: '', activeFcf: null, fcfAvailability: 'available', affiliations: [], programs: [], meeting: null, contactUrl: null,
   }
   if (kind === 'event') return defaultEventDetails()
   if (kind === 'advancement') return defaultAdvancementDetails()
-  if (kind === 'organization') return { organizationType: 'district', scope: 'geographic', parent: null, affiliations: [], jurisdictions: [] }
+  if (kind === 'organization') return { organizationType: 'district', scope: 'geographic', countryCode: 'US', unitLabel: 'District', parent: null, affiliations: [], jurisdictions: [] }
   return { section: 'other', body: [], links: [] }
 }
 
@@ -1075,21 +1155,28 @@ function newDraft(kind: RecordKind): ContentRecord {
 function DetailsEditor({ draft, updateDetails }: { draft: ContentRecord; updateDetails: (details: RecordDetails) => void }) {
   if (draft.kind === 'outpost') {
     const details = draft.details as OutpostDetails
+    const countryChoices = supportedDirectoryCountries
     const update = (field: keyof OutpostDetails, value: OutpostDetails[keyof OutpostDetails]) => updateDetails({ ...details, [field]: value })
     return <fieldset><legend>Outpost details</legend><div className="form-grid">
       <label>Hub Outpost ID<input value={details.hubOutpostId || draft.id || 'Assigned when saved'} readOnly /></label>
+      <label>Country<select value={details.countryCode ?? 'US'} onChange={(event) => { const selected = countryChoices.find((item) => item.code === event.target.value); updateDetails({ ...details, countryCode: event.target.value, countryName: selected?.name ?? event.target.value, jurisdiction: event.target.value === 'US' ? '' : selected?.name ?? '', civilSubdivisionLabel: event.target.value === 'US' ? 'State' : null, fcfAvailability: event.target.value === 'US' ? 'available' : 'not-verified', activeFcf: null, affiliations: [] }) }}>{countryChoices.map((item) => <option key={item.code} value={item.code}>{item.name}</option>)}</select></label>
+      <label>Local unit label<input value={details.localUnitLabel ?? 'Outpost'} onChange={(event) => update('localUnitLabel', event.target.value)} /></label>
+      <label>Source-native identifier<input value={details.identifierRaw ?? ''} onChange={(event) => update('identifierRaw', event.target.value || null)} /></label>
+      <label>Source display name<input value={details.displayNameRaw ?? ''} onChange={(event) => update('displayNameRaw', event.target.value || null)} /></label>
       <label>Outpost number<input value={details.outpostNumber ?? ''} onChange={(event) => update('outpostNumber', event.target.value || null)} /></label>
       <label>Campus suffix<input value={details.campusSuffix ?? ''} onChange={(event) => update('campusSuffix', event.target.value || null)} /></label>
       <label>Church<input value={details.church} onChange={(event) => update('church', event.target.value)} /></label>
       <label className="full">Public street address<input value={details.streetAddress ?? ''} onChange={(event) => update('streetAddress', event.target.value || null)} /></label>
-      <label>City<input value={details.city} onChange={(event) => update('city', event.target.value)} /></label>
-      <label>State or territory<select value={details.jurisdiction} onChange={(event) => update('jurisdiction', event.target.value)}><option value="">Choose…</option>{jurisdictions.map((place) => <option key={place.abbreviation} value={place.name}>{place.name}</option>)}</select></label>
+      <label>City / locality (optional outside USA)<input value={details.city} onChange={(event) => update('city', event.target.value)} /></label>
+      {details.countryCode === 'US' ? <label>State or territory<select value={details.jurisdiction} onChange={(event) => update('jurisdiction', event.target.value)}><option value="">Choose…</option>{jurisdictions.map((place) => <option key={place.abbreviation} value={place.name}>{place.name}</option>)}</select></label> : <><label>Civil subdivision name (optional)<input value={details.jurisdiction === details.countryName ? '' : details.jurisdiction} onChange={(event) => update('jurisdiction', event.target.value || details.countryName)} /></label><label>Subdivision label (optional)<input placeholder="State, province, federal territory…" value={details.civilSubdivisionLabel ?? ''} onChange={(event) => update('civilSubdivisionLabel', event.target.value || null)} /></label></>}
       <label>Postal code<input inputMode="numeric" value={details.postalCode ?? ''} onChange={(event) => update('postalCode', event.target.value || null)} /></label>
       <label>District<input value={details.district} onChange={(event) => update('district', event.target.value)} /></label>
       <label>Region<input value={details.region} onChange={(event) => update('region', event.target.value)} /></label>
       <label>Language overlay<input value={details.languageOverlay} onChange={(event) => update('languageOverlay', event.target.value)} /></label>
       <label>FCF territory<input value={details.fcfTerritory} onChange={(event) => update('fcfTerritory', event.target.value)} /></label>
       <label>FCF Activity Status<select value={details.activeFcf === null ? 'unknown' : String(details.activeFcf)} onChange={(event) => update('activeFcf', event.target.value === 'unknown' ? null : event.target.value === 'true')}><option value="unknown">Not verified</option><option value="true">Yes</option><option value="false">No</option></select></label>
+      <label>FCF availability<select value={details.fcfAvailability ?? 'not-verified'} onChange={(event) => update('fcfAvailability', event.target.value as OutpostDetails['fcfAvailability'])}><option value="not-verified">Not verified</option><option value="available">Available</option><option value="not-offered">Not offered</option></select></label>
+      <label className="full">Country-defined affiliations (label | name | ministry/language/fcf)<textarea value={formatAffiliations(details.affiliations)} onChange={(event) => update('affiliations', parseAffiliations(event.target.value))} /></label>
       <label className="full">Program Groups (comma separated)<input value={details.programs.join(', ')} onChange={(event) => update('programs', event.target.value.split(',').map((value) => value.trim()).filter(Boolean))} /></label>
       <label className="full">Meeting information<textarea value={details.meeting ?? ''} onChange={(event) => update('meeting', event.target.value || null)} /></label>
       <label className="full">Public church contact URL<input type="url" value={details.contactUrl ?? ''} onChange={(event) => update('contactUrl', event.target.value || null)} /></label>
@@ -1185,7 +1272,9 @@ function DetailsEditor({ draft, updateDetails }: { draft: ContentRecord; updateD
     const details = draft.details as OrganizationDetails
     const update = (field: keyof OrganizationDetails, value: OrganizationDetails[keyof OrganizationDetails]) => updateDetails({ ...details, [field]: value })
     return <fieldset><legend>Organization details</legend><div className="form-grid">
-      <label>Type<select value={details.organizationType} onChange={(event) => update('organizationType', event.target.value as OrganizationDetails['organizationType'])}><option value="region">U.S. region</option><option value="district">U.S. district</option><option value="language-region">Language region</option><option value="language-district">Language district</option><option value="fcf-territory">FCF territory</option></select></label>
+      <label>Country code<input value={details.countryCode} maxLength={2} onChange={(event) => update('countryCode', event.target.value.toUpperCase())} /></label>
+      <label>Country-defined label<input value={details.unitLabel} onChange={(event) => update('unitLabel', event.target.value)} /></label>
+      <label>Type<select value={details.organizationType} onChange={(event) => update('organizationType', event.target.value as OrganizationDetails['organizationType'])}><option value="region">U.S. region</option><option value="district">U.S. district</option><option value="language-region">Language region</option><option value="language-district">Language district</option><option value="fcf-territory">FCF territory</option><option value="country-defined">Country-defined unit</option></select></label>
       <label>Scope<select value={details.scope} onChange={(event) => update('scope', event.target.value as OrganizationDetails['scope'])}><option value="geographic">Geographic</option><option value="language">Language</option><option value="fcf">FCF</option></select></label>
       <label>Parent<input value={details.parent ?? ''} onChange={(event) => update('parent', event.target.value || null)} /></label>
       <label className="full">Affiliations (one per line)<textarea value={details.affiliations.join('\n')} onChange={(event) => update('affiliations', event.target.value.split('\n').filter(Boolean))} /></label>
@@ -1803,6 +1892,196 @@ function OperatorPopulation({ reloadContent, report }: {
   </section>
 }
 
+function OperatorInternationalPopulation({ reloadContent, report }: {
+  reloadContent: () => Promise<unknown>
+  report: (notice: string, error?: string) => void
+}) {
+  const [items, setItems] = useState<StagedInternationalCandidate[]>([])
+  const [country, setCountry] = useState('')
+  const [selected, setSelected] = useState<StagedInternationalCandidate | null>(null)
+  const [reason, setReason] = useState('')
+  const [duplicateDecision, setDuplicateDecision] = useState<'no-match' | 'confirmed-correction' | ''>('')
+  const [targetOutpostId, setTargetOutpostId] = useState('')
+  const load = useCallback(async () => {
+    const filters = new URLSearchParams(); if (country) filters.set('country', country)
+    const { data } = await fetchStagedInternationalCandidates(filters); setItems(data.items)
+  }, [country])
+  useEffect(() => { void load().catch((error: unknown) => report('', error instanceof Error ? error.message : 'Could not load International candidates.')) }, [load, report])
+  const apply = async () => {
+    if (!selected || !reason.trim()) return
+    try {
+      let expectedVersion: number | null = null
+      if (duplicateDecision === 'confirmed-correction' && targetOutpostId) expectedVersion = (await fetchOperatorRecord(targetOutpostId)).data.record.version ?? null
+      const { data } = await runOperatorAction<{ id: string }>(`/api/operator/international-population/candidates/${encodeURIComponent(selected.id)}/apply`, 'POST', { reason, duplicateDecision: duplicateDecision || null, targetOutpostId: targetOutpostId || null, expectedVersion })
+      await Promise.all([load(), reloadContent()]); setSelected(null); setReason('')
+      report(`International candidate converted to private draft ${data.id}. It was not published.`)
+    } catch (error) { report('', error instanceof Error ? error.message : 'International conversion failed.') }
+  }
+  return <section className="submission-workspace" aria-labelledby="international-population-heading">
+    <div className="section-heading split"><div><p className="eyebrow">Country review</p><h2 id="international-population-heading">International Candidates</h2></div><p>Country and National Program facts remain private until this review creates a draft.</p></div>
+    <div className="submission-filters"><label>Country code<input value={country} maxLength={2} onChange={(event) => setCountry(event.target.value.toUpperCase())} /></label></div>
+    <div className="submission-queue-layout"><div className="submission-private-list" aria-label="International candidates">
+      {items.map((item) => <button key={item.id} type="button" className={selected?.id === item.id ? 'selected' : ''} onClick={() => { setSelected(item); setReason(''); setDuplicateDecision(''); setTargetOutpostId('') }}><span>{item.country_code} · {item.state}</span><strong>{item.display_name_raw ?? item.identifier_raw ?? item.city ?? item.country_name}</strong><small>{item.national_program_name}</small></button>)}
+      {items.length === 0 && <p className="empty-queue">No International candidates match this country.</p>}
+    </div><div className="submission-private-detail">{selected ? <>
+      <h3>{selected.display_name_raw ?? selected.stable_candidate_key}</h3><p>{selected.local_unit_label} · {selected.country_name}</p>
+      <h4>Exact field evidence</h4><ul>{selected.sources.map((source) => <li key={`${source.field}:${source.url}`}><strong>{source.field}</strong> · <a href={source.url} target="_blank" rel="noreferrer">{source.label} ↗</a> · checked {source.checkedAt}</li>)}</ul>
+      <h4>Country-scoped candidate matches</h4>{selected.matches.length ? <ul>{selected.matches.map((match) => <li key={match.id}><code>{match.outpostId}</code> · {match.kind} · {match.evidence}</li>)}</ul> : <p>No match was recorded; this is not proof that no duplicate exists.</p>}
+      {selected.state === 'duplicate-review' && <><label>Duplicate decision<select value={duplicateDecision} onChange={(event) => { setDuplicateDecision(event.target.value as typeof duplicateDecision); setTargetOutpostId('') }}><option value="">Choose after review</option><option value="no-match">Dismiss candidate matches</option><option value="confirmed-correction">Convert as correction</option></select></label>{duplicateDecision === 'confirmed-correction' && <label>Canonical correction target<select value={targetOutpostId} onChange={(event) => setTargetOutpostId(event.target.value)}><option value="">Choose scoped match</option>{selected.matches.map((match) => <option key={match.id} value={match.outpostId}>{match.outpostId} · {match.kind}</option>)}</select></label>}</>}
+      <label>Decision reason<input value={reason} maxLength={500} onChange={(event) => setReason(event.target.value)} /></label>
+      {['staged', 'duplicate-review'].includes(selected.state) && <button type="button" disabled={!reason.trim() || (selected.state === 'duplicate-review' && (!duplicateDecision || (duplicateDecision === 'confirmed-correction' && !targetOutpostId)))} onClick={() => void apply()}>Convert to draft only</button>}
+      {selected.applied_outpost_id && <p>Applied draft: <code>{selected.applied_outpost_id}</code></p>}
+    </> : <div className="empty-editor"><h3>Select an International candidate</h3><p>Review its country-scoped facts before draft conversion.</p></div>}</div></div>
+  </section>
+}
+
+function OperatorAutomation({ workspace, reload, loadNextPage, report }: {
+  workspace: MaintenanceWorkspace
+  reload: () => Promise<void>
+  loadNextPage: (queue: keyof MaintenanceWorkspace['pagination'], cursor: string) => Promise<void>
+  report: (notice: string, error?: string) => void
+}) {
+  const [reason, setReason] = useState('')
+  const [sourceDocumentId, setSourceDocumentId] = useState(workspace.availableSources[0]?.id ?? '')
+  const [busy, setBusy] = useState(false)
+
+  const submitAutomationAction = async (path: string, method: 'POST' | 'PUT', body: unknown, notice: string) => {
+    setBusy(true); report('')
+    try {
+      await runOperatorAction(path, method, body)
+      await reload()
+      setReason('')
+      report(notice)
+    } catch (error) {
+      report('', error instanceof Error ? error.message : 'Automation action failed.')
+    } finally { setBusy(false) }
+  }
+  const requireReason = () => {
+    if (reason.trim()) return true
+    report('', 'Enter a decision reason before changing automation state.')
+    return false
+  }
+
+  return <section className="automation-workspace" aria-labelledby="automation-heading">
+    <div className="section-heading split">
+      <div><p className="eyebrow">Private operations</p><h2 id="automation-heading">Automation</h2></div>
+      <span className={`automation-health ${workspace.scheduler.openAlertCount ? 'has-alerts' : ''}`}>
+        {workspace.scheduler.openAlertCount} open alert{workspace.scheduler.openAlertCount === 1 ? '' : 's'}
+      </span>
+    </div>
+    <p className="automation-policy"><strong>Technical checks are not factual verification.</strong> “Reachable” or “unchanged” means only that approved bytes or metadata were available. It never advances a verification date. A failure or changed page never closes an Outpost, cancels an Event, or publishes content.</p>
+    {workspace.readOnly && <p className="alert error" role="status">Operator privilege renewal is required. Scheduler health and alerts remain visible, while configuration, Run now, and review actions are read-only. Safety and retention jobs continue.</p>}
+
+    <div className="automation-summary" aria-label="Scheduler status">
+      <div><strong>{workspace.scheduler.lastRunStatus ?? 'Not run'}</strong><span>Last outcome</span></div>
+      <div><strong>{workspace.scheduler.dueJobCount}</strong><span>Due jobs</span></div>
+      <div><strong>{workspace.scheduler.dueSourceCount}</strong><span>Due sources</span></div>
+      <div><strong>{workspace.scheduler.cadence}</strong><span>Production Cron</span></div>
+    </div>
+    {!workspace.readOnly && <div className="automation-controls">
+      <label>Decision reason<input value={reason} maxLength={500} onChange={(event) => setReason(event.target.value)} placeholder="Why is this action appropriate?" /></label>
+      <button className="button primary" type="button" disabled={busy} onClick={() => {
+        if (!window.confirm('Run only currently due, bounded maintenance now?')) return
+        void submitAutomationAction('/api/operator/automation/run', 'POST', { confirmed: true }, 'Due maintenance finished. Review the sanitized outcome and alerts below.')
+      }}>Run due maintenance now</button>
+    </div>}
+
+    <h3>Jobs</h3>
+    <div className="automation-card-grid">
+      {workspace.jobs.map((job) => <form key={job.key} className="automation-card" onSubmit={(event) => {
+        event.preventDefault()
+        if (!requireReason()) return
+        const values = new FormData(event.currentTarget)
+        void submitAutomationAction(`/api/operator/automation/jobs/${encodeURIComponent(job.key)}`, 'PUT', {
+          enabled: values.get('enabled') === 'true', batchSize: Number(values.get('batchSize')),
+          intervalSeconds: Number(values.get('intervalSeconds')), reason,
+        }, `${job.key} configuration saved.`)
+      }}>
+        <div className="card-topline"><strong>{job.key.replaceAll('-', ' ')}</strong><span>{job.circuitState}</span></div>
+        <p>{job.ruleVersion} · last success {job.lastSuccessAt ? new Date(job.lastSuccessAt).toLocaleString() : 'not recorded'}</p>
+        <label>State<select name="enabled" defaultValue={String(job.enabled)} disabled={workspace.readOnly}><option value="true">Enabled</option><option value="false">Paused</option></select></label>
+        <label>Batch<select name="batchSize" defaultValue={String(job.batchSize)} disabled={workspace.readOnly}>
+          {maintenanceJobPolicy(job.key).batchSizes.map((value) => <option key={value}>{value}</option>)}
+        </select></label>
+        <label>Cadence<select name="intervalSeconds" defaultValue={String(job.intervalSeconds)} disabled={workspace.readOnly}>
+          {maintenanceJobPolicy(job.key).intervals
+            .map((value) => <option key={value} value={value}>{value < 3600 ? '30 minutes' : value < 86400 ? `${value / 3600} hour${value === 3600 ? '' : 's'}` : 'Daily'}</option>)}
+        </select></label>
+        {!workspace.readOnly && <button type="submit" disabled={busy}>Save job</button>}
+        {!workspace.readOnly && job.circuitState === 'open' && <button type="button" disabled={busy} onClick={() => {
+          if (requireReason()) void submitAutomationAction(
+            `/api/operator/automation/jobs/${encodeURIComponent(job.key)}/circuit`, 'POST', { reason },
+            `${job.key} circuit reset for another bounded attempt.`,
+          )
+        }}>Reset job circuit</button>}
+      </form>)}
+    </div>
+
+    {!workspace.readOnly && <><h3>Approve a Source Document</h3><form className="source-approval-form" onSubmit={(event) => {
+      event.preventDefault()
+      if (!sourceDocumentId || !requireReason()) return
+      const values = new FormData(event.currentTarget)
+      void submitAutomationAction(`/api/operator/automation/sources/${encodeURIComponent(sourceDocumentId)}/approve`, 'POST', {
+        mode: values.get('mode'), intervalSeconds: Number(values.get('intervalSeconds')),
+        maximumResponseBytes: Number(values.get('maximumResponseBytes')),
+        maximumRedirects: Number(values.get('maximumRedirects')), reason,
+      }, 'Source Monitor approval recorded. It remains disabled until explicitly enabled below.')
+    }}>
+      <label>Exact canonical Source Document<select value={sourceDocumentId} onChange={(event) => setSourceDocumentId(event.target.value)} required><option value="">Choose a source…</option>{workspace.availableSources.map((source) => <option key={source.id} value={source.id}>{source.label} — {source.url}</option>)}</select></label>
+      <label>Mode<select name="mode"><option value="availability-metadata">Availability and metadata</option><option value="bounded-fingerprint">Bounded fingerprint</option></select></label>
+      <label>Interval<select name="intervalSeconds" defaultValue="86400">{sourceMonitorPolicy.intervals.map((value) => <option key={value} value={value}>{value < 86400 ? `${value / 3600} hours` : value === 86400 ? 'Daily' : value === 259200 ? '3 days' : 'Weekly'}</option>)}</select></label>
+      <label>Maximum bytes<select name="maximumResponseBytes" defaultValue="65536">{sourceMonitorPolicy.responseCaps.map((value) => <option key={value} value={value}>{value / 1024} KiB</option>)}</select></label>
+      <label>Same-host redirects<select name="maximumRedirects" defaultValue="1">{sourceMonitorPolicy.redirectCounts.map((value) => <option key={value} value={value}>{value === 0 ? 'None' : 'One'}</option>)}</select></label>
+      <button type="submit" disabled={busy || !sourceDocumentId}>Approve disabled monitor</button>
+    </form></>}
+    {!workspace.readOnly && workspace.pagination.availableSources && <button type="button" onClick={() => void loadNextPage('availableSources', workspace.pagination.availableSources!)}>Load more Source Documents</button>}
+
+    {!workspace.readOnly && <><h3>Approved Source Monitors</h3><div className="automation-card-grid">
+      {workspace.monitors.length === 0 && <p className="empty-queue">No Source Documents are approved for monitoring.</p>}
+      {workspace.monitors.map((monitor) => <article className="automation-card" key={monitor.sourceDocumentId}>
+        <div className="card-topline"><strong>{monitor.sourceLabel}</strong><span>{monitor.technicalStatus}</span></div>
+        <p><a href={monitor.sourceUrl} target="_blank" rel="noreferrer">Open public source</a> · {monitor.hostname} · {monitor.mode}</p>
+        <p>Last technical success: {monitor.lastSuccessAt ? new Date(monitor.lastSuccessAt).toLocaleString() : 'No baseline'} · failures: {monitor.consecutiveFailures}</p>
+        <div className="inline-actions">
+          <button type="button" disabled={busy} onClick={() => { if (requireReason()) void submitAutomationAction(`/api/operator/automation/sources/${encodeURIComponent(monitor.sourceDocumentId)}/state`, 'PUT', { action: monitor.enabled ? 'disable' : 'enable', reason }, monitor.enabled ? 'Source Monitor disabled.' : 'Source Monitor enabled.') }}>{monitor.enabled ? 'Disable' : 'Enable'}</button>
+          {monitor.circuitState === 'open' && <button type="button" disabled={busy} onClick={() => { if (requireReason()) void submitAutomationAction(`/api/operator/automation/sources/${encodeURIComponent(monitor.sourceDocumentId)}/state`, 'PUT', { action: 'reset-circuit', reason }, 'Source Monitor circuit reset for another bounded attempt.') }}>Reset circuit</button>}
+        </div>
+      </article>)}
+      {workspace.pagination.monitors && <button type="button" onClick={() => void loadNextPage('monitors', workspace.pagination.monitors!)}>Load more Source Monitors</button>}
+    </div></>}
+
+    {!workspace.readOnly && <><h3>Source-change review</h3><div className="automation-card-grid">
+      {workspace.candidates.length === 0 && <p className="empty-queue">No open Automated Update Drafts.</p>}
+      {workspace.candidates.map((candidate) => <article className="automation-card" key={candidate.id}>
+        <div className="card-topline"><strong>{candidate.sourceLabel}</strong><span>{candidate.state}</span></div>
+        <p><a href={candidate.sourceUrl} target="_blank" rel="noreferrer">Inspect public source</a> · {candidate.adapterVersion}</p>
+        {candidate.affectedFieldsTruncated && <p>Showing the first {candidate.affectedFields.length} of at least {candidate.affectedFieldCount} affected field references. Inspect every current Field Provenance link before deciding.</p>}
+        <ul>{candidate.priorPublicValues.map((field) => <li key={`${field.contentId}:${field.fieldPath}`}><code>{field.fieldPath}</code>: {JSON.stringify(field.value)}</li>)}</ul>
+        {!candidate.hasTypedProposal && <p>No value was extracted or guessed. Inspect the source, then edit the canonical record manually if needed.</p>}
+        <div className="inline-actions">
+          {(['review', 'no-material-change', 'supersede', 'dismiss'] as const).map((action) => <button key={action} type="button" disabled={busy} onClick={() => { if (requireReason()) void submitAutomationAction(`/api/operator/automation/candidates/${encodeURIComponent(candidate.id)}`, 'PUT', { action, reason }, `Candidate marked ${action.replaceAll('-', ' ')}.`) }}>{action.replaceAll('-', ' ')}</button>)}
+        </div>
+      </article>)}
+      {workspace.pagination.candidates && <button type="button" onClick={() => void loadNextPage('candidates', workspace.pagination.candidates!)}>Load more source-change candidates</button>}
+    </div></>}
+
+    <h3>Automation Alerts</h3><div className="automation-card-grid" role="list">
+      {workspace.alerts.length === 0 && <p className="empty-queue">No open Automation Alerts.</p>}
+      {workspace.alerts.map((alert) => <article className={`automation-card alert-${alert.severity}`} key={alert.id} role="listitem">
+        <div className="card-topline"><strong>{alert.type.replaceAll('-', ' ')}</strong><span>{alert.status}</span></div>
+        <p>{alert.summary}</p><small>Seen {alert.occurrenceCount} time{alert.occurrenceCount === 1 ? '' : 's'} · last {new Date(alert.lastSeenAt).toLocaleString()}</small>
+        {!workspace.readOnly && <div className="inline-actions">
+          {alert.status === 'open' && <button type="button" disabled={busy} onClick={() => { if (requireReason()) void submitAutomationAction(`/api/operator/automation/alerts/${encodeURIComponent(alert.id)}`, 'PUT', { action: 'acknowledged', reason }, 'Automation Alert acknowledged.') }}>Acknowledge</button>}
+          <button type="button" disabled={busy} onClick={() => { if (requireReason()) void submitAutomationAction(`/api/operator/automation/alerts/${encodeURIComponent(alert.id)}`, 'PUT', { action: 'resolved', reason }, 'Automation Alert resolved.') }}>Resolve</button>
+        </div>}
+      </article>)}
+      {workspace.pagination.alerts && <button type="button" onClick={() => void loadNextPage('alerts', workspace.pagination.alerts!)}>Load more Automation Alerts</button>}
+    </div>
+
+    <details><summary>Recent sanitized outcomes</summary><ol className="maintenance-run-list">{workspace.recentRuns.map((run) => <li key={`${run.startedAt}:${run.trigger}`}><time dateTime={run.startedAt}>{new Date(run.startedAt).toLocaleString()}</time> — {run.trigger}, {run.status}; {run.jobsClaimed} jobs, {run.actionsApplied} actions, {run.failedTasks} failures, {run.outboundSubrequests} source requests, {run.fetchedBytes} bytes.</li>)}</ol></details>
+  </section>
+}
+
 function OperatorPage() {
   const [session, setSession] = useState<OperatorSession | null>(null)
   const [transferToken] = useState(() => captureInitialTransferToken(
@@ -1810,6 +2089,7 @@ function OperatorPage() {
     (url) => window.history.replaceState(null, '', url),
   ))
   const [snapshot, setSnapshot] = useState<OperatorSnapshot | null>(null)
+  const [automation, setAutomation] = useState<MaintenanceWorkspace | null>(null)
   const [draft, setDraft] = useState<ContentRecord | null>(null)
   const [draftBaseline, setDraftBaseline] = useState('')
   const [previewOpen, setPreviewOpen] = useState(false)
@@ -1832,10 +2112,33 @@ function OperatorPage() {
     return data
   }
 
+  const loadAutomation = async () => {
+    const { data } = await fetchMaintenanceWorkspace()
+    setAutomation(data)
+  }
+
+  const loadNextAutomationPage = async (
+    queue: keyof MaintenanceWorkspace['pagination'],
+    cursor: string,
+  ) => {
+    const { data } = await fetchMaintenanceWorkspace({ queue, cursor })
+    setAutomation((current) => current ? {
+      ...current,
+      [queue]: [...current[queue], ...data[queue]],
+      pagination: { ...current.pagination, [queue]: data.pagination[queue] },
+    } : data)
+  }
+
   const load = async () => {
     setErrorMessage('')
     const operatorSession = await loadSession()
-    if (operatorSession.role !== 'active' || operatorSession.account.lifecycleState === 'renewal-required') {
+    if (operatorSession.role !== 'active') {
+      setSnapshot(null)
+      setAutomation(null)
+      return null
+    }
+    await loadAutomation()
+    if (operatorSession.account.lifecycleState === 'renewal-required') {
       setSnapshot(null)
       return null
     }
@@ -1946,6 +2249,7 @@ function OperatorPage() {
         {errorMessage && <p ref={errorRef} className="alert error" role="alert" tabIndex={-1}>{errorMessage}</p>}
         {notice && <p className="alert success" role="status">{notice}</p>}
         {session?.role === 'active' && <OperatorAccountPanel session={session} reload={async () => { await load() }} />}
+      {automation && <OperatorAutomation workspace={automation} reload={loadAutomation} loadNextPage={loadNextAutomationPage} report={reportOperatorResult} />}
         {snapshot && <div className="operator-status"><span className="status-dot" /> Authorized as <strong>{snapshot.operatorLabel}</strong><span>Showing {snapshot.records.length} records</span></div>}
         {snapshot && <div className="operator-layout">
           <aside className="record-manager">
@@ -1988,6 +2292,10 @@ function OperatorPage() {
           report={reportOperatorResult}
         />}
         {snapshot && <OperatorPopulation
+          reloadContent={load}
+          report={reportOperatorResult}
+        />}
+        {snapshot && <OperatorInternationalPopulation
           reloadContent={load}
           report={reportOperatorResult}
         />}
@@ -2064,6 +2372,10 @@ function App() {
 
   let content: ReactNode
   if (route === '/operator') content = <OperatorPage />
+  else if (route === '/signup' || route === '/sign-in' || route === '/forgot-password'
+    || route === '/reset-password' || route === '/account') {
+    content = <AccountPages route={route} navigate={navigate} />
+  }
   else if (loadError) content = <div className="load-state"><h1>The hub could not load</h1><p>{loadError}</p><button type="button" onClick={() => { setLoadError(''); setBundle(null); setLoadAttempt((attempt) => attempt + 1) }}>Try again</button></div>
   else if (!bundle) content = <div className="load-state" role="status"><div className="loader" /><p>Loading verified records…</p></div>
   else if (route === '/outposts') content = <OutpostsPage coverage={bundle.coverage} />

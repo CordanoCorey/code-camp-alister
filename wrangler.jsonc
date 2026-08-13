@@ -3,6 +3,7 @@
   "name": "ranger-outpost-hub",
   "main": "./worker/index.ts",
   "compatibility_date": "2026-08-12",
+  "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "binding": "ASSETS",
     "not_found_handling": "single-page-application"
@@ -20,6 +21,9 @@
     "production": {
       "name": "ranger-outpost-hub-production",
       "workers_dev": true,
+      "triggers": {
+        "crons": ["7,37 * * * *"]
+      },
       "observability": {
         "enabled": true,
         "logs": {

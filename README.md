@@ -4,7 +4,7 @@ An independent, source-backed Royal Rangers directory and learning hub. The MVP 
 
 This is not an official Royal Rangers, Assemblies of God, or Gospel Publishing House platform.
 
-**Production status:** Slice 8's local directory-operation paths and a 103-candidate source cohort are implemented, but no public intake, nationwide publication, or remote lifecycle activation is claimed until the production D1, one-identity Access gate, Turnstile configuration, deployment, Operator review, and browser evidence are complete. See [`docs/qa/us-directory-population.md`](docs/qa/us-directory-population.md).
+**Production status:** Repository-local implementation and verification now cover the public directory, Operator operations, bounded maintenance, ordinary adult Account authentication, and the annual Account lifecycle through migration 0012. No deployment, public intake, nationwide publication, production email delivery, or remote lifecycle activation is claimed until the production D1, one-identity Access gate, Turnstile and email-provider configuration, reviewed rollout, and production browser evidence are complete. See [`docs/qa/production-launch.md`](docs/qa/production-launch.md).
 
 ## Try the beta locally
 
@@ -43,7 +43,7 @@ Replace the example with the real published support address. When this setting i
 | `npm run db:integrity:production` | Run read-only migration/count/provenance/search/foreign-key checks remotely. |
 | `npm run deploy:production` | Require a clean release, build the selected Vite production environment, verify it, and deploy that output. |
 | `npm run smoke:production -- https://...workers.dev` | Run the credential-free, read-only HTTPS production smoke suite. |
-| `npm run db:verify` | Verify the 0008-to-0009 upgrade and fresh migration in disposable D1-compatible states. |
+| `npm run db:verify` | Verify a populated 0011-to-0012 upgrade and a fresh migration through 0012 in disposable D1-compatible states. |
 | `npm run operator:recovery:production` | Interactively stage the normal successor-acceptance flow when the current email is inaccessible. |
 | `npm run outposts:manifests:build` | Deterministically compile reviewed research notes into bounded source manifests. |
 | `npm run outposts:validate -- <path>` | Validate selected manifests before any write; defaults to `data/us-outposts`. |
@@ -65,7 +65,7 @@ Replace the example with the real published support address. When this setting i
 - Cloudflare Access protects the deployed Operator Console. No app password is stored in the repository.
 - The service worker caches only the public app shell, same-origin hashed assets, and previously viewed bounded public GET queries. Operator routes, mutations, errors, and private/no-store responses are explicitly excluded.
 
-Migration 0007 is the one-way canonical content cutover, 0008 adds the fixed sole Operator lifecycle, and 0009 adds private proposals, annual Listing Verification, staged source batches, duplicate evidence, and canonical coverage views. Retained Slice 1–4 JSON and editorial tables are read-only recovery evidence; new reads and writes use the normalized model. Public and Operator lists use opaque keyset cursors (20 records by default, 50 maximum). See [`docs/operations/us-directory-operations.md`](docs/operations/us-directory-operations.md) for the review/staging runbook.
+Migration 0007 is the one-way canonical content cutover, 0008 adds the fixed sole Operator lifecycle, 0009 adds private directory operations, 0010 adds bounded automated maintenance, 0011 adds ordinary adult Accounts, and 0012 adds their annual renewal, exact expiry, delivered-warning retention, and guarded deletion lifecycle. Retained Slice 1–4 JSON and editorial tables are read-only recovery evidence; new reads and writes use the normalized model. Public and Operator lists use opaque keyset cursors (20 records by default, 50 maximum). See [`docs/operations/us-directory-operations.md`](docs/operations/us-directory-operations.md) and [`docs/operations/automated-maintenance.md`](docs/operations/automated-maintenance.md) for the review and maintenance runbooks.
 
 ## Install and offline behavior
 
@@ -94,7 +94,7 @@ The migrations contain only records tied to visible sources. The directory found
 
 Local Operator Preview is loaded from ignored `.dev.vars` and works only on the exact `localhost` or `127.0.0.1` hostname. It is absent from the named production environment. Copy `.dev.vars.example` only for local work.
 
-Production uses one real remote D1 binding under `env.production`, a Vite build selected with `CLOUDFLARE_ENV=production`, and two server-only Access settings entered through interactive Wrangler secret prompts:
+Production uses one real remote D1 binding under `env.production`, a Vite build selected with `CLOUDFLARE_ENV=production`, server-only ordinary-auth/email/lifecycle settings, and two Access settings entered through interactive Wrangler secret prompts:
 
 - `ACCESS_TEAM_DOMAIN`, the exact Access issuer URL
 - `ACCESS_POLICY_AUD`, the Access application audience tag

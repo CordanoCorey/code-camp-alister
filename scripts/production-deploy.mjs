@@ -68,6 +68,10 @@ async function main() {
   if (built.config.observability?.logs?.head_sampling_rate !== 0.1) {
     throw new Error('The production build does not contain the reviewed log sampling configuration.')
   }
+  const builtCrons = built.config.triggers?.crons ?? []
+  if (builtCrons.length !== 1 || builtCrons[0] !== production.maintenanceCron) {
+    throw new Error('The production build does not contain the reviewed maintenance dispatcher Cron.')
+  }
 
   run(npx, [
     'wrangler',

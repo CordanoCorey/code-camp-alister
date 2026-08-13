@@ -21,6 +21,11 @@ export function createMigratedD1() {
     '0007_normalized_content_model.sql',
     '0008_operator_lifecycle.sql',
     '0009_us_directory_operations.sql',
+    '0010_automated_data_maintenance.sql',
+    '0011_ordinary_adult_accounts.sql',
+    '0012_ordinary_account_lifecycle.sql',
+    '0013_international_directory_foundation.sql',
+    '0014_international_candidate_review.sql',
   ]) {
     sqlite.exec(readFileSync(new URL(`../migrations/${name}`, import.meta.url), 'utf8'))
   }
@@ -43,7 +48,9 @@ export function createMigratedD1() {
         },
         async all<T>() {
           queries.push({ sql, bindings: [...bindings] })
-          return { results: prepared().all(...bindings) as T[] }
+          const results = prepared().all(...bindings) as T[]
+          const meta = sqlite.prepare('SELECT changes() changes, last_insert_rowid() last_row_id').get() as { changes: number; last_row_id: number | bigint }
+          return { results, success: true, meta: { changes: Number(meta.changes), last_row_id: Number(meta.last_row_id) } }
         },
         async run() {
           queries.push({ sql, bindings: [...bindings] })
@@ -67,6 +74,10 @@ export function createMigratedD1() {
         sqlite.exec('ROLLBACK;')
         throw error
       }
+    },
+    async exec(sql: string) {
+      sqlite.exec(sql)
+      return { count: 0, duration: 0 }
     },
   }
   return {

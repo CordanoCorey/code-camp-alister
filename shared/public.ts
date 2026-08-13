@@ -25,18 +25,26 @@ function publicOutpostDetails(value: RecordDetails): OutpostDetails {
   const details = value as OutpostDetails
   return {
     hubOutpostId: details.hubOutpostId,
+    countryCode: details.countryCode ?? 'US',
+    countryName: details.countryName ?? 'United States',
+    localUnitLabel: details.localUnitLabel ?? 'Outpost',
+    identifierRaw: details.identifierRaw ?? details.outpostNumber,
+    displayNameRaw: details.displayNameRaw ?? null,
     outpostNumber: details.outpostNumber,
     campusSuffix: details.campusSuffix,
     church: details.church,
     streetAddress: details.streetAddress,
     city: details.city,
     jurisdiction: details.jurisdiction,
+    civilSubdivisionLabel: details.civilSubdivisionLabel,
     postalCode: details.postalCode,
     district: details.district,
     region: details.region,
     languageOverlay: details.languageOverlay,
     fcfTerritory: details.fcfTerritory,
     activeFcf: details.activeFcf,
+    fcfAvailability: details.fcfAvailability ?? (details.activeFcf === null ? 'not-verified' : 'available'),
+    affiliations: Array.isArray(details.affiliations) ? details.affiliations.map((item) => ({ ...item })) : [],
     programs: Array.isArray(details.programs) ? [...details.programs] : [],
     meeting: details.meeting,
     contactUrl: details.contactUrl,
@@ -119,6 +127,8 @@ function publicAdvancementDetails(value: RecordDetails): AdvancementDetails {
 function publicOrganizationDetails(value: RecordDetails): OrganizationDetails {
   const details = value as OrganizationDetails
   return {
+    countryCode: details.countryCode ?? 'US',
+    unitLabel: details.unitLabel ?? 'Organization unit',
     organizationType: details.organizationType,
     scope: details.scope,
     parent: details.parent,

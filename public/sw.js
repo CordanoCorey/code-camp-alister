@@ -1,6 +1,6 @@
 import { assetPathsFromShell, canCacheResponse, classifyRequest, markOfflineResponse } from './sw-policy.js'
 
-const CACHE_VERSION = 'v5'
+const CACHE_VERSION = 'v6'
 const SHELL_CACHE = `ranger-outpost-shell-${CACHE_VERSION}`
 const DATA_CACHE = `ranger-outpost-public-data-${CACHE_VERSION}`
 const APP_SHELL = [

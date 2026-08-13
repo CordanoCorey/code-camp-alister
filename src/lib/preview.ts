@@ -29,8 +29,8 @@ function detailWarnings(record: ContentRecord) {
   if (record.kind === 'advancement') return validateAdvancementDetails(record.details)
   if (record.kind === 'outpost') {
     const details = record.details as Partial<OutpostDetails>
-    return !details.church?.trim() || !details.city?.trim() || !details.jurisdiction?.trim()
-      ? ['An outpost preview needs a church name, city, and state or territory.']
+    return !details.church?.trim() || !details.countryCode?.trim() || !details.countryName?.trim() || !details.jurisdiction?.trim()
+      ? ['An outpost preview needs a church name, ISO country, country name, and civil location.']
       : []
   }
   if (record.kind === 'organization') {

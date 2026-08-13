@@ -47,11 +47,23 @@ import { CursorInputError, decodeCursor, encodeCursor, readPageSize } from './pa
 import { saveNormalizedRecord, type EditableRecord } from './content-writes'
 import { handlePublicOutpostIntake, type PublicIntakeEnv } from './public-outpost-intake'
 import {
+  handleOrdinaryAuth,
+  ordinaryAuthConfiguration,
+  type OrdinaryAuthEnv,
+} from './ordinary-auth'
+import { handleOrdinaryAccount } from './ordinary-account-http'
+import {
   applyStagedOutpostCandidate,
   getPopulationReport,
   listStagedOutpostCandidates,
   stageOutpostManifest,
 } from './outpost-population'
+import {
+  applyInternationalCandidate,
+  getInternationalPopulationReport,
+  listInternationalCandidates,
+  stageInternationalManifest,
+} from './international-population'
 import {
   getDirectorySubmission,
   listDirectorySubmissions,
@@ -60,6 +72,16 @@ import {
   transitionDirectorySubmission,
   updateOutpostLifecycle,
 } from './directory-operations'
+import { runMaintenance } from './maintenance'
+import {
+  approveSourceMonitor,
+  getMaintenanceWorkspace,
+  reviewAutomatedUpdateCandidate,
+  reviewAutomationAlert,
+  resetMaintenanceJobCircuit,
+  setSourceMonitorState,
+  updateMaintenanceJob,
+} from './maintenance-operations'
 import {
   eventLifecycleStatuses,
   isPublicationStatus,
@@ -76,11 +98,19 @@ import {
   type OutpostDetails,
 } from '../shared/domain'
 
-type Env = PublicIntakeEnv & {
+type Env = PublicIntakeEnv & OrdinaryAuthEnv & {
   ASSETS: Fetcher
   LOCAL_OPERATOR_PREVIEW?: string
   ACCESS_TEAM_DOMAIN?: string
   ACCESS_POLICY_AUD?: string
+}
+
+function ordinaryLifecycleMaintenanceConfiguration(env: Env, requestOrigin?: string) {
+  const origin = requestOrigin ?? env.AUTH_CANONICAL_ORIGIN
+  if (!origin) return undefined
+  const configuration = ordinaryAuthConfiguration(new Request(`${origin}/`), env)
+  if (!configuration.enabled || !configuration.email) return undefined
+  return { accountUrl: `${configuration.origin}/account`, email: configuration.email }
 }
 
 type SourceRow = {
@@ -140,7 +170,7 @@ type CoverageGapRow = {
 }
 
 const MAX_REQUEST_BYTES = 65_536
-const CURRENT_SCHEMA_MIGRATION = '0009_us_directory_operations.sql'
+const CURRENT_SCHEMA_MIGRATION = '0014_international_candidate_review.sql'
 const REAUTHENTICATION_COOKIE = 'ranger_operator_reauth'
 
 class RequestInputError extends Error {
@@ -337,8 +367,8 @@ function validateAdvancement(record: EditableRecord) {
 
 function validateOutpost(record: EditableRecord) {
   const details = record.details as Partial<OutpostDetails>
-  if (!details.church?.trim() || !details.city?.trim() || !details.jurisdiction?.trim()) {
-    throw new Error('Published outpost facts need a church name, city, and state or territory.')
+  if (!details.church?.trim() || !details.countryCode?.trim() || !details.countryName?.trim() || !details.jurisdiction?.trim()) {
+    throw new Error('Outpost facts need a church name, ISO country, country name, and civil location.')
   }
   if (details.contactUrl && !details.contactUrl.startsWith('https://')) {
     throw new Error('The public church contact route must be an HTTPS URL.')
@@ -363,6 +393,13 @@ function validateOutpost(record: EditableRecord) {
     ['meeting', details.meeting],
     ['contactUrl', details.contactUrl],
   ]
+  if (details.countryCode !== 'US') fields.push(
+    ['countryCode', details.countryCode],
+    ['countryName', details.countryName],
+    ['civilSubdivisionLabel', details.civilSubdivisionLabel],
+    ['fcfAvailability', details.fcfAvailability],
+    ['affiliations', details.affiliations],
+  )
   const sourcedFields = new Set(record.sources.map((source) => source.fieldName))
   const missing = fields
     .filter(([, fieldValue]) => {
@@ -709,7 +746,7 @@ async function handleApi(request: Request, env: Env, requestId: string): Promise
           },
         })
       }
-      return json({ status: 'ok', schema: '0009' })
+      return json({ status: 'ok', schema: '0013' })
     } catch {
       if (request.method === 'HEAD') {
         return new Response(null, {
@@ -722,6 +759,14 @@ async function handleApi(request: Request, env: Env, requestId: string): Promise
       }
       return json({ status: 'unavailable' }, { status: 503 })
     }
+  }
+
+  if (path.startsWith('/api/auth/')) {
+    return handleOrdinaryAuth(request, env, requestId)
+  }
+
+  if (path.startsWith('/api/account/')) {
+    return handleOrdinaryAccount(request, env)
   }
 
   if (request.method === 'GET' && path === '/api/public') {
@@ -777,10 +822,161 @@ async function handleApi(request: Request, env: Env, requestId: string): Promise
   )
   if (lifecycleResponse) return lifecycleResponse
   if (authorization.role !== 'active') return unauthorizedRole()
+  if (request.method === 'GET' && path === '/api/operator/automation') {
+    try {
+      const search = new URL(request.url).searchParams
+      const queue = search.get('queue')
+      const cursor = search.get('cursor')
+      const validQueues = ['monitors', 'availableSources', 'candidates', 'alerts'] as const
+      if ((queue === null) !== (cursor === null)
+        || (queue !== null && !validQueues.includes(queue as typeof validQueues[number]))) {
+        throw new CursorInputError('The Automation page cursor is invalid.')
+      }
+      return json(await getMaintenanceWorkspace(
+        env.DB,
+        now.toISOString(),
+        authorization.account.lifecycleState === 'renewal-required',
+        queue && cursor ? { queue: queue as typeof validQueues[number], cursor } : undefined,
+      ))
+    } catch (workspaceError) {
+      return workspaceError instanceof CursorInputError
+        ? error('The Automation page cursor is invalid.', 400)
+        : error('Automation status is temporarily unavailable.', 503)
+    }
+  }
   if (authorization.account.lifecycleState === 'renewal-required') {
     return json({ error: 'Operator privilege renewal is required.', code: 'renewal-required' }, { status: 423 })
   }
   const actor = authorization.principal
+
+  if (request.method === 'POST' && path === '/api/operator/automation/run') {
+    try {
+      const body = await readJsonBody<{ confirmed?: unknown }>(request)
+      if (body.confirmed !== true) throw new RequestInputError('Confirm the bounded maintenance run.')
+      const result = await runMaintenance({
+        db: env.DB, now: () => new Date(), createId: () => crypto.randomUUID(), fetch,
+        ordinaryAccountLifecycle: ordinaryLifecycleMaintenanceConfiguration(env, new URL(request.url).origin),
+      }, { trigger: 'operator-run-now', operatorTenureId: actor.tenureNumber })
+      return json(result)
+    } catch (runError) {
+      return respondToActionError(runError, 'Maintenance could not be run.')
+    }
+  }
+
+  const automationJobCircuitMatch = path.match(/^\/api\/operator\/automation\/jobs\/([^/]+)\/circuit$/)
+  if (automationJobCircuitMatch && request.method === 'POST') {
+    try {
+      const body = await readJsonBody<{ reason?: unknown }>(request)
+      if (typeof body.reason !== 'string') throw new RequestInputError('Explain why the circuit is being reset.')
+      await resetMaintenanceJobCircuit(env.DB, {
+        jobKey: decodeURIComponent(automationJobCircuitMatch[1]), reason: body.reason,
+        actor, now: now.toISOString(),
+      })
+      return json({ ok: true })
+    } catch (jobError) {
+      return respondToActionError(jobError, 'Maintenance job circuit could not be reset.')
+    }
+  }
+
+  const automationJobMatch = path.match(/^\/api\/operator\/automation\/jobs\/([^/]+)$/)
+  if (automationJobMatch && request.method === 'PUT') {
+    try {
+      const body = await readJsonBody<{
+        enabled?: unknown; batchSize?: unknown; intervalSeconds?: unknown; reason?: unknown
+      }>(request)
+      if (typeof body.enabled !== 'boolean' || !Number.isInteger(body.batchSize)
+        || !Number.isInteger(body.intervalSeconds) || typeof body.reason !== 'string') {
+        throw new RequestInputError('Choose a supported enabled state, batch size, cadence, and reason.')
+      }
+      await updateMaintenanceJob(env.DB, {
+        jobKey: decodeURIComponent(automationJobMatch[1]), enabled: body.enabled,
+        batchSize: body.batchSize as number, intervalSeconds: body.intervalSeconds as number,
+        reason: body.reason, actor, now: now.toISOString(),
+      })
+      return json({ ok: true })
+    } catch (jobError) {
+      return respondToActionError(jobError, 'Maintenance job configuration could not be updated.')
+    }
+  }
+
+  const sourceApprovalMatch = path.match(/^\/api\/operator\/automation\/sources\/([^/]+)\/approve$/)
+  if (sourceApprovalMatch && request.method === 'POST') {
+    try {
+      const body = await readJsonBody<{
+        mode?: unknown; intervalSeconds?: unknown; maximumResponseBytes?: unknown
+        maximumRedirects?: unknown; reason?: unknown
+      }>(request)
+      if ((body.mode !== 'availability-metadata' && body.mode !== 'bounded-fingerprint')
+        || !Number.isInteger(body.intervalSeconds) || !Number.isInteger(body.maximumResponseBytes)
+        || !Number.isInteger(body.maximumRedirects) || typeof body.reason !== 'string') {
+        throw new RequestInputError('Choose supported Source Monitor limits and provide a reason.')
+      }
+      await approveSourceMonitor(env.DB, {
+        sourceDocumentId: decodeURIComponent(sourceApprovalMatch[1]), mode: body.mode,
+        intervalSeconds: body.intervalSeconds as number,
+        maximumResponseBytes: body.maximumResponseBytes as number,
+        maximumRedirects: body.maximumRedirects as number,
+        reason: body.reason, actor, now: now.toISOString(),
+      })
+      return json({ ok: true }, { status: 201 })
+    } catch (approvalError) {
+      return respondToActionError(approvalError, 'The Source Monitor could not be approved.')
+    }
+  }
+
+  const sourceStateMatch = path.match(/^\/api\/operator\/automation\/sources\/([^/]+)\/state$/)
+  if (sourceStateMatch && request.method === 'PUT') {
+    try {
+      const body = await readJsonBody<{ action?: unknown; reason?: unknown }>(request)
+      if (!['enable', 'disable', 'reset-circuit'].includes(body.action as string) || typeof body.reason !== 'string') {
+        throw new RequestInputError('Choose enable, disable, or reset circuit and provide a reason.')
+      }
+      await setSourceMonitorState(env.DB, {
+        sourceDocumentId: decodeURIComponent(sourceStateMatch[1]),
+        action: body.action as 'enable' | 'disable' | 'reset-circuit',
+        reason: body.reason, actor, now: now.toISOString(),
+      })
+      return json({ ok: true })
+    } catch (stateError) {
+      return respondToActionError(stateError, 'The Source Monitor state could not be updated.')
+    }
+  }
+
+  const candidateReviewMatch = path.match(/^\/api\/operator\/automation\/candidates\/([^/]+)$/)
+  if (candidateReviewMatch && request.method === 'PUT') {
+    try {
+      const body = await readJsonBody<{ action?: unknown; reason?: unknown }>(request)
+      if (!['review', 'no-material-change', 'supersede', 'dismiss'].includes(body.action as string)
+        || typeof body.reason !== 'string') {
+        throw new RequestInputError('Choose a supported review action and provide a reason.')
+      }
+      await reviewAutomatedUpdateCandidate(env.DB, {
+        candidateId: decodeURIComponent(candidateReviewMatch[1]),
+        action: body.action as 'review' | 'no-material-change' | 'supersede' | 'dismiss',
+        reason: body.reason, actor, now: now.toISOString(),
+      })
+      return json({ ok: true })
+    } catch (candidateError) {
+      return respondToActionError(candidateError, 'The Automated Update Draft could not be reviewed.')
+    }
+  }
+
+  const alertReviewMatch = path.match(/^\/api\/operator\/automation\/alerts\/([^/]+)$/)
+  if (alertReviewMatch && request.method === 'PUT') {
+    try {
+      const body = await readJsonBody<{ action?: unknown; reason?: unknown }>(request)
+      if ((body.action !== 'acknowledged' && body.action !== 'resolved') || typeof body.reason !== 'string') {
+        throw new RequestInputError('Choose acknowledge or resolve and provide a reason.')
+      }
+      await reviewAutomationAlert(env.DB, {
+        alertId: decodeURIComponent(alertReviewMatch[1]), action: body.action,
+        reason: body.reason, actor, now: now.toISOString(),
+      })
+      return json({ ok: true })
+    } catch (alertError) {
+      return respondToActionError(alertError, 'The Automation Alert could not be reviewed.')
+    }
+  }
 
   if (request.method === 'GET' && path === '/api/operator/snapshot') {
     const [auditRows, recordPage, conflicts, brokenSources, coverageGaps, freshnessQueue, countRows] = await Promise.all([
@@ -873,6 +1069,29 @@ async function handleApi(request: Request, env: Env, requestId: string): Promise
     } catch (stageError) {
       return respondToActionError(stageError, 'The reviewed population batch could not be staged.')
     }
+  }
+
+  if (request.method === 'GET' && path === '/api/operator/international-population/report') {
+    return json(await getInternationalPopulationReport(env.DB))
+  }
+  if (request.method === 'GET' && path === '/api/operator/international-population/candidates') {
+    try { return json(await listInternationalCandidates(env.DB, url.searchParams)) }
+    catch (listError) { return respondToActionError(listError, 'International candidates could not be loaded.') }
+  }
+  if (request.method === 'POST' && path === '/api/operator/international-population/stage') {
+    try {
+      const body = await readJsonBody<{ manifest?: unknown }>(request)
+      const result = await stageInternationalManifest(env.DB, body.manifest, actor, now.toISOString())
+      return json(result, { status: result.idempotent ? 200 : 201 })
+    } catch (stageError) { return respondToActionError(stageError, 'The international batch could not be staged.') }
+  }
+  const internationalApplyMatch = path.match(/^\/api\/operator\/international-population\/candidates\/([^/]+)\/apply$/)
+  if (internationalApplyMatch && request.method === 'POST') {
+    try {
+      const body = await readJsonBody<{ duplicateDecision?: 'no-match' | 'confirmed-correction' | null; targetOutpostId?: string | null; expectedVersion?: number | null; reason?: string }>(request)
+      const id = await applyInternationalCandidate(env.DB, { candidateId: decodeURIComponent(internationalApplyMatch[1]), duplicateDecision: body.duplicateDecision ?? null, targetOutpostId: body.targetOutpostId ?? null, expectedVersion: body.expectedVersion ?? null, reason: body.reason ?? '', actor, now: now.toISOString() })
+      return json({ id }, { status: 201 })
+    } catch (applyError) { return respondToActionError(applyError, 'The international candidate could not be converted.') }
   }
 
   const populationApplyMatch = path.match(/^\/api\/operator\/population\/candidates\/([^/]+)\/apply$/)
@@ -1244,15 +1463,30 @@ function withSecurityHeaders(request: Request, response: Response) {
     "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self' mailto:; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://challenges.cloudflare.com; connect-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; manifest-src 'self'; worker-src 'self'",
   )
   const url = new URL(request.url)
+  if (isOrdinaryAccountRoute(url.pathname)) {
+    secured.headers.set('cache-control', 'private, no-store')
+    secured.headers.set('pragma', 'no-cache')
+    secured.headers.set('referrer-policy', 'no-referrer')
+  }
   if (url.protocol === 'https:' && url.hostname !== 'localhost' && url.hostname !== '127.0.0.1') {
     secured.headers.set('strict-transport-security', 'max-age=31536000; includeSubDomains')
   }
   return secured
 }
 
+const ordinaryAccountPageRoutes = new Set([
+  '/signup', '/sign-in', '/forgot-password', '/reset-password', '/account',
+])
+
+function isOrdinaryAccountRoute(path: string) {
+  return path.startsWith('/api/auth/') || path.startsWith('/api/account/')
+    || ordinaryAccountPageRoutes.has(path)
+}
+
 function routeCategory(path: string) {
   if (path === '/api/health') return 'health'
   if (path === '/operator' || path.startsWith('/operator/') || path.startsWith('/api/operator/')) return 'operator'
+  if (isOrdinaryAccountRoute(path)) return 'ordinary-account'
   if (path === '/api/public' || path.startsWith('/api/public/') || path === '/api/search') return 'public-api'
   if (path.startsWith('/api/')) return 'api'
   return 'asset'
@@ -1281,5 +1515,29 @@ export default {
         durationMs: Date.now() - startedAt,
       }))
     }
+  },
+  scheduled(controller: ScheduledController, env: Env, context: ExecutionContext) {
+    const correlationId = crypto.randomUUID()
+    const scheduledAt = new Date(controller.scheduledTime)
+    const runtimeStartedAt = Date.now()
+    const promise = runMaintenance({
+      db: env.DB,
+      now: () => new Date(scheduledAt.valueOf() + Date.now() - runtimeStartedAt),
+      createId: () => crypto.randomUUID(),
+      fetch,
+      ordinaryAccountLifecycle: ordinaryLifecycleMaintenanceConfiguration(env),
+    }, { trigger: 'cron' }).then((outcome) => {
+      console.log(JSON.stringify({
+        event: 'maintenance', correlationId, trigger: 'cron', status: outcome.status,
+        jobsClaimed: outcome.jobsClaimed, actionsApplied: outcome.actionsApplied,
+        failedTasks: outcome.failedTasks, outboundSubrequests: outcome.outboundSubrequests,
+        fetchedBytes: outcome.fetchedBytes,
+      }))
+      return outcome
+    }).catch(() => {
+      console.error(JSON.stringify({ event: 'maintenance', correlationId, trigger: 'cron', status: 'failed' }))
+      throw new Error('Scheduled maintenance failed safely.')
+    })
+    context.waitUntil(promise)
   },
 } satisfies ExportedHandler<Env>

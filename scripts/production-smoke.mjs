@@ -13,6 +13,8 @@ const SPA_ROUTES = [
   '/add-your-outpost',
 ]
 
+const PRIVATE_ACCOUNT_ROUTES = ['/signup', '/sign-in', '/forgot-password', '/reset-password', '/account']
+
 const PAGED_PUBLIC_APIS = [
   ['/api/public/outposts?limit=2', 'outpost'],
   ['/api/public/advancement?limit=2', 'advancement'],
@@ -33,6 +35,13 @@ const FORBIDDEN_PUBLIC_KEYS = new Set([
   'accessCleanupRequired',
   'pendingTransfer',
   'verifiedEmail',
+  'email',
+  'authUserId',
+  'profile',
+  'claimedPosition',
+  'eligibility',
+  'session',
+  'token',
   'assertions',
   'brokenSources',
   'conflicts',
@@ -45,6 +54,11 @@ const FORBIDDEN_PUBLIC_KEYS = new Set([
   'sourceHealthNotes',
   'submitterEmail',
   'version',
+  'accessDueAt',
+  'noticeOpenAt',
+  'deletionDueAt',
+  'confirmedDeliveryAt',
+  'lifecycleState',
 ])
 
 function assert(condition, message) {
@@ -64,6 +78,16 @@ function requireSecurityHeaders(response, label) {
   assert(response.headers.get('x-frame-options') === 'DENY', `${label} is missing the frame denial header.`)
   assert(response.headers.get('referrer-policy') === 'strict-origin-when-cross-origin', `${label} has an unexpected Referrer-Policy.`)
   assert(response.headers.get('permissions-policy')?.includes('camera=()'), `${label} is missing the restrictive Permissions-Policy.`)
+}
+
+function requirePrivateAccountHeaders(response, label) {
+  const csp = response.headers.get('content-security-policy') ?? ''
+  assert(csp.includes("default-src 'self'") && csp.includes("frame-ancestors 'none'"), `${label} is missing the expected CSP.`)
+  assert(response.headers.get('strict-transport-security')?.includes('max-age='), `${label} is missing HSTS.`)
+  assert(response.headers.get('x-content-type-options') === 'nosniff', `${label} is missing nosniff.`)
+  assert(response.headers.get('x-frame-options') === 'DENY', `${label} is missing frame denial.`)
+  assert(response.headers.get('referrer-policy') === 'no-referrer', `${label} must use Referrer-Policy: no-referrer.`)
+  requireNoStore(response, label)
 }
 
 function requireNoStore(response, label) {
@@ -149,6 +173,15 @@ export async function runProductionSmoke(baseUrl, options = {}) {
     assert(/<div[^>]+id=["']root["']/i.test(html), `${path} did not return the Ranger Outpost Hub shell.`)
     if (path === '/') rootHtml = html
     checks.push(`SPA ${path}`)
+  }
+
+  for (const path of PRIVATE_ACCOUNT_ROUTES) {
+    const response = await request(path)
+    assert(response.status === 200, `${path} returned ${response.status}; expected 200.`)
+    requirePrivateAccountHeaders(response, path)
+    assert(response.headers.get('content-type')?.includes('text/html'), `${path} did not return SPA HTML.`)
+    assert(/<div[^>]+id=["']root["']/i.test(await response.text()), `${path} did not return the SPA shell.`)
+    checks.push(`private account SPA ${path}`)
   }
 
   const manifestResponse = await request('/manifest.webmanifest')
@@ -246,6 +279,32 @@ export async function runProductionSmoke(baseUrl, options = {}) {
   assert(!/(?:secret|replyEmail|notes|referenceCode|challengeToken)/i.test(JSON.stringify(intakeConfig)), 'Public intake configuration leaked private state.')
   checks.push(`public intake ${intakeConfig.enabled ? 'configured' : 'fallback'}`)
 
+  const accountConfigResponse = await request('/api/account/config')
+  assert(accountConfigResponse.status === 200, 'Ordinary account configuration did not respond.')
+  requirePrivateAccountHeaders(accountConfigResponse, 'Ordinary account configuration')
+  const accountConfig = await readJson(accountConfigResponse, 'Ordinary account configuration')
+  assert(accountConfig.enabled === true && accountConfig.signupEnabled === true
+    && accountConfig.localPreview === false
+    && typeof accountConfig.siteKey === 'string' && accountConfig.siteKey.length > 0
+    && accountConfig.action === 'adult-account-eligibility',
+  'Production ordinary signup is not fully configured with provider-controlled settings.')
+  checks.push('ordinary account production configuration')
+
+  const accountSessionResponse = await request('/api/account/session')
+  assert(accountSessionResponse.status === 200, '/api/account/session did not accept an anonymous production session check.')
+  requirePrivateAccountHeaders(accountSessionResponse, '/api/account/session')
+  const accountSession = await readJson(accountSessionResponse, '/api/account/session')
+  assert(isObject(accountSession) && accountSession.authenticated === false,
+    '/api/account/session did not return the anonymous session shape.')
+  checks.push('ordinary account anonymous session')
+
+  const authSessionResponse = await request('/api/auth/get-session')
+  assert(authSessionResponse.status === 200, '/api/auth/get-session did not accept an anonymous production session check.')
+  requirePrivateAccountHeaders(authSessionResponse, '/api/auth/get-session')
+  assert(await readJson(authSessionResponse, '/api/auth/get-session') === null,
+    '/api/auth/get-session did not return an empty anonymous session.')
+  checks.push('ordinary auth anonymous session')
+
   for (const [path, expectedStatus] of [
     ['/api/public/outposts?cursor=not-a-cursor', 400],
     ['/api/not-a-real-route', 404],
@@ -259,7 +318,8 @@ export async function runProductionSmoke(baseUrl, options = {}) {
     checks.push(`failure ${path}`)
   }
 
-  for (const path of ['/operator', '/operator/records', '/api/operator/snapshot', '/api/operator/account/status']) {
+  for (const path of ['/operator', '/operator/records', '/api/operator/snapshot',
+    '/api/operator/account/status', '/api/operator/automation']) {
     const operatorResponse = await request(path, { redirect: 'manual' })
     assert([302, 401, 403].includes(operatorResponse.status), `Unauthenticated ${path} access returned ${operatorResponse.status}.`)
     requireNoStore(operatorResponse, `Unauthenticated ${path} access`)
@@ -273,7 +333,7 @@ export async function runProductionSmoke(baseUrl, options = {}) {
   requireSecurityHeaders(healthResponse, '/api/health')
   requireNoStore(healthResponse, '/api/health')
   const health = await readJson(healthResponse, '/api/health')
-  assert(JSON.stringify(health) === JSON.stringify({ status: 'ok', schema: '0009' }), '/api/health leaked or omitted readiness fields.')
+  assert(JSON.stringify(health) === JSON.stringify({ status: 'ok', schema: '0012' }), '/api/health leaked or omitted readiness fields.')
   checks.push('readiness GET')
 
   const healthHead = await request('/api/health', { method: 'HEAD' })

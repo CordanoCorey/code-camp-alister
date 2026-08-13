@@ -4,8 +4,12 @@ import { fileURLToPath } from 'node:url'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const ZERO_UUID = '00000000-0000-0000-0000-000000000000'
-const SERVER_ONLY_KEYS = ['ACCESS_TEAM_DOMAIN', 'ACCESS_POLICY_AUD', 'TURNSTILE_SECRET_KEY', 'INTAKE_SIGNING_SECRET']
-const LOCAL_BYPASSES = ['LOCAL_OPERATOR_PREVIEW', 'LOCAL_PUBLIC_INTAKE_BYPASS']
+const SERVER_ONLY_KEYS = [
+  'ACCESS_TEAM_DOMAIN', 'ACCESS_POLICY_AUD', 'TURNSTILE_SECRET_KEY', 'INTAKE_SIGNING_SECRET',
+  'AUTH_SECRET', 'AUTH_CANONICAL_ORIGIN', 'AUTH_EMAIL_PROVIDER', 'AUTH_EMAIL_FROM', 'RESEND_API_KEY',
+  'TURNSTILE_EXPECTED_HOSTNAMES', 'ORDINARY_ACCOUNT_LIFECYCLE_ENABLED',
+]
+const LOCAL_BYPASSES = ['LOCAL_OPERATOR_PREVIEW', 'LOCAL_PUBLIC_INTAKE_BYPASS', 'LOCAL_AUTH_EMAIL_PREVIEW']
 
 function assert(condition, message) {
   if (!condition) throw new Error(message)
@@ -22,6 +26,9 @@ export function validateProductionConfig(config) {
   assert(production && typeof production === 'object', 'The Wrangler production environment is missing.')
   assert(production.name === 'ranger-outpost-hub-production', 'The production Worker name is unexpected.')
   assert(production.workers_dev === true, 'The production Worker must explicitly enable its workers.dev hostname.')
+  assert(Array.isArray(production.triggers?.crons) && production.triggers.crons.length === 1
+    && production.triggers.crons[0] === '7,37 * * * *',
+  'Production must define the single reviewed 30-minute maintenance dispatcher Cron.')
   for (const key of LOCAL_BYPASSES) assert(!Object.hasOwn(production.vars ?? {}, key), `Production must not define ${key}.`)
   for (const key of SERVER_ONLY_KEYS) {
     assert(!Object.hasOwn(config.vars ?? {}, key), `${key} must be stored as a production Worker secret.`)
@@ -50,6 +57,7 @@ export function validateProductionConfig(config) {
   return {
     databaseName: database.database_name,
     workerName: production.name,
+    maintenanceCron: production.triggers.crons[0],
   }
 }
 

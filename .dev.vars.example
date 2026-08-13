@@ -9,3 +9,15 @@ INTAKE_SIGNING_SECRET=replace-with-a-random-local-value-of-at-least-32-character
 # TURNSTILE_SITE_KEY=
 # TURNSTILE_SECRET_KEY=
 # TURNSTILE_EXPECTED_HOSTNAMES=hub.example
+
+# Exact-loopback ordinary-account beta. Use an independent random local value.
+# Never configure LOCAL_AUTH_EMAIL_PREVIEW in production.
+LOCAL_AUTH_EMAIL_PREVIEW=true
+AUTH_SECRET=replace-with-an-independent-random-local-value-of-at-least-32-characters
+
+# Production-only Worker secrets/configuration (never Vite variables):
+# AUTH_CANONICAL_ORIGIN=https://hub.example
+# AUTH_EMAIL_PROVIDER=resend
+# AUTH_EMAIL_FROM=Ranger Outpost Hub <account@verified.example>
+# RESEND_API_KEY=
+# ORDINARY_ACCOUNT_LIFECYCLE_ENABLED=true

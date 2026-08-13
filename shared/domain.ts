@@ -28,18 +28,26 @@ export type ProgramGroup = (typeof programGroups)[number]
 
 export type OutpostDetails = {
   hubOutpostId: string
+  countryCode?: string
+  countryName?: string
+  localUnitLabel?: string
+  identifierRaw?: string | null
+  displayNameRaw?: string | null
   outpostNumber: string | null
   campusSuffix: string | null
   church: string
   streetAddress: string | null
   city: string
   jurisdiction: string
+  civilSubdivisionLabel?: string | null
   postalCode: string | null
   district: string
   region: string
   languageOverlay: string
   fcfTerritory: string
   activeFcf: boolean | null
+  fcfAvailability?: 'available' | 'not-offered' | 'not-verified'
+  affiliations?: Array<{ label: string; name: string; scope: 'ministry' | 'language' | 'fcf' }>
   programs: string[]
   meeting: string | null
   contactUrl: string | null
@@ -190,7 +198,10 @@ export type OrganizationDetails = {
     | 'language-region'
     | 'language-district'
     | 'fcf-territory'
+    | 'country-defined'
   scope: 'geographic' | 'language' | 'fcf'
+  countryCode?: string
+  unitLabel?: string
   parent: string | null
   affiliations: string[]
   jurisdictions: string[]
@@ -467,6 +478,116 @@ export type StagedOutpostCandidate = {
     evidence: string
     state: 'candidate' | 'confirmed-duplicate' | 'dismissed'
   }>
+}
+
+export type StagedInternationalCandidate = {
+  id: string
+  stable_candidate_key: string
+  country_code: string
+  country_name: string
+  national_program_name: string
+  local_unit_label: string
+  identifier_raw: string | null
+  display_name_raw: string | null
+  church: string | null
+  city: string | null
+  state: 'staged' | 'duplicate-review' | 'converted-to-draft' | 'rejected'
+  applied_outpost_id: string | null
+  sources: Array<{ field: string; url: string; label: string; checkedAt: string }>
+  matches: Array<{ id: string; outpostId: string; kind: string; evidence: string; state: string }>
+}
+
+export type MaintenanceJobSummary = {
+  key: string
+  enabled: boolean
+  ruleVersion: string
+  intervalSeconds: number
+  batchSize: number
+  nextDueAt: string
+  lastSuccessAt: string | null
+  consecutiveFailures: number
+  circuitState: 'closed' | 'open'
+  leasedUntil: string | null
+}
+
+export type ApprovedSourceMonitorSummary = {
+  sourceDocumentId: string
+  sourceLabel: string
+  sourceUrl: string
+  enabled: boolean
+  hostname: string
+  mode: 'availability-metadata' | 'bounded-fingerprint'
+  intervalSeconds: number
+  maximumResponseBytes: number
+  maximumRedirects: number
+  nextDueAt: string
+  lastAttemptAt: string | null
+  lastSuccessAt: string | null
+  consecutiveFailures: number
+  circuitState: 'closed' | 'open'
+  technicalStatus: 'not-checked' | 'reachable' | 'backoff' | 'circuit-open'
+}
+
+export type AutomatedUpdateCandidateSummary = {
+  id: string
+  sourceDocumentId: string
+  sourceLabel: string
+  sourceUrl: string
+  state: 'open' | 'reviewing' | 'converted-to-draft' | 'no-material-change' | 'superseded' | 'dismissed'
+  affectedFields: Array<{ contentId: string; fieldPath: string }>
+  affectedFieldCount: number
+  affectedFieldsTruncated: boolean
+  priorPublicValues: Array<{ contentId: string; fieldPath: string; value: unknown }>
+  hasTypedProposal: boolean
+  adapterVersion: string
+  createdAt: string
+}
+
+export type AutomationAlertSummary = {
+  id: string
+  type: 'repeated-failure' | 'scheduler-overdue' | 'circuit-open' | 'invariant-failure' | 'backlog-threshold'
+  severity: 'warning' | 'critical'
+  summary: string
+  status: 'open' | 'acknowledged' | 'resolved'
+  occurrenceCount: number
+  firstSeenAt: string
+  lastSeenAt: string
+}
+
+export type MaintenanceWorkspace = {
+  readOnly: boolean
+  scheduler: {
+    cadence: string
+    lastRunAt: string | null
+    lastRunStatus: 'succeeded' | 'partial' | 'failed' | null
+    nextDueAt: string | null
+    dueJobCount: number
+    dueSourceCount: number
+    openAlertCount: number
+  }
+  jobs: MaintenanceJobSummary[]
+  recentRuns: Array<{
+    id: string
+    trigger: 'cron' | 'operator-run-now' | 'local-test'
+    status: 'succeeded' | 'partial' | 'failed'
+    startedAt: string
+    completedAt: string | null
+    jobsClaimed: number
+    actionsApplied: number
+    failedTasks: number
+    outboundSubrequests: number
+    fetchedBytes: number
+  }>
+  monitors: ApprovedSourceMonitorSummary[]
+  availableSources: Array<{ id: string; label: string; url: string }>
+  candidates: AutomatedUpdateCandidateSummary[]
+  alerts: AutomationAlertSummary[]
+  pagination: {
+    monitors: string | null
+    availableSources: string | null
+    candidates: string | null
+    alerts: string | null
+  }
 }
 
 export function isRecordKind(value: unknown): value is RecordKind {
