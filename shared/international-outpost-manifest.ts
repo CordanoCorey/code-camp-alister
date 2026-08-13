@@ -58,7 +58,9 @@ function text(value: unknown, maximum: number, label: string, optional = false):
 }
 function isoDate(value: unknown, label: string): string {
   const result = text(value, 10, label) as string
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(result) || Number.isNaN(Date.parse(result))) throw new Error(`${label} must be an ISO date.`)
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(result)
+  const parsed = match ? new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]))) : null
+  if (!parsed || parsed.toISOString().slice(0, 10) !== result) throw new Error(`${label} must be a valid ISO date.`)
   return result
 }
 function url(value: unknown, label: string): string {
@@ -142,4 +144,15 @@ export function parseInternationalManifest(value: unknown): InternationalManifes
   const identities = new Set<string>()
   for (const candidate of candidates) { if (!candidate.identifierRaw) continue; const identity = `${candidate.countryCode}|${candidate.nationalProgramId}|${candidate.identifierRaw}`.toLocaleLowerCase(); if (identities.has(identity)) throw new Error('Source-native identifiers must be unique within country and National Program scope.'); identities.add(identity) }
   return { schemaVersion: 1, batchKey: text(raw.batchKey, 160, 'batchKey') as string, sourceRegister: text(raw.sourceRegister, 200, 'sourceRegister') as string, reviewedAt, coverage: { countryCode: coverageCountry, state: coverageRaw.state as CoverageState, namedLocalEditors: editors, sources: (coverageRaw.sources as unknown[]).map((entry, index) => source(entry, reviewedAt, `coverage source ${index + 1}`)) }, candidates }
+}
+
+function canonical(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`
+  if (value && typeof value === 'object') return `{${Object.entries(value as Record<string, unknown>).sort(([left], [right]) => left.localeCompare(right)).map(([key, child]) => `${JSON.stringify(key)}:${canonical(child)}`).join(',')}}`
+  return JSON.stringify(value)
+}
+
+export async function internationalManifestChecksum(value: unknown) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(canonical(value)))
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('')
 }

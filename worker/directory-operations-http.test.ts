@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import worker from './index'
 import { createMigratedD1 } from './test-sqlite-d1'
+import { readFileSync } from 'node:fs'
 
 const proposal = {
   submissionType: 'new-listing', targetOutpostId: null, church: 'Private Proposal Church',
@@ -336,6 +337,36 @@ describe('Operator U.S. directory operations HTTP seam', () => {
     })
     expect(repeatedApply.status).toBe(400)
     expect(migrated.sqlite.prepare('SELECT COUNT(*) count FROM content_records').get()).toEqual({ count: 147 })
+  })
+
+  it('stages an international batch privately and creates canonical facts only on Operator conversion', async () => {
+    await claim()
+    const manifest = JSON.parse(readFileSync(new URL('../data/international-outposts/cohort-za-01.json', import.meta.url), 'utf8'))
+    expect(migrated.sqlite.prepare("SELECT COUNT(*) count FROM countries WHERE code = 'ZA'").get()).toEqual({ count: 0 })
+    const stage = () => call('/api/operator/international-population/stage', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ manifest }),
+    })
+    expect((await stage()).status).toBe(201)
+    const replay = await stage()
+    expect(replay.status).toBe(200)
+    expect(await replay.json()).toMatchObject({ idempotent: true, candidateCount: 3 })
+    expect(migrated.sqlite.prepare("SELECT COUNT(*) count FROM countries WHERE code = 'ZA'").get()).toEqual({ count: 0 })
+    expect(migrated.sqlite.prepare('SELECT COUNT(*) count FROM staged_international_candidates').get()).toEqual({ count: 3 })
+
+    const queue = await call('/api/operator/international-population/candidates?country=ZA&state=staged')
+    const body = await queue.json() as { items: Array<{ id: string; church: string | null }> }
+    expect(body.items).toHaveLength(3)
+    const supported = body.items.find((item) => item.church)
+    const applied = await call(`/api/operator/international-population/candidates/${encodeURIComponent(supported!.id)}/apply`, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ reason: 'Reviewed every cited South African source; create a private draft.' }),
+    })
+    expect(applied.status).toBe(201)
+    const appliedBody = await applied.json() as { id: string }
+    expect(migrated.sqlite.prepare("SELECT name FROM countries WHERE code = 'ZA'").get()).toEqual({ name: 'South Africa' })
+    expect(migrated.sqlite.prepare("SELECT name FROM national_programs WHERE id = 'rr-south-africa'").get()).toEqual({ name: 'Royal Rangers South Africa' })
+    expect(migrated.sqlite.prepare('SELECT status FROM content_records WHERE id = ?').get(appliedBody.id)).toEqual({ status: 'draft' })
+    expect(migrated.sqlite.prepare('SELECT COUNT(*) count FROM public_outpost_directory WHERE content_id = ?').get(appliedBody.id)).toEqual({ count: 0 })
   })
 
   it('derives complete jurisdiction and region coverage only from eligible public listings', async () => {

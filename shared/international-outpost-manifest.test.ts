@@ -13,5 +13,6 @@ describe('international manifest', () => {
     [{ ...valid, candidates: [{ ...valid.candidates[0], fieldSources: {} }] }, 'field-level provenance'],
     [{ ...valid, candidates: Array(5).fill(valid.candidates[0]).map((candidate, index) => ({ ...candidate, candidateKey: `intl-my-example-${index}` })) }, 'one to four'],
     [{ ...valid, candidates: [{ ...valid.candidates[0], activeFcf: true }] }, 'without verified availability'],
+    [{ ...valid, reviewedAt: '2026-02-31' }, 'valid ISO date'],
   ])('rejects invalid manifests', (value, message) => expect(() => parseInternationalManifest(value)).toThrow(message))
 })

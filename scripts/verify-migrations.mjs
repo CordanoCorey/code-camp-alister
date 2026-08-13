@@ -20,6 +20,7 @@ const migrationNames = [
   '0011_ordinary_adult_accounts.sql',
   '0012_ordinary_account_lifecycle.sql',
   '0013_international_directory_foundation.sql',
+  '0014_international_candidate_review.sql',
 ]
 const temporary = await mkdtemp(join(tmpdir(), 'ranger-outpost-migrations-'))
 const npx = process.platform === 'win32' ? 'npx.cmd' : 'npx'
@@ -56,6 +57,7 @@ function assertDatabase(path, scenario) {
     const failedAccountAssertions = db.prepare('SELECT name FROM migration_0011_assertions WHERE passed <> 1').all()
     const failedOrdinaryLifecycleAssertions = db.prepare('SELECT name FROM migration_0012_assertions WHERE passed <> 1').all()
     const failedInternationalAssertions = db.prepare('SELECT name FROM migration_0013_assertions WHERE passed <> 1').all()
+    const failedInternationalReviewAssertions = db.prepare('SELECT name FROM migration_0014_assertions WHERE passed <> 1').all()
     const foreignKeys = db.prepare('PRAGMA foreign_key_check').all()
     const duplicateSlugs = Number(db.prepare('SELECT COUNT(*) count FROM (SELECT slug FROM content_records GROUP BY slug HAVING COUNT(*) > 1)').get().count)
     const parity = db.prepare(`SELECT
@@ -132,8 +134,8 @@ function assertDatabase(path, scenario) {
       accountFailures.push(...Object.entries(preservedMaintenance)
         .filter(([, preserved]) => preserved !== 1).map(([name]) => `maintenance_${name}_not_preserved`))
     }
-    if (failedAssertions.length || failedLifecycleAssertions.length || failedDirectoryAssertions.length || failedMaintenanceAssertions.length || failedAccountAssertions.length || failedOrdinaryLifecycleAssertions.length || failedInternationalAssertions.length || foreignKeys.length || duplicateSlugs || failures.length || operatorFailures.length || accountFailures.length) {
-      throw new Error(`${scenario} integrity failed: ${JSON.stringify({ failedAssertions, failedLifecycleAssertions, failedDirectoryAssertions, failedMaintenanceAssertions, failedAccountAssertions, failedOrdinaryLifecycleAssertions, failedInternationalAssertions, foreignKeys, duplicateSlugs, failures, operatorFailures, accountFailures })}`)
+    if (failedAssertions.length || failedLifecycleAssertions.length || failedDirectoryAssertions.length || failedMaintenanceAssertions.length || failedAccountAssertions.length || failedOrdinaryLifecycleAssertions.length || failedInternationalAssertions.length || failedInternationalReviewAssertions.length || foreignKeys.length || duplicateSlugs || failures.length || operatorFailures.length || accountFailures.length) {
+      throw new Error(`${scenario} integrity failed: ${JSON.stringify({ failedAssertions, failedLifecycleAssertions, failedDirectoryAssertions, failedMaintenanceAssertions, failedAccountAssertions, failedOrdinaryLifecycleAssertions, failedInternationalAssertions, failedInternationalReviewAssertions, foreignKeys, duplicateSlugs, failures, operatorFailures, accountFailures })}`)
     }
     return {
       scenario,
@@ -146,6 +148,7 @@ function assertDatabase(path, scenario) {
       accountAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0011_assertions').get().count),
       ordinaryLifecycleAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0012_assertions').get().count),
       internationalAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0013_assertions').get().count),
+      internationalReviewAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0014_assertions').get().count),
     }
   } finally {
     db.close()
@@ -214,7 +217,7 @@ async function scenario(name, staged) {
   const sqlite = candidates.find((path) => {
     const candidate = new DatabaseSync(path, { readOnly: true })
     try {
-      return Boolean(candidate.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'migration_0013_assertions'").get())
+      return Boolean(candidate.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'migration_0014_assertions'").get())
     } finally {
       candidate.close()
     }
@@ -226,7 +229,7 @@ async function scenario(name, staged) {
 try {
   const results = [
     await scenario('upgrade-from-0011', true),
-    await scenario('fresh-through-0013', false),
+    await scenario('fresh-through-0014', false),
   ]
   console.log(JSON.stringify({ isolated: true, results }, null, 2))
 } finally {

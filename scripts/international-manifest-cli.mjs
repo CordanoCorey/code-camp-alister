@@ -3,8 +3,11 @@ import { basename, extname, resolve } from 'node:path'
 import { parseInternationalManifest } from '../shared/international-outpost-manifest.ts'
 
 const root = resolve(import.meta.dirname, '..')
-const [command, ...inputs] = process.argv.slice(2)
-if (!['build', 'validate', 'report'].includes(command)) throw new Error('Usage: international-manifest-cli.mjs <build|validate|report> [path ...]')
+const [command, ...arguments_] = process.argv.slice(2)
+const originIndex = arguments_.indexOf('--origin')
+const suppliedOrigin = originIndex >= 0 ? arguments_[originIndex + 1] : undefined
+const inputs = arguments_.filter((argument, index) => argument !== '--origin' && index !== originIndex + 1)
+if (!['build', 'validate', 'stage', 'report'].includes(command)) throw new Error('Usage: international-manifest-cli.mjs <build|validate|stage|report> [path ...] [--origin URL]')
 
 async function jsonFiles(path) {
   const absolute = resolve(root, path)
@@ -36,6 +39,15 @@ if (command === 'report') {
     conflicts: 0,
     coverageGaps: manifests.filter(({ manifest }) => manifest.coverage.state !== 'verified-directory-maintained-by-local-editors').length,
   }, null, 2))
+} else if (command === 'stage') {
+  const origin = new URL(suppliedOrigin ?? process.env.OUTPOSTS_ORIGIN ?? 'http://127.0.0.1:5173').origin
+  const headers = { 'content-type': 'application/json', ...(process.env.CF_ACCESS_SESSION_TOKEN ? { cookie: `CF_Authorization=${process.env.CF_ACCESS_SESSION_TOKEN}` } : {}) }
+  for (const { manifest } of manifests) {
+    const response = await fetch(`${origin}/api/operator/international-population/stage`, { method: 'POST', headers, body: JSON.stringify({ manifest }) })
+    const body = await response.json()
+    if (!response.ok) throw new Error(body.error ?? `Staging failed with HTTP ${response.status}.`)
+    console.log(`${manifest.batchKey}: ${body.idempotent ? 'already staged' : `staged ${body.candidateCount} private candidates`}`)
+  }
 } else {
   console.log(`${command === 'build' ? 'Built' : 'Validated'} ${manifests.length} international manifests with ${keys.length} private candidates. No facts were staged or published.`)
 }

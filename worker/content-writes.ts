@@ -290,6 +290,7 @@ export async function saveNormalizedRecord(
   previous: ContentRecord | null,
   expectedVersion: number | null,
   transactionTail: D1PreparedStatement[] = [],
+  transactionHead: D1PreparedStatement[] = [],
 ) {
   const isNew = previous === null
   if (!isNew && previous.kind !== input.kind) throw new Error('A record type cannot be changed after creation.')
@@ -298,7 +299,7 @@ export async function saveNormalizedRecord(
   }
   const now = new Date().toISOString()
   const publishedAt = input.status === 'published' ? now : null
-  const statements: D1PreparedStatement[] = []
+  const statements: D1PreparedStatement[] = [...transactionHead]
   if (isNew) {
     statements.push(db.prepare(`INSERT INTO content_records
       (id, kind, slug, title, summary, status, details_json, verified_at, published_at, updated_at, version)

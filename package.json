@@ -21,6 +21,7 @@
     "outposts:report": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/outpost-manifest-cli.mjs report",
     "international:manifests:build": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/international-manifest-cli.mjs build",
     "international:validate": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/international-manifest-cli.mjs validate",
+    "international:stage": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/international-manifest-cli.mjs stage",
     "international:report": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/international-manifest-cli.mjs report",
     "maintenance:local:run": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/maintenance-local.mjs run",
     "maintenance:local:status": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/maintenance-local.mjs status",

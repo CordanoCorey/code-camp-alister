@@ -480,6 +480,23 @@ export type StagedOutpostCandidate = {
   }>
 }
 
+export type StagedInternationalCandidate = {
+  id: string
+  stable_candidate_key: string
+  country_code: string
+  country_name: string
+  national_program_name: string
+  local_unit_label: string
+  identifier_raw: string | null
+  display_name_raw: string | null
+  church: string | null
+  city: string | null
+  state: 'staged' | 'duplicate-review' | 'converted-to-draft' | 'rejected'
+  applied_outpost_id: string | null
+  sources: Array<{ field: string; url: string; label: string; checkedAt: string }>
+  matches: Array<{ id: string; outpostId: string; kind: string; evidence: string; state: string }>
+}
+
 export type MaintenanceJobSummary = {
   key: string
   enabled: boolean

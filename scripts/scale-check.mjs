@@ -73,7 +73,7 @@ function timed(name, sql, bindings, maximumRows, requiredPlan) {
 
 try {
   db.exec('PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;')
-  for (let number = 1; number <= 12; number += 1) {
+  for (let number = 1; number <= 14; number += 1) {
     const prefix = String(number).padStart(4, '0')
     const migrationUrl = new URL(`../migrations/${[
       '0001_initial.sql',
@@ -89,6 +89,7 @@ try {
       '0011_ordinary_adult_accounts.sql',
       '0012_ordinary_account_lifecycle.sql',
       '0013_international_directory_foundation.sql',
+      '0014_international_candidate_review.sql',
     ][number - 1]}`, import.meta.url)
     if (!migrationUrl.pathname.includes(prefix)) throw new Error(`Migration ordering failed at ${prefix}.`)
     db.exec(await readFile(migrationUrl, 'utf8'))
@@ -417,7 +418,7 @@ try {
   ]
 
   console.log(JSON.stringify({
-    schemaMigration: '0013_international_directory_foundation.sql',
+    schemaMigration: '0014_international_candidate_review.sql',
     syntheticOutposts: 20_000,
     syntheticOrdinaryAccounts: ordinaryAccountCount,
     totalOutposts: outpostCount,

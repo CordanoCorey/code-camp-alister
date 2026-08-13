@@ -32,6 +32,7 @@ import type {
   RecordKind,
   SourceRecord,
   StagedOutpostCandidate,
+  StagedInternationalCandidate,
 } from '../shared/domain'
 import { maintenanceJobPolicy, sourceMonitorPolicy } from '../shared/maintenance-policy'
 import {
@@ -83,6 +84,7 @@ import {
   fetchOperatorSubmission,
   fetchOperatorSubmissions,
   fetchStagedOutpostCandidates,
+  fetchStagedInternationalCandidates,
   fetchPublicBootstrap,
   fetchOrdinarySession,
   fetchRecordPage,
@@ -1890,6 +1892,49 @@ function OperatorPopulation({ reloadContent, report }: {
   </section>
 }
 
+function OperatorInternationalPopulation({ reloadContent, report }: {
+  reloadContent: () => Promise<unknown>
+  report: (notice: string, error?: string) => void
+}) {
+  const [items, setItems] = useState<StagedInternationalCandidate[]>([])
+  const [country, setCountry] = useState('')
+  const [selected, setSelected] = useState<StagedInternationalCandidate | null>(null)
+  const [reason, setReason] = useState('')
+  const [duplicateDecision, setDuplicateDecision] = useState<'no-match' | 'confirmed-correction' | ''>('')
+  const [targetOutpostId, setTargetOutpostId] = useState('')
+  const load = useCallback(async () => {
+    const filters = new URLSearchParams(); if (country) filters.set('country', country)
+    const { data } = await fetchStagedInternationalCandidates(filters); setItems(data.items)
+  }, [country])
+  useEffect(() => { void load().catch((error: unknown) => report('', error instanceof Error ? error.message : 'Could not load International candidates.')) }, [load, report])
+  const apply = async () => {
+    if (!selected || !reason.trim()) return
+    try {
+      let expectedVersion: number | null = null
+      if (duplicateDecision === 'confirmed-correction' && targetOutpostId) expectedVersion = (await fetchOperatorRecord(targetOutpostId)).data.record.version ?? null
+      const { data } = await runOperatorAction<{ id: string }>(`/api/operator/international-population/candidates/${encodeURIComponent(selected.id)}/apply`, 'POST', { reason, duplicateDecision: duplicateDecision || null, targetOutpostId: targetOutpostId || null, expectedVersion })
+      await Promise.all([load(), reloadContent()]); setSelected(null); setReason('')
+      report(`International candidate converted to private draft ${data.id}. It was not published.`)
+    } catch (error) { report('', error instanceof Error ? error.message : 'International conversion failed.') }
+  }
+  return <section className="submission-workspace" aria-labelledby="international-population-heading">
+    <div className="section-heading split"><div><p className="eyebrow">Country review</p><h2 id="international-population-heading">International Candidates</h2></div><p>Country and National Program facts remain private until this review creates a draft.</p></div>
+    <div className="submission-filters"><label>Country code<input value={country} maxLength={2} onChange={(event) => setCountry(event.target.value.toUpperCase())} /></label></div>
+    <div className="submission-queue-layout"><div className="submission-private-list" aria-label="International candidates">
+      {items.map((item) => <button key={item.id} type="button" className={selected?.id === item.id ? 'selected' : ''} onClick={() => { setSelected(item); setReason(''); setDuplicateDecision(''); setTargetOutpostId('') }}><span>{item.country_code} · {item.state}</span><strong>{item.display_name_raw ?? item.identifier_raw ?? item.city ?? item.country_name}</strong><small>{item.national_program_name}</small></button>)}
+      {items.length === 0 && <p className="empty-queue">No International candidates match this country.</p>}
+    </div><div className="submission-private-detail">{selected ? <>
+      <h3>{selected.display_name_raw ?? selected.stable_candidate_key}</h3><p>{selected.local_unit_label} · {selected.country_name}</p>
+      <h4>Exact field evidence</h4><ul>{selected.sources.map((source) => <li key={`${source.field}:${source.url}`}><strong>{source.field}</strong> · <a href={source.url} target="_blank" rel="noreferrer">{source.label} ↗</a> · checked {source.checkedAt}</li>)}</ul>
+      <h4>Country-scoped candidate matches</h4>{selected.matches.length ? <ul>{selected.matches.map((match) => <li key={match.id}><code>{match.outpostId}</code> · {match.kind} · {match.evidence}</li>)}</ul> : <p>No match was recorded; this is not proof that no duplicate exists.</p>}
+      {selected.state === 'duplicate-review' && <><label>Duplicate decision<select value={duplicateDecision} onChange={(event) => { setDuplicateDecision(event.target.value as typeof duplicateDecision); setTargetOutpostId('') }}><option value="">Choose after review</option><option value="no-match">Dismiss candidate matches</option><option value="confirmed-correction">Convert as correction</option></select></label>{duplicateDecision === 'confirmed-correction' && <label>Canonical correction target<select value={targetOutpostId} onChange={(event) => setTargetOutpostId(event.target.value)}><option value="">Choose scoped match</option>{selected.matches.map((match) => <option key={match.id} value={match.outpostId}>{match.outpostId} · {match.kind}</option>)}</select></label>}</>}
+      <label>Decision reason<input value={reason} maxLength={500} onChange={(event) => setReason(event.target.value)} /></label>
+      {['staged', 'duplicate-review'].includes(selected.state) && <button type="button" disabled={!reason.trim() || (selected.state === 'duplicate-review' && (!duplicateDecision || (duplicateDecision === 'confirmed-correction' && !targetOutpostId)))} onClick={() => void apply()}>Convert to draft only</button>}
+      {selected.applied_outpost_id && <p>Applied draft: <code>{selected.applied_outpost_id}</code></p>}
+    </> : <div className="empty-editor"><h3>Select an International candidate</h3><p>Review its country-scoped facts before draft conversion.</p></div>}</div></div>
+  </section>
+}
+
 function OperatorAutomation({ workspace, reload, loadNextPage, report }: {
   workspace: MaintenanceWorkspace
   reload: () => Promise<void>
@@ -2247,6 +2292,10 @@ function OperatorPage() {
           report={reportOperatorResult}
         />}
         {snapshot && <OperatorPopulation
+          reloadContent={load}
+          report={reportOperatorResult}
+        />}
+        {snapshot && <OperatorInternationalPopulation
           reloadContent={load}
           report={reportOperatorResult}
         />}

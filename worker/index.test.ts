@@ -506,7 +506,7 @@ describe('public API privacy contract at the Worker request seam', () => {
 
 describe('production readiness at the Worker request seam', () => {
   it.each(['GET', 'HEAD'])('%s proves the current schema is available without leaking configuration', async (method) => {
-    const database = createDb({ latestMigration: '0013_international_directory_foundation.sql' })
+    const database = createDb({ latestMigration: '0014_international_candidate_review.sql' })
     const response = await request('https://hub.example/api/health', { method }, createEnv(database.db))
 
     expect(response.status).toBe(200)
@@ -514,7 +514,7 @@ describe('production readiness at the Worker request seam', () => {
     expect(response.headers.get('x-content-type-options')).toBe('nosniff')
     expect(database.queries).toHaveLength(1)
     expect(database.queries[0].sql).toContain('FROM d1_migrations')
-    expect(database.queries[0].bindings).toEqual(['0013_international_directory_foundation.sql'])
+    expect(database.queries[0].bindings).toEqual(['0014_international_candidate_review.sql'])
     if (method === 'HEAD') expect(await response.text()).toBe('')
     else expect(await response.json()).toEqual({ status: 'ok', schema: '0013' })
   })
