@@ -11,6 +11,7 @@ const securityHeaders = {
   'x-frame-options': 'DENY',
 }
 const publicCacheHeaders = { ...securityHeaders, 'cache-control': 'public, max-age=60' }
+const privateAccountHeaders = { ...securityHeaders, 'cache-control': 'private, no-store', 'referrer-policy': 'no-referrer' }
 
 function record(kind, slug = `${kind}-record`) {
   return {
@@ -47,7 +48,8 @@ function successfulProduction({ leakPrivateField = false } = {}) {
     const url = new URL(input)
     requests.push({ url, init })
 
-    if (url.pathname === '/operator' || url.pathname === '/operator/records' || url.pathname === '/api/operator/snapshot' || url.pathname === '/api/operator/account/status') {
+    if (url.pathname === '/operator' || url.pathname === '/operator/records' || url.pathname === '/api/operator/snapshot'
+      || url.pathname === '/api/operator/account/status' || url.pathname === '/api/operator/automation') {
       return Response.json({ error: 'Operator authorization required.' }, {
         status: 401,
         headers: { ...securityHeaders, 'cache-control': 'no-store' },
@@ -69,9 +71,18 @@ function successfulProduction({ leakPrivateField = false } = {}) {
       if (init.method === 'HEAD') {
         return new Response(null, { headers: { ...securityHeaders, 'cache-control': 'no-store', 'content-type': 'application/json' } })
       }
-      return Response.json({ status: 'ok', schema: '0009' }, {
+      return Response.json({ status: 'ok', schema: '0012' }, {
         headers: { ...securityHeaders, 'cache-control': 'no-store' },
       })
+    }
+    if (url.pathname === '/api/account/config') {
+      return Response.json({ enabled: true, signupEnabled: true, localPreview: false, siteKey: 'production-site-key', action: 'adult-account-eligibility' }, { headers: privateAccountHeaders })
+    }
+    if (url.pathname === '/api/account/session') {
+      return Response.json({ authenticated: false }, { headers: privateAccountHeaders })
+    }
+    if (url.pathname === '/api/auth/get-session') {
+      return Response.json(null, { headers: privateAccountHeaders })
     }
     if (url.pathname === '/api/public/outpost-submissions/config') {
       return Response.json({ enabled: false, districts: [], languageOverlays: [] }, {
@@ -117,11 +128,12 @@ function successfulProduction({ leakPrivateField = false } = {}) {
       return new Response('body{}', { headers: { ...securityHeaders, 'content-type': 'text/css' } })
     }
 
+    const isAccountPage = ['/signup', '/sign-in', '/forgot-password', '/reset-password', '/account'].includes(url.pathname)
     return new Response(`<!doctype html><html><head>
       <link rel="stylesheet" href="/assets/index-a1.css">
       <link rel="manifest" href="/manifest.webmanifest">
       </head><body><div id="root"></div><script type="module" src="/assets/index-b2.js"></script></body></html>`, {
-      headers: { ...securityHeaders, 'content-type': 'text/html; charset=utf-8' },
+      headers: { ...(isAccountPage ? privateAccountHeaders : securityHeaders), 'content-type': 'text/html; charset=utf-8' },
     })
   })
   return { fetch, requests }
@@ -155,6 +167,11 @@ describe('production smoke command', () => {
       '/help',
       '/search',
       '/add-your-outpost',
+      '/signup',
+      '/sign-in',
+      '/forgot-password',
+      '/reset-password',
+      '/account',
       '/manifest.webmanifest',
       '/ranger-hub-mark-192.png',
       '/ranger-hub-mark-512.png',
@@ -170,12 +187,16 @@ describe('production smoke command', () => {
       '/api/public/records/outpost-record',
       '/api/search?q=Ranger&limit=2',
       '/api/public/outpost-submissions/config',
+      '/api/account/config',
+      '/api/account/session',
+      '/api/auth/get-session',
       '/api/public/outposts?cursor=not-a-cursor',
       '/api/not-a-real-route',
       '/operator',
       '/operator/records',
       '/api/operator/snapshot',
       '/api/operator/account/status',
+      '/api/operator/automation',
       '/api/health',
     ]))
     const operatorRequest = production.requests.find(({ url }) => url.pathname === '/api/operator/snapshot')

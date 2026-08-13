@@ -1,4 +1,5 @@
-import type { ContentRecord, CursorPage, DirectorySubmissionDetail, DirectorySubmissionState, DirectorySubmissionSummary, OperatorSession, OperatorSnapshot, PublicBootstrap, StagedOutpostCandidate } from '../../shared/domain'
+import type { ContentRecord, CursorPage, DirectorySubmissionDetail, DirectorySubmissionState, DirectorySubmissionSummary, MaintenanceWorkspace, OperatorSession, OperatorSnapshot, PublicBootstrap, StagedOutpostCandidate } from '../../shared/domain'
+import type { OrdinaryAccountProfile, ValidatedOrdinaryProfile } from '../../shared/account'
 
 type ErrorPayload = { error?: string }
 
@@ -57,6 +58,14 @@ export function fetchOperatorRecord(id: string) {
 
 export function fetchOperatorSnapshot() {
   return requestJson<OperatorSnapshot>('/api/operator/snapshot', undefined, 'Could not open the Operator workspace.')
+}
+
+export function fetchMaintenanceWorkspace(page?: {
+  queue: keyof MaintenanceWorkspace['pagination']
+  cursor: string
+}) {
+  const query = page ? `?queue=${encodeURIComponent(page.queue)}&cursor=${encodeURIComponent(page.cursor)}` : ''
+  return requestJson<MaintenanceWorkspace>(`/api/operator/automation${query}`, undefined, 'Could not load the Automation workspace.')
 }
 
 export function fetchOperatorSubmissions(filters = new URLSearchParams()) {
@@ -133,4 +142,127 @@ export function runOperatorAction<T = unknown>(path: string, method: 'POST' | 'P
     },
     'Operator action failed.',
   )
+}
+
+export type OrdinaryAccountConfiguration = {
+  enabled: boolean
+  signupEnabled: boolean
+  localPreview: boolean
+  siteKey: string | null
+  action: string
+}
+
+export type OrdinarySession = {
+  authenticated: boolean
+  emailVerified?: boolean
+  displayName?: string
+  profileReady?: boolean
+  lifecycleState?: 'active' | 'renewal-notice' | 'expired'
+}
+
+export type OrdinaryLifecycleStatus = {
+  id: string
+  state: 'active' | 'renewal-notice' | 'expired'
+  accessDueAt: string
+  noticeOpenAt: string
+  confirmedDeliveryAt: string | null
+  deletionDueAt: string | null
+  renewalAllowed: boolean
+  warningDelivery: 'not-due' | 'pending' | 'accepted' | 'failed'
+  version: number
+}
+
+export type OrdinaryOutpostMatch = {
+  id: string
+  title: string
+  church: string
+  externalNumber: string | null
+  city: string
+  jurisdiction: string
+}
+
+export function fetchOrdinaryAccountConfiguration() {
+  return requestJson<OrdinaryAccountConfiguration>('/api/account/config')
+}
+
+export function checkAdultEligibility(body: { birthYear: string; attested: boolean; challengeToken?: string }) {
+  return requestJson<{ token: string; expiresAt: string }>('/api/account/eligibility', {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
+  })
+}
+
+export function createOrdinaryAccount(body: {
+  email: string
+  password: string
+  eligibilityToken: string
+  profile: ValidatedOrdinaryProfile
+}) {
+  return requestJson<{ user?: { id: string }; status?: boolean }>('/api/auth/sign-up/email', {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
+  }, 'Account creation could not be completed.')
+}
+
+export function signInOrdinaryAccount(email: string, password: string) {
+  return requestJson<{ user?: unknown; token?: string }>('/api/auth/sign-in/email', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ email, password, rememberMe: false }),
+  }, 'Sign-in failed. Check the email, password, and verification status.')
+}
+
+export function signOutOrdinaryAccount() {
+  return requestJson<{ success?: boolean }>('/api/auth/sign-out', {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}',
+  }, 'Sign-out failed.')
+}
+
+export function fetchOrdinarySession() {
+  return requestJson<OrdinarySession>('/api/account/session')
+}
+
+export function fetchOrdinaryProfile() {
+  return requestJson<{ profile: OrdinaryAccountProfile }>('/api/account/profile')
+}
+
+export function fetchOrdinaryLifecycle() {
+  return requestJson<{ lifecycle: OrdinaryLifecycleStatus }>('/api/account/lifecycle')
+}
+
+export function renewOrdinaryAccount(expectedVersion: number, idempotencyKey: string) {
+  return requestJson<{ lifecycle: OrdinaryLifecycleStatus }>('/api/account/renew', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ expectedVersion, idempotencyKey }),
+  }, 'The Account could not be renewed.')
+}
+
+export function updateOrdinaryProfile(profile: ValidatedOrdinaryProfile, expectedVersion: number) {
+  return requestJson<{ profile: OrdinaryAccountProfile }>('/api/account/profile', {
+    method: 'PUT', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ profile, expectedVersion }),
+  }, 'The private profile could not be updated.')
+}
+
+export function searchOrdinaryOutposts(
+  path: 'usa' | 'international', scope: string, query: string, privateProfile = false,
+) {
+  const params = new URLSearchParams({ path, scope, q: query })
+  if (privateProfile) params.set('context', 'profile')
+  return requestJson<{ items: OrdinaryOutpostMatch[] }>(`/api/account/outposts?${params.toString()}`)
+}
+
+export function requestOrdinaryPasswordReset(email: string) {
+  return requestJson<{ status: boolean; message: string }>('/api/auth/request-password-reset', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ email, redirectTo: '/reset-password' }),
+  }, 'If the address is eligible, a recovery message will be sent.')
+}
+
+export function resetOrdinaryPassword(token: string, newPassword: string) {
+  return requestJson<{ status: boolean }>('/api/auth/reset-password', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ token, newPassword }),
+  }, 'The recovery link is invalid or expired.')
+}
+
+export function consumeLocalAuthPreview(purpose: 'verification' | 'password-reset' | 'renewal-warning') {
+  return requestJson<{ url: string }>(`/api/account/local-email-preview?purpose=${purpose}`)
 }

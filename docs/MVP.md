@@ -128,9 +128,15 @@ Slice 4 beta-hardening evidence is recorded in [`docs/qa/beta-readiness.md`](qa/
 
 Slice 5 normalized-model, migration-parity, and isolated 20,000-Outpost query evidence is recorded in [`docs/qa/production-scale-model.md`](qa/production-scale-model.md). It establishes bounded local architecture behavior without claiming deployed performance or production readiness.
 
+## Account-enabled beta addendum
+
+Slice 10 extends the historical Initial Public Release with local ordinary adult Accounts while preserving anonymous public browsing. It adds provider-owned email/password identity, email verification and recovery, separate USA and International onboarding, a transient neutral Birth Year check, and one private non-authoritative profile per Account. Claimed Position and Current Outpost remain unverified context and grant no membership, Permission Grant, editing access, or Operator authority. Dated local evidence and limitations are recorded in [`docs/qa/adult-account-authentication.md`](qa/adult-account-authentication.md).
+
+Slice 11 adds a one-calendar-year Ordinary Access Term, a one-calendar-month Renewal Notice, explicit pre-expiry one-year Renewal, exact expiry enforcement, and bounded irreversible deletion six calendar months after confirmed warning-provider acceptance. It does not change anonymous public browsing, Operator lifecycle, membership, verification, permissions, editors, workspaces, calendars, or youth-account scope. Dated local evidence and limitations are recorded in [`docs/qa/ordinary-account-lifecycle.md`](qa/ordinary-account-lifecycle.md).
+
 ## Explicitly deferred
 
-- Ordinary adult accounts and all youth accounts
+- Youth accounts
 - Private Outpost Calendars and Meeting Plans
 - Membership, claimed-position, and delegated editor workflows
 - Donations and payments

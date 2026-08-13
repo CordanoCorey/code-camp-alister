@@ -19,6 +19,9 @@
     "outposts:stage": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/outpost-manifest-cli.mjs stage",
     "outposts:stage:production": "npm run config:production:check && node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/outpost-manifest-cli.mjs stage --production",
     "outposts:report": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/outpost-manifest-cli.mjs report",
+    "maintenance:local:run": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/maintenance-local.mjs run",
+    "maintenance:local:status": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/maintenance-local.mjs status",
+    "maintenance:test": "vitest run worker/maintenance.test.ts worker/maintenance-scheduling.test.ts worker/maintenance-operations.test.ts worker/maintenance-http.test.ts worker/scheduled.test.ts",
     "dev": "npm run db:setup && vite",
     "build": "tsc -b && vite build",
     "config:production:check": "node scripts/production-config.mjs",
@@ -27,11 +30,12 @@
     "preview": "vite preview",
     "smoke:production": "node scripts/production-smoke.mjs",
     "test": "vitest run",
-    "test:integration": "vitest run worker/index.test.ts tests/sw-policy.test.js src/lib/preview.test.ts scripts/production-config.test.js scripts/production-smoke.test.js",
+    "test:integration": "vitest run worker/index.test.ts worker/maintenance-http.test.ts worker/scheduled.test.ts tests/sw-policy.test.js src/lib/preview.test.ts scripts/production-config.test.js scripts/production-smoke.test.js",
     "check": "npm run lint && npm run test && npm run build",
-    "scale:check": "node scripts/scale-check.mjs"
+    "scale:check": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/scale-check.mjs"
   },
   "dependencies": {
+    "better-auth": "1.6.27",
     "jose": "^6.2.8",
     "react": "19.2.8",
     "react-dom": "19.2.8"

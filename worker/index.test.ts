@@ -145,6 +145,18 @@ describe('Operator authorization at the Worker request seam', () => {
     expect(response.headers.get('cache-control')).toBe('no-store')
   })
 
+  it('never treats an ordinary Account session cookie as Operator authority', async () => {
+    const database = createDb()
+    const response = await request('https://hub.example/api/operator/snapshot', {
+      headers: { cookie: 'better-auth.session_token=ordinary-account-session' },
+    }, createEnv(database.db))
+
+    expect(response.status).toBe(401)
+    expect(await response.json()).toEqual({ error: 'Operator authorization required.' })
+    expect(database.queries).toEqual([])
+    expect(database.mutations).toBe(0)
+  })
+
   it.each([
     ['create record', '/api/operator/records', 'POST'],
     ['update record', '/api/operator/records/record-1', 'PUT'],
@@ -494,7 +506,7 @@ describe('public API privacy contract at the Worker request seam', () => {
 
 describe('production readiness at the Worker request seam', () => {
   it.each(['GET', 'HEAD'])('%s proves the current schema is available without leaking configuration', async (method) => {
-    const database = createDb({ latestMigration: '0009_us_directory_operations.sql' })
+    const database = createDb({ latestMigration: '0012_ordinary_account_lifecycle.sql' })
     const response = await request('https://hub.example/api/health', { method }, createEnv(database.db))
 
     expect(response.status).toBe(200)
@@ -502,9 +514,9 @@ describe('production readiness at the Worker request seam', () => {
     expect(response.headers.get('x-content-type-options')).toBe('nosniff')
     expect(database.queries).toHaveLength(1)
     expect(database.queries[0].sql).toContain('FROM d1_migrations')
-    expect(database.queries[0].bindings).toEqual(['0009_us_directory_operations.sql'])
+    expect(database.queries[0].bindings).toEqual(['0012_ordinary_account_lifecycle.sql'])
     if (method === 'HEAD') expect(await response.text()).toBe('')
-    else expect(await response.json()).toEqual({ status: 'ok', schema: '0009' })
+    else expect(await response.json()).toEqual({ status: 'ok', schema: '0012' })
   })
 
   it.each([

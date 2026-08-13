@@ -20,6 +20,7 @@ import type {
   EventDetails,
   EventLifecycleStatus,
   FreshnessItemType,
+  MaintenanceWorkspace,
   OperatorSession,
   OperatorSnapshot,
   OrganizationDetails,
@@ -32,6 +33,7 @@ import type {
   SourceRecord,
   StagedOutpostCandidate,
 } from '../shared/domain'
+import { maintenanceJobPolicy, sourceMonitorPolicy } from '../shared/maintenance-policy'
 import {
   advancementSubtypes,
   eventCategories,
@@ -69,9 +71,11 @@ import {
   type EventView,
 } from '../shared/events'
 import { AddOutpostPage } from './AddOutpostPage'
+import { AccountPages } from './account/AccountPages'
 import { jurisdictions } from './data/jurisdictions'
 import {
   fetchMoreOperatorRecords,
+  fetchMaintenanceWorkspace,
   fetchOperatorRecord,
   fetchOperatorSession,
   fetchOperatorSnapshot,
@@ -79,11 +83,13 @@ import {
   fetchOperatorSubmissions,
   fetchStagedOutpostCandidates,
   fetchPublicBootstrap,
+  fetchOrdinarySession,
   fetchRecordPage,
   runOperatorAction,
   runOperatorAccountAction,
   saveOperatorRecord,
   searchOperatorOutposts,
+  signOutOrdinaryAccount,
 } from './data/client'
 import { captureInitialTransferToken } from './lib/transfer-fragment'
 import {
@@ -108,6 +114,11 @@ type Route =
   | '/other'
   | '/help'
   | '/operator'
+  | '/signup'
+  | '/sign-in'
+  | '/forgot-password'
+  | '/reset-password'
+  | '/account'
 
 const navItems: Array<{ href: Route; label: string }> = [
   { href: '/outposts', label: 'Find an Outpost' },
@@ -138,6 +149,11 @@ const routeTitles: Record<Route, string> = {
   '/other': 'Other Resources',
   '/help': 'Help & Sources',
   '/operator': 'Operator Console',
+  '/signup': 'Create an Account',
+  '/sign-in': 'Sign In',
+  '/forgot-password': 'Reset Password',
+  '/reset-password': 'Choose a New Password',
+  '/account': 'Account',
 }
 
 const navigationEventName = 'ranger-outpost:navigate'
@@ -231,6 +247,11 @@ function useRoute() {
     '/other',
     '/help',
     '/operator',
+    '/signup',
+    '/sign-in',
+    '/forgot-password',
+    '/reset-password',
+    '/account',
   ].includes(parsed.pathname)
     ? (parsed.pathname as Route)
     : '/'
@@ -302,7 +323,25 @@ function Shell({
   routeAnnouncement: string
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [ordinarySession, setOrdinarySession] = useState<{ authenticated: boolean; displayName?: string }>({ authenticated: false })
   useEffect(() => setMenuOpen(false), [location])
+  useEffect(() => {
+    let active = true
+    const refresh = () => {
+      fetchOrdinarySession()
+        .then(({ data }) => { if (active) setOrdinarySession(data) })
+        .catch(() => { if (active) setOrdinarySession({ authenticated: false }) })
+    }
+    refresh()
+    window.addEventListener('ranger-outpost:sessionchange', refresh)
+    return () => { active = false; window.removeEventListener('ranger-outpost:sessionchange', refresh) }
+  }, [location])
+  const signOut = async () => {
+    try { await signOutOrdinaryAccount() } finally {
+      setOrdinarySession({ authenticated: false })
+      navigateTo('/sign-in')
+    }
+  }
   return (
     <>
       <a className="skip-link" href="#main-content">Skip to content</a>
@@ -326,6 +365,12 @@ function Shell({
             />
             <button type="submit">Search</button>
           </form>
+          <div className="account-header-actions">
+            {ordinarySession.authenticated ? <>
+              <AppLink href="/account">Account{ordinarySession.displayName ? ` · ${ordinarySession.displayName}` : ''}</AppLink>
+              <button className="link-button" type="button" onClick={() => void signOut()}>Sign out</button>
+            </> : <AppLink href="/sign-in">Sign in</AppLink>}
+          </div>
           <button
             className="menu-button"
             type="button"
@@ -1803,6 +1848,153 @@ function OperatorPopulation({ reloadContent, report }: {
   </section>
 }
 
+function OperatorAutomation({ workspace, reload, loadNextPage, report }: {
+  workspace: MaintenanceWorkspace
+  reload: () => Promise<void>
+  loadNextPage: (queue: keyof MaintenanceWorkspace['pagination'], cursor: string) => Promise<void>
+  report: (notice: string, error?: string) => void
+}) {
+  const [reason, setReason] = useState('')
+  const [sourceDocumentId, setSourceDocumentId] = useState(workspace.availableSources[0]?.id ?? '')
+  const [busy, setBusy] = useState(false)
+
+  const submitAutomationAction = async (path: string, method: 'POST' | 'PUT', body: unknown, notice: string) => {
+    setBusy(true); report('')
+    try {
+      await runOperatorAction(path, method, body)
+      await reload()
+      setReason('')
+      report(notice)
+    } catch (error) {
+      report('', error instanceof Error ? error.message : 'Automation action failed.')
+    } finally { setBusy(false) }
+  }
+  const requireReason = () => {
+    if (reason.trim()) return true
+    report('', 'Enter a decision reason before changing automation state.')
+    return false
+  }
+
+  return <section className="automation-workspace" aria-labelledby="automation-heading">
+    <div className="section-heading split">
+      <div><p className="eyebrow">Private operations</p><h2 id="automation-heading">Automation</h2></div>
+      <span className={`automation-health ${workspace.scheduler.openAlertCount ? 'has-alerts' : ''}`}>
+        {workspace.scheduler.openAlertCount} open alert{workspace.scheduler.openAlertCount === 1 ? '' : 's'}
+      </span>
+    </div>
+    <p className="automation-policy"><strong>Technical checks are not factual verification.</strong> “Reachable” or “unchanged” means only that approved bytes or metadata were available. It never advances a verification date. A failure or changed page never closes an Outpost, cancels an Event, or publishes content.</p>
+    {workspace.readOnly && <p className="alert error" role="status">Operator privilege renewal is required. Scheduler health and alerts remain visible, while configuration, Run now, and review actions are read-only. Safety and retention jobs continue.</p>}
+
+    <div className="automation-summary" aria-label="Scheduler status">
+      <div><strong>{workspace.scheduler.lastRunStatus ?? 'Not run'}</strong><span>Last outcome</span></div>
+      <div><strong>{workspace.scheduler.dueJobCount}</strong><span>Due jobs</span></div>
+      <div><strong>{workspace.scheduler.dueSourceCount}</strong><span>Due sources</span></div>
+      <div><strong>{workspace.scheduler.cadence}</strong><span>Production Cron</span></div>
+    </div>
+    {!workspace.readOnly && <div className="automation-controls">
+      <label>Decision reason<input value={reason} maxLength={500} onChange={(event) => setReason(event.target.value)} placeholder="Why is this action appropriate?" /></label>
+      <button className="button primary" type="button" disabled={busy} onClick={() => {
+        if (!window.confirm('Run only currently due, bounded maintenance now?')) return
+        void submitAutomationAction('/api/operator/automation/run', 'POST', { confirmed: true }, 'Due maintenance finished. Review the sanitized outcome and alerts below.')
+      }}>Run due maintenance now</button>
+    </div>}
+
+    <h3>Jobs</h3>
+    <div className="automation-card-grid">
+      {workspace.jobs.map((job) => <form key={job.key} className="automation-card" onSubmit={(event) => {
+        event.preventDefault()
+        if (!requireReason()) return
+        const values = new FormData(event.currentTarget)
+        void submitAutomationAction(`/api/operator/automation/jobs/${encodeURIComponent(job.key)}`, 'PUT', {
+          enabled: values.get('enabled') === 'true', batchSize: Number(values.get('batchSize')),
+          intervalSeconds: Number(values.get('intervalSeconds')), reason,
+        }, `${job.key} configuration saved.`)
+      }}>
+        <div className="card-topline"><strong>{job.key.replaceAll('-', ' ')}</strong><span>{job.circuitState}</span></div>
+        <p>{job.ruleVersion} · last success {job.lastSuccessAt ? new Date(job.lastSuccessAt).toLocaleString() : 'not recorded'}</p>
+        <label>State<select name="enabled" defaultValue={String(job.enabled)} disabled={workspace.readOnly}><option value="true">Enabled</option><option value="false">Paused</option></select></label>
+        <label>Batch<select name="batchSize" defaultValue={String(job.batchSize)} disabled={workspace.readOnly}>
+          {maintenanceJobPolicy(job.key).batchSizes.map((value) => <option key={value}>{value}</option>)}
+        </select></label>
+        <label>Cadence<select name="intervalSeconds" defaultValue={String(job.intervalSeconds)} disabled={workspace.readOnly}>
+          {maintenanceJobPolicy(job.key).intervals
+            .map((value) => <option key={value} value={value}>{value < 3600 ? '30 minutes' : value < 86400 ? `${value / 3600} hour${value === 3600 ? '' : 's'}` : 'Daily'}</option>)}
+        </select></label>
+        {!workspace.readOnly && <button type="submit" disabled={busy}>Save job</button>}
+        {!workspace.readOnly && job.circuitState === 'open' && <button type="button" disabled={busy} onClick={() => {
+          if (requireReason()) void submitAutomationAction(
+            `/api/operator/automation/jobs/${encodeURIComponent(job.key)}/circuit`, 'POST', { reason },
+            `${job.key} circuit reset for another bounded attempt.`,
+          )
+        }}>Reset job circuit</button>}
+      </form>)}
+    </div>
+
+    {!workspace.readOnly && <><h3>Approve a Source Document</h3><form className="source-approval-form" onSubmit={(event) => {
+      event.preventDefault()
+      if (!sourceDocumentId || !requireReason()) return
+      const values = new FormData(event.currentTarget)
+      void submitAutomationAction(`/api/operator/automation/sources/${encodeURIComponent(sourceDocumentId)}/approve`, 'POST', {
+        mode: values.get('mode'), intervalSeconds: Number(values.get('intervalSeconds')),
+        maximumResponseBytes: Number(values.get('maximumResponseBytes')),
+        maximumRedirects: Number(values.get('maximumRedirects')), reason,
+      }, 'Source Monitor approval recorded. It remains disabled until explicitly enabled below.')
+    }}>
+      <label>Exact canonical Source Document<select value={sourceDocumentId} onChange={(event) => setSourceDocumentId(event.target.value)} required><option value="">Choose a source…</option>{workspace.availableSources.map((source) => <option key={source.id} value={source.id}>{source.label} — {source.url}</option>)}</select></label>
+      <label>Mode<select name="mode"><option value="availability-metadata">Availability and metadata</option><option value="bounded-fingerprint">Bounded fingerprint</option></select></label>
+      <label>Interval<select name="intervalSeconds" defaultValue="86400">{sourceMonitorPolicy.intervals.map((value) => <option key={value} value={value}>{value < 86400 ? `${value / 3600} hours` : value === 86400 ? 'Daily' : value === 259200 ? '3 days' : 'Weekly'}</option>)}</select></label>
+      <label>Maximum bytes<select name="maximumResponseBytes" defaultValue="65536">{sourceMonitorPolicy.responseCaps.map((value) => <option key={value} value={value}>{value / 1024} KiB</option>)}</select></label>
+      <label>Same-host redirects<select name="maximumRedirects" defaultValue="1">{sourceMonitorPolicy.redirectCounts.map((value) => <option key={value} value={value}>{value === 0 ? 'None' : 'One'}</option>)}</select></label>
+      <button type="submit" disabled={busy || !sourceDocumentId}>Approve disabled monitor</button>
+    </form></>}
+    {!workspace.readOnly && workspace.pagination.availableSources && <button type="button" onClick={() => void loadNextPage('availableSources', workspace.pagination.availableSources!)}>Load more Source Documents</button>}
+
+    {!workspace.readOnly && <><h3>Approved Source Monitors</h3><div className="automation-card-grid">
+      {workspace.monitors.length === 0 && <p className="empty-queue">No Source Documents are approved for monitoring.</p>}
+      {workspace.monitors.map((monitor) => <article className="automation-card" key={monitor.sourceDocumentId}>
+        <div className="card-topline"><strong>{monitor.sourceLabel}</strong><span>{monitor.technicalStatus}</span></div>
+        <p><a href={monitor.sourceUrl} target="_blank" rel="noreferrer">Open public source</a> · {monitor.hostname} · {monitor.mode}</p>
+        <p>Last technical success: {monitor.lastSuccessAt ? new Date(monitor.lastSuccessAt).toLocaleString() : 'No baseline'} · failures: {monitor.consecutiveFailures}</p>
+        <div className="inline-actions">
+          <button type="button" disabled={busy} onClick={() => { if (requireReason()) void submitAutomationAction(`/api/operator/automation/sources/${encodeURIComponent(monitor.sourceDocumentId)}/state`, 'PUT', { action: monitor.enabled ? 'disable' : 'enable', reason }, monitor.enabled ? 'Source Monitor disabled.' : 'Source Monitor enabled.') }}>{monitor.enabled ? 'Disable' : 'Enable'}</button>
+          {monitor.circuitState === 'open' && <button type="button" disabled={busy} onClick={() => { if (requireReason()) void submitAutomationAction(`/api/operator/automation/sources/${encodeURIComponent(monitor.sourceDocumentId)}/state`, 'PUT', { action: 'reset-circuit', reason }, 'Source Monitor circuit reset for another bounded attempt.') }}>Reset circuit</button>}
+        </div>
+      </article>)}
+      {workspace.pagination.monitors && <button type="button" onClick={() => void loadNextPage('monitors', workspace.pagination.monitors!)}>Load more Source Monitors</button>}
+    </div></>}
+
+    {!workspace.readOnly && <><h3>Source-change review</h3><div className="automation-card-grid">
+      {workspace.candidates.length === 0 && <p className="empty-queue">No open Automated Update Drafts.</p>}
+      {workspace.candidates.map((candidate) => <article className="automation-card" key={candidate.id}>
+        <div className="card-topline"><strong>{candidate.sourceLabel}</strong><span>{candidate.state}</span></div>
+        <p><a href={candidate.sourceUrl} target="_blank" rel="noreferrer">Inspect public source</a> · {candidate.adapterVersion}</p>
+        {candidate.affectedFieldsTruncated && <p>Showing the first {candidate.affectedFields.length} of at least {candidate.affectedFieldCount} affected field references. Inspect every current Field Provenance link before deciding.</p>}
+        <ul>{candidate.priorPublicValues.map((field) => <li key={`${field.contentId}:${field.fieldPath}`}><code>{field.fieldPath}</code>: {JSON.stringify(field.value)}</li>)}</ul>
+        {!candidate.hasTypedProposal && <p>No value was extracted or guessed. Inspect the source, then edit the canonical record manually if needed.</p>}
+        <div className="inline-actions">
+          {(['review', 'no-material-change', 'supersede', 'dismiss'] as const).map((action) => <button key={action} type="button" disabled={busy} onClick={() => { if (requireReason()) void submitAutomationAction(`/api/operator/automation/candidates/${encodeURIComponent(candidate.id)}`, 'PUT', { action, reason }, `Candidate marked ${action.replaceAll('-', ' ')}.`) }}>{action.replaceAll('-', ' ')}</button>)}
+        </div>
+      </article>)}
+      {workspace.pagination.candidates && <button type="button" onClick={() => void loadNextPage('candidates', workspace.pagination.candidates!)}>Load more source-change candidates</button>}
+    </div></>}
+
+    <h3>Automation Alerts</h3><div className="automation-card-grid" role="list">
+      {workspace.alerts.length === 0 && <p className="empty-queue">No open Automation Alerts.</p>}
+      {workspace.alerts.map((alert) => <article className={`automation-card alert-${alert.severity}`} key={alert.id} role="listitem">
+        <div className="card-topline"><strong>{alert.type.replaceAll('-', ' ')}</strong><span>{alert.status}</span></div>
+        <p>{alert.summary}</p><small>Seen {alert.occurrenceCount} time{alert.occurrenceCount === 1 ? '' : 's'} · last {new Date(alert.lastSeenAt).toLocaleString()}</small>
+        {!workspace.readOnly && <div className="inline-actions">
+          {alert.status === 'open' && <button type="button" disabled={busy} onClick={() => { if (requireReason()) void submitAutomationAction(`/api/operator/automation/alerts/${encodeURIComponent(alert.id)}`, 'PUT', { action: 'acknowledged', reason }, 'Automation Alert acknowledged.') }}>Acknowledge</button>}
+          <button type="button" disabled={busy} onClick={() => { if (requireReason()) void submitAutomationAction(`/api/operator/automation/alerts/${encodeURIComponent(alert.id)}`, 'PUT', { action: 'resolved', reason }, 'Automation Alert resolved.') }}>Resolve</button>
+        </div>}
+      </article>)}
+      {workspace.pagination.alerts && <button type="button" onClick={() => void loadNextPage('alerts', workspace.pagination.alerts!)}>Load more Automation Alerts</button>}
+    </div>
+
+    <details><summary>Recent sanitized outcomes</summary><ol className="maintenance-run-list">{workspace.recentRuns.map((run) => <li key={`${run.startedAt}:${run.trigger}`}><time dateTime={run.startedAt}>{new Date(run.startedAt).toLocaleString()}</time> — {run.trigger}, {run.status}; {run.jobsClaimed} jobs, {run.actionsApplied} actions, {run.failedTasks} failures, {run.outboundSubrequests} source requests, {run.fetchedBytes} bytes.</li>)}</ol></details>
+  </section>
+}
+
 function OperatorPage() {
   const [session, setSession] = useState<OperatorSession | null>(null)
   const [transferToken] = useState(() => captureInitialTransferToken(
@@ -1810,6 +2002,7 @@ function OperatorPage() {
     (url) => window.history.replaceState(null, '', url),
   ))
   const [snapshot, setSnapshot] = useState<OperatorSnapshot | null>(null)
+  const [automation, setAutomation] = useState<MaintenanceWorkspace | null>(null)
   const [draft, setDraft] = useState<ContentRecord | null>(null)
   const [draftBaseline, setDraftBaseline] = useState('')
   const [previewOpen, setPreviewOpen] = useState(false)
@@ -1832,10 +2025,33 @@ function OperatorPage() {
     return data
   }
 
+  const loadAutomation = async () => {
+    const { data } = await fetchMaintenanceWorkspace()
+    setAutomation(data)
+  }
+
+  const loadNextAutomationPage = async (
+    queue: keyof MaintenanceWorkspace['pagination'],
+    cursor: string,
+  ) => {
+    const { data } = await fetchMaintenanceWorkspace({ queue, cursor })
+    setAutomation((current) => current ? {
+      ...current,
+      [queue]: [...current[queue], ...data[queue]],
+      pagination: { ...current.pagination, [queue]: data.pagination[queue] },
+    } : data)
+  }
+
   const load = async () => {
     setErrorMessage('')
     const operatorSession = await loadSession()
-    if (operatorSession.role !== 'active' || operatorSession.account.lifecycleState === 'renewal-required') {
+    if (operatorSession.role !== 'active') {
+      setSnapshot(null)
+      setAutomation(null)
+      return null
+    }
+    await loadAutomation()
+    if (operatorSession.account.lifecycleState === 'renewal-required') {
       setSnapshot(null)
       return null
     }
@@ -1946,6 +2162,7 @@ function OperatorPage() {
         {errorMessage && <p ref={errorRef} className="alert error" role="alert" tabIndex={-1}>{errorMessage}</p>}
         {notice && <p className="alert success" role="status">{notice}</p>}
         {session?.role === 'active' && <OperatorAccountPanel session={session} reload={async () => { await load() }} />}
+      {automation && <OperatorAutomation workspace={automation} reload={loadAutomation} loadNextPage={loadNextAutomationPage} report={reportOperatorResult} />}
         {snapshot && <div className="operator-status"><span className="status-dot" /> Authorized as <strong>{snapshot.operatorLabel}</strong><span>Showing {snapshot.records.length} records</span></div>}
         {snapshot && <div className="operator-layout">
           <aside className="record-manager">
@@ -2064,6 +2281,10 @@ function App() {
 
   let content: ReactNode
   if (route === '/operator') content = <OperatorPage />
+  else if (route === '/signup' || route === '/sign-in' || route === '/forgot-password'
+    || route === '/reset-password' || route === '/account') {
+    content = <AccountPages route={route} navigate={navigate} />
+  }
   else if (loadError) content = <div className="load-state"><h1>The hub could not load</h1><p>{loadError}</p><button type="button" onClick={() => { setLoadError(''); setBundle(null); setLoadAttempt((attempt) => attempt + 1) }}>Try again</button></div>
   else if (!bundle) content = <div className="load-state" role="status"><div className="loader" /><p>Loading verified records…</p></div>
   else if (route === '/outposts') content = <OutpostsPage coverage={bundle.coverage} />

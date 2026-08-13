@@ -469,6 +469,99 @@ export type StagedOutpostCandidate = {
   }>
 }
 
+export type MaintenanceJobSummary = {
+  key: string
+  enabled: boolean
+  ruleVersion: string
+  intervalSeconds: number
+  batchSize: number
+  nextDueAt: string
+  lastSuccessAt: string | null
+  consecutiveFailures: number
+  circuitState: 'closed' | 'open'
+  leasedUntil: string | null
+}
+
+export type ApprovedSourceMonitorSummary = {
+  sourceDocumentId: string
+  sourceLabel: string
+  sourceUrl: string
+  enabled: boolean
+  hostname: string
+  mode: 'availability-metadata' | 'bounded-fingerprint'
+  intervalSeconds: number
+  maximumResponseBytes: number
+  maximumRedirects: number
+  nextDueAt: string
+  lastAttemptAt: string | null
+  lastSuccessAt: string | null
+  consecutiveFailures: number
+  circuitState: 'closed' | 'open'
+  technicalStatus: 'not-checked' | 'reachable' | 'backoff' | 'circuit-open'
+}
+
+export type AutomatedUpdateCandidateSummary = {
+  id: string
+  sourceDocumentId: string
+  sourceLabel: string
+  sourceUrl: string
+  state: 'open' | 'reviewing' | 'converted-to-draft' | 'no-material-change' | 'superseded' | 'dismissed'
+  affectedFields: Array<{ contentId: string; fieldPath: string }>
+  affectedFieldCount: number
+  affectedFieldsTruncated: boolean
+  priorPublicValues: Array<{ contentId: string; fieldPath: string; value: unknown }>
+  hasTypedProposal: boolean
+  adapterVersion: string
+  createdAt: string
+}
+
+export type AutomationAlertSummary = {
+  id: string
+  type: 'repeated-failure' | 'scheduler-overdue' | 'circuit-open' | 'invariant-failure' | 'backlog-threshold'
+  severity: 'warning' | 'critical'
+  summary: string
+  status: 'open' | 'acknowledged' | 'resolved'
+  occurrenceCount: number
+  firstSeenAt: string
+  lastSeenAt: string
+}
+
+export type MaintenanceWorkspace = {
+  readOnly: boolean
+  scheduler: {
+    cadence: string
+    lastRunAt: string | null
+    lastRunStatus: 'succeeded' | 'partial' | 'failed' | null
+    nextDueAt: string | null
+    dueJobCount: number
+    dueSourceCount: number
+    openAlertCount: number
+  }
+  jobs: MaintenanceJobSummary[]
+  recentRuns: Array<{
+    id: string
+    trigger: 'cron' | 'operator-run-now' | 'local-test'
+    status: 'succeeded' | 'partial' | 'failed'
+    startedAt: string
+    completedAt: string | null
+    jobsClaimed: number
+    actionsApplied: number
+    failedTasks: number
+    outboundSubrequests: number
+    fetchedBytes: number
+  }>
+  monitors: ApprovedSourceMonitorSummary[]
+  availableSources: Array<{ id: string; label: string; url: string }>
+  candidates: AutomatedUpdateCandidateSummary[]
+  alerts: AutomationAlertSummary[]
+  pagination: {
+    monitors: string | null
+    availableSources: string | null
+    candidates: string | null
+    alerts: string | null
+  }
+}
+
 export function isRecordKind(value: unknown): value is RecordKind {
   return typeof value === 'string' && recordKinds.includes(value as RecordKind)
 }

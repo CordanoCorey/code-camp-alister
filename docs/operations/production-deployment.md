@@ -1,6 +1,6 @@
 # Production deployment and recovery
 
-This runbook launches Ranger Outpost Hub as one public, read-only Cloudflare Worker with one remote D1 database and one Cloudflare Access identity for the Operator paths. It implements the Initial Public Release boundaries in `CONTEXT.md` and ADRs 0010, 0012, 0013, 0014, and 0015. It does not provision ordinary accounts, copy protected program material, or automate publication. After Slice 7, follow [`operator-lifecycle.md`](operator-lifecycle.md) for bootstrap, renewal, staged transfer, cleanup, and emergency recovery.
+This runbook launches Ranger Outpost Hub as one public Cloudflare Worker with one remote D1 database, one Cloudflare Access identity for the Operator paths, ordinary adult Account authentication, and the single reviewed maintenance dispatcher Cron. It implements the Initial Public Release boundaries in `CONTEXT.md` and ADRs 0010, 0012–0015, and 0017–0019. Ordinary signup must remain fail-closed until Turnstile, transactional email, lifecycle warning delivery, and deletion monitoring are all configured. The deployment still excludes youth accounts, copied protected program material, and automatic factual publication. Follow [`operator-lifecycle.md`](operator-lifecycle.md) for the separate Operator lifecycle and [`automated-maintenance.md`](automated-maintenance.md) for Cron activation and rollback.
 
 Current platform constraints and source links are recorded in [`../research/cloudflare-production-deployment.md`](../research/cloudflare-production-deployment.md). Read that note before changing these commands. In particular, the Cloudflare Vite environment is selected at build time, Worker rollback does not roll back D1, D1 Time Travel restores only in place, and this schema's FTS5 virtual table prevents a routine full D1 SQL export.
 
@@ -27,17 +27,19 @@ The expected first launch uses Cloudflare's Free plans and a provider HTTPS `wor
 | Operator bypass | `LOCAL_OPERATOR_PREVIEW=true` in ignored `.dev.vars`, exact loopback hosts only | Variable absent; deployed hostnames cannot use the code-level bypass |
 | Access settings | Not required for loopback preview | `ACCESS_TEAM_DOMAIN` and `ACCESS_POLICY_AUD` entered through interactive Worker secret prompts |
 | Public support recipient | Optional `VITE_PUBLIC_SUPPORT_EMAIL` in `.env.local`; visible in the browser bundle | Supply only a published support address; otherwise retain the copyable-submission fallback |
+| Ordinary Account authentication | Exact loopback only, ignored `AUTH_SECRET`, and `LOCAL_AUTH_EMAIL_PREVIEW=true` | Server-only canonical origin, independent auth secret, exact Turnstile hostname/site/secret, Resend sender/key, and `ORDINARY_ACCOUNT_LIFECYCLE_ENABLED=true` |
+| Ordinary lifecycle | Local preview sink and isolated deterministic maintenance clocks | The reviewed Cron, private Automation Alerts, warning provider, and paused-first deletion rollout |
 | Logs | Local terminal | Persisted custom Workers Logs at 10% sampling; automatic URL-bearing invocation logs disabled |
 
-`.dev.vars.example` documents the only local Worker variable. `.dev.vars`, `.env*`, `.wrangler`, D1 exports/backups, and `.cloudflare-recovery` are ignored. Access settings never use a `VITE_` prefix.
+`.dev.vars.example` documents the local-only Worker variables and production server-only names without values. `.dev.vars`, `.env*`, `.wrangler`, D1 exports/backups, and `.cloudflare-recovery` are ignored. Access, auth, email, Turnstile, and lifecycle settings never use a `VITE_` prefix.
 
-The production configuration validator intentionally fails until the real D1 UUID is present:
+The production configuration validator intentionally fails until the real D1 UUID is present. It also requires exactly the reviewed `7,37 * * * *` Cron:
 
 ```powershell
 npm run config:production:check
 ```
 
-It also rejects a production or top-level `LOCAL_OPERATOR_PREVIEW`, committed Access values, missing logs, a non-`workers.dev` production target, or any all-zero production D1 UUID.
+It also rejects every local bypass in production, committed server-only auth/Access/email/lifecycle values, missing logs/Cron, a non-`workers.dev` production target, or any all-zero production D1 UUID.
 
 ## Launch sequence
 
@@ -104,7 +106,7 @@ Record the commit SHA locally. A GitHub push is optional and requires separate a
 
 ### 5. Apply and verify remote migrations
 
-Re-run `db:verify`, `scale:check`, and `check`, then apply only the source-controlled `0001` through `0009` history:
+Re-run `db:verify`, `scale:check`, and `check`, capture a D1 Time Travel bookmark, then apply only the source-controlled `0001` through `0012` history:
 
 ```powershell
 npm run db:migrate:production
@@ -114,12 +116,14 @@ npm run db:integrity:production
 
 Expected non-sensitive integrity evidence:
 
-- migration list has no pending migrations and includes `0001` through `0009` in applied state;
+- migration list has no pending migrations and includes `0001` through `0012` in applied state;
 - 139 total content records;
 - 343 Field Provenance rows;
 - seven passing `migration_0007_assertions` rows;
 - seven passing `migration_0008_assertions` rows, one unclaimed Operator singleton, no open tenure, and no pending transfer before bootstrap;
-- seven passing `migration_0009_assertions` rows and no proposal-private columns in public tables/views;
+- seven passing rows in each of `migration_0007_assertions` through `migration_0012_assertions`, with no proposal-private, auth, lifecycle, or fetched-body columns in public tables;
+- ordinary auth-user/profile/lifecycle counts agree, no Birth Year column exists, no ordinary Account is seeded by migration, and no unconfirmed warning has a deletion deadline;
+- seven maintenance jobs exist, including the bounded `ordinary-account-lifecycle` job;
 - public Outposts are lifecycle-eligible and coverage includes every U.S. jurisdiction row; and
 - `PRAGMA foreign_key_check` returns no rows.
 
@@ -140,9 +144,13 @@ The parent and wildcard destinations are both required because `/*` does not cov
 
 Configure the path application before enabling public traffic. If Cloudflare will not accept selective path destinations for the assigned `workers.dev` hostname, stop. Do not weaken the gate, purchase a domain, or expose the Operator console.
 
-### 7. Configure or deliberately leave public intake in fallback
+### 7. Configure public intake and ordinary Account lifecycle fail-closed
 
 Create a Turnstile Free widget for the exact production hostname. Enter `TURNSTILE_SECRET_KEY` and `INTAKE_SIGNING_SECRET` only through interactive Worker secret prompts. Configure the public site key and exact `TURNSTILE_EXPECTED_HOSTNAMES` value without putting any secret in `VITE_*` or source control. Partial/mismatched configuration must leave online intake disabled; verify that the email/copy fallback remains available. Follow [us-directory-operations.md](us-directory-operations.md) for exact behavior and the production staging boundary.
+
+Before enabling ordinary signup, configure an independent `AUTH_SECRET`, exact HTTPS `AUTH_CANONICAL_ORIGIN`, `AUTH_EMAIL_PROVIDER=resend`, verified `AUTH_EMAIL_FROM`, `RESEND_API_KEY`, the ordinary Turnstile site/secret/hostname values, and `ORDINARY_ACCOUNT_LIFECYCLE_ENABLED=true` as server-only Worker settings. Do not put them in `VITE_*`, Wrangler source variables, command arguments, logs, or QA evidence. The runtime intentionally leaves signup disabled unless the complete set is present.
+
+Deploy migration 0012 and the lifecycle Worker with `ordinary-account-lifecycle` paused first. Inspect the due-warning dry-run count without sending, confirm private alerts and Cron observation, then enable warning delivery only for a designated non-personal test Account. Confirm provider acceptance, the normal `/account` link, one durable attempt per term, and the delivery-based deadline. Permit destructive deletion only after a separate review of that test Account, an exact D1 bookmark, and two healthy Cron outcomes. D1 Time Travel is disaster recovery for the service, never end-user Account restoration.
 
 Keep the Worker-side JWT verification. After the first guarded deployment exists, enter the exact issuer URL and audience tag through interactive prompts:
 
@@ -179,7 +187,7 @@ Run safe production reads only:
 npm run smoke:production -- https://your-worker.workers.dev
 ```
 
-The command refuses HTTP and credential-bearing URLs. It verifies the public SPA routes, manifest/icons/service worker/hashed assets, bounded public APIs, detail/search/pagination, cache and security headers, plain failures, all three logged-out Operator path shapes, and the D1-backed health endpoint. It never signs into Access or performs a write.
+The command refuses HTTP and credential-bearing URLs. It verifies the public SPA routes, private Account shell/no-store policy, manifest/icons/service worker/hashed assets, bounded public APIs, detail/search/pagination, cache and security headers, plain failures, all three logged-out Operator path shapes, and the D1-backed 0012 health endpoint. It never signs into Access, sends email, or performs a write.
 
 In a logged-out/incognito browser, confirm public routes need no account and all Operator destinations are gated. In the one allowed Operator session:
 

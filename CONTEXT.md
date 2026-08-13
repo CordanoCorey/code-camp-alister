@@ -25,8 +25,32 @@ One person's period of control over the Operator Account. Immutable audit histor
 _Avoid_: Shared operator history
 
 **Account**:
-An authenticated adult identity that may be granted permission to propose or publish changes in a future account-enabled release. The initial public release has no ordinary Accounts; only the sole Operator Account is securely provisioned to the project founder, and an Account never by itself establishes an official Royal Rangers role.
+An authenticated ordinary adult identity for private personalization in the Account-Enabled Beta. An Account never by itself establishes membership, a verified Royal Rangers role, editing permission, or Operator authority.
 _Avoid_: Ranger record, membership record
+
+**Ordinary Access Term**:
+The one-calendar-year period during which an email-verified Account may use ordinary private capabilities. It begins at activation and can be extended only by an explicit timely Renewal; it is unrelated to Operator Tenure and public browsing.
+_Avoid_: Session lifetime, membership term, Operator renewal
+
+**Renewal Notice**:
+The private in-app and email warning for the current Ordinary Access Term, opening one calendar month before access is due. Confirmed provider acceptance of its email starts the separate Deletion Deadline, while a failed delivery starts no deletion clock.
+_Avoid_: General notification, delivery guarantee, public banner
+
+**Renewal**:
+The signed-in Account holder's explicit pre-expiry choice to add one calendar year to the existing access due instant. A Renewal does not reverify age, membership, Claimed Position, Current Outpost, or any Permission Grant.
+_Avoid_: Page activity, automatic extension, Operator renewal
+
+**Expired Account**:
+An Account whose Ordinary Access Term has reached its exact due instant without timely Renewal. Its sessions and ordinary private capabilities are blocked, it cannot renew late, and it proceeds toward irreversible deletion while public browsing remains available.
+_Avoid_: Signed-out Account, restorable suspension, expired Operator Account
+
+**Deletion Deadline**:
+The exact instant six calendar months after confirmed provider acceptance of the Renewal Notice. Bounded maintenance permanently deletes the still-unrenewed Expired Account at or after this instant; no deadline exists before confirmed acceptance.
+_Avoid_: Six months after expiration, warning attempt time, user-recovery window
+
+**Account-Enabled Beta**:
+The local beta following the Initial Public Release that adds ordinary adult identity, separate USA and International onboarding, and a private non-authoritative profile while leaving membership, permissions, workspaces, lifecycle deletion, and youth Accounts for later slices.
+_Avoid_: Membership platform, production launch
 
 **Initial Public Release**:
 The public, read-only Ranger Outpost Hub containing only verified original information, directory and event facts entered by the Operator, and clearly identified external links. It excludes ordinary Accounts, member-only features, external editing, donations, uploads, and permission-gated reproduced material.
@@ -45,7 +69,7 @@ The registration confirmation that an Account applicant is at least 18 and under
 _Avoid_: Guilt trip, verified birth date
 
 **Adult Eligibility Record**:
-The confirmation result, confirmation date, and accepted attestation version retained after the Birth Year is destroyed following the first successful sign-in.
+The confirmed result, confirmation time, and accepted attestation version retained when an email-verified ordinary Account is activated. The Birth Year is destroyed immediately after evaluation and is never part of this record.
 _Avoid_: Retained birth year, birth date
 
 **Privileged Access Event**:
@@ -61,7 +85,7 @@ A secret or sign-in mechanism used only to access the Independent Service. It is
 _Avoid_: Email password, mailbox password
 
 **Claimed Position**:
-The Royal Rangers relationship an Account holder selects: Parent/Guardian, Adult Leader, Outpost Coordinator, Pastor, Section/Division/Area Leader, District Leader, Regional Leader, National Leader, or FCF Leader. A future legally reviewed youth-account system may add Ranger/Boy; every selection personalizes the experience but grants no editing authority by itself.
+The adult Royal Rangers relationship an Account holder selects: Parent/Guardian, Adult Leader, Outpost Coordinator, Pastor, Section/Division/Area Leader, District Leader, Regional Leader, National Leader, FCF Leader, or a bounded private Other label. Every selection personalizes the experience but grants no membership, verification, or editing authority by itself; Ranger/Boy and Service Operator are not ordinary-account choices.
 _Avoid_: Permission, verified office
 
 **Permission Grant**:
@@ -81,8 +105,12 @@ An Account holder whose relationship to a particular Outpost has been privately 
 _Avoid_: Public member, directory member
 
 **Current Outpost**:
-The single Outpost an Account holder presently identifies with, or No Current Outpost. For the Operator Account it is optional context that establishes neither membership nor authority; future ordinary-account membership is verified separately.
+The single verified public Outpost Listing an Account holder presently identifies with, an unmatched private Outpost Claim, or No Current Outpost. For ordinary and Operator Accounts it is optional context that establishes neither membership nor authority; membership is verified separately.
 _Avoid_: Permanent outpost, multiple home outposts
+
+**Private Outpost Claim**:
+An Account holder's non-authoritative association with an unlisted or unmatched outpost, scoped by a USA jurisdiction or International country and optional local subdivision so that a bare outpost number is never globally identifying. It is visible only to the holder and never becomes a Published Fact or membership proof.
+_Avoid_: Outpost Listing, verified membership, global outpost number
 
 **Onboarding Path**:
 The Account-registration route chosen at the start: USA or International. Each path requests geography and organizational information appropriate to that context rather than forcing one location model on every Account.
@@ -223,7 +251,7 @@ An Account holder's private bookmark to an authorized advancement page, Event, H
 _Avoid_: Copied resource
 
 **Deleted Account**:
-An Account whose personal data, credentials, memberships, permissions, preferences, private calendars, bookmarks, and Meeting Plans have been destroyed after the retention period. It cannot be restored; the person must create and verify a new Account, while required editorial history identifies the former actor only as Deleted Account.
+The absence left after an ordinary Account's personal data, credentials, sessions, eligibility, profile, claims, and private content have been permanently destroyed at its Deletion Deadline. It is not a recoverable user or tombstone; a returning person completes a new eligibility, verification, and onboarding flow, while a real durable editorial reference may retain only the literal anonymous attribution `Deleted Account`.
 _Avoid_: Suspended account, restorable account
 
 ## Geography and affiliations
@@ -291,8 +319,24 @@ An Outpost-specific addition or correction that affects only its private Outpost
 _Avoid_: Public event correction
 
 **Automated Update Draft**:
-A proposed data change created by monitoring an approved source. It preserves provenance and may publish automatically only when both the source and transformation have been approved; ambiguous or disputed changes require an authorized editor.
+A private proposed data change or review candidate created from an Approved Source Monitor. It preserves the triggering Source Observation and affected Field Provenance, and in the Initial Public Release it can never publish without a separate Operator review and publication action.
 _Avoid_: Unsourced scrape, autonomous editorial decision
+
+**Maintenance Run**:
+A bounded execution of versioned routine rules under the Independent Service's system identity. It records sanitized outcomes without borrowing an Operator Tenure or transferring the Service Operator's accountability.
+_Avoid_: Operator session, autonomous administrator
+
+**Approved Source Monitor**:
+An exact Source Document and canonical hostname that the active Operator has explicitly approved for a low-rate, bounded technical check. Approval is never inherited from a Directory Submission, staged candidate, or Field Provenance.
+_Avoid_: Crawler target, submitted URL
+
+**Source Observation**:
+Bounded technical evidence about an Approved Source Monitor's availability, validators, redirect outcome, or byte fingerprint. It does not verify a Published Fact, advance Field Provenance, or prove an Outpost or Event changed.
+_Avoid_: Verification Cycle, factual reverification
+
+**Automation Alert**:
+A private, coalesced notice that routine maintenance is delayed, failing, circuit-open, or outside an invariant. It contains sanitized operational evidence and requires an active Operator Tenure to acknowledge or resolve.
+_Avoid_: Public status incident, factual correction
 
 **Freshness Queue**:
 The Operator's private worklist of facts approaching verification expiry, broken source links, conflicting Event facts, completed Events, and geographic coverage gaps. Automation adds drafts and reminders, while the Operator controls publication in the Initial Public Release.
