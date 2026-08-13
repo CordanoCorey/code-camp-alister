@@ -1,0 +1,146 @@
+{
+  "version": 1,
+  "batchKey": "reference-calendar-2026-expansion",
+  "candidates": [
+    {
+      "candidateId": "event-jbei-pa-2026",
+      "slug": "johnnie-barnes-excellence-initiative-pennsylvania-2026",
+      "title": "Johnnie Barnes Excellence Initiative · Pennsylvania",
+      "summary": "A Royal Rangers USA leadership-development seminar for people serving or preparing to serve beyond the local outpost.",
+      "checkedAt": "2026-08-13T00:00:00.000Z",
+      "details": {
+        "occurrenceId": "event-jbei-pa-2026",
+        "series": { "id": "series-jbei", "name": "Johnnie Barnes Excellence Initiative" },
+        "category": "training",
+        "host": "Royal Rangers USA",
+        "scope": "national",
+        "relatedOrganizations": [{ "id": "rr-usa", "name": "Royal Rangers USA" }],
+        "startDate": "2026-11-13",
+        "endDate": "2026-11-14",
+        "startTime": null,
+        "endTime": null,
+        "timeZone": "America/New_York",
+        "allDay": true,
+        "locationStatus": "announced",
+        "location": "Red Lion Hotel, Harrisburg, Pennsylvania",
+        "audience": ["District, regional, and national service leaders"],
+        "registrationStatus": "open",
+        "registrationUrl": "https://brushfire.com/agusa/rangers/622612",
+        "registrationDeadline": "2026-10-12",
+        "deadlineExceptionNote": null,
+        "costStatus": "not-verified",
+        "costNote": null,
+        "lifecycleStatus": "accepting-registration",
+        "officialUrl": "https://royalrangers.com/training/events"
+      },
+      "sources": [
+        { "id": "source-jbei-pa-organizer", "fieldName": "title", "label": "Royal Rangers USA live training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-jbei-pa-summary", "fieldName": "summary", "label": "Royal Rangers USA JBEI information", "url": "https://royalrangers.com/-/media/RoyalRangers/Schedule-Component/PDFs/JBEI/2026/JBEI-NE-Region-Event-Information-and-Schedule.pdf", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-jbei-pa-occurrence", "fieldName": "occurrenceId", "label": "Hub occurrence identity derived from organizer occurrence", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-jbei-pa-series", "fieldName": "series", "label": "Royal Rangers USA recurring JBEI schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-jbei-pa-category", "fieldName": "category", "label": "Royal Rangers USA national training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-jbei-pa-host", "fieldName": "host", "label": "Royal Rangers USA national training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-jbei-pa-scope", "fieldName": "scope", "label": "Royal Rangers USA national training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-jbei-pa-org", "fieldName": "relatedOrganizations", "label": "Royal Rangers USA national training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-jbei-pa-start", "fieldName": "startDate", "label": "Royal Rangers USA live training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-jbei-pa-end", "fieldName": "endDate", "label": "Royal Rangers USA live training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-jbei-pa-zone", "fieldName": "timeZone", "label": "IANA time zone derived from verified organizer venue", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-jbei-pa-all-day", "fieldName": "allDay", "label": "No occurrence times asserted from organizer sources", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-jbei-pa-location-status", "fieldName": "locationStatus", "label": "Royal Rangers USA live training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-jbei-pa-location", "fieldName": "location", "label": "Royal Rangers USA live training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-jbei-pa-audience", "fieldName": "audience", "label": "Royal Rangers USA JBEI information", "url": "https://royalrangers.com/-/media/RoyalRangers/Schedule-Component/PDFs/JBEI/2026/JBEI-NE-Region-Event-Information-and-Schedule.pdf", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-jbei-pa-registration-status", "fieldName": "registrationStatus", "label": "Royal Rangers USA live training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-jbei-pa-registration-url", "fieldName": "registrationUrl", "label": "Registration link selected by Royal Rangers USA", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-jbei-pa-deadline", "fieldName": "registrationDeadline", "label": "Royal Rangers USA minimum-registration deadline", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-jbei-pa-cost", "fieldName": "costStatus", "label": "Cost not verified from reviewed organizer sources", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-jbei-pa-lifecycle", "fieldName": "lifecycleStatus", "label": "Royal Rangers USA live training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-jbei-pa-official", "fieldName": "officialUrl", "label": "Royal Rangers USA live training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" }
+        ,{ "id": "source-jbei-pa-region-location-assertion", "fieldName": "conflict.location", "label": "Northeast Region event page", "url": "https://northeastregion.org/events/", "verifiedAt": "2026-08-13T00:00:00.000Z" }
+      ],
+      "conflicts": [
+        {
+          "fieldName": "location",
+          "reason": "Organizer-controlled pages disagree about the current venue; retain all assertions and omit a silent choice during review.",
+          "assertions": [
+            { "sourceId": "source-jbei-pa-location", "sourceLabel": "Royal Rangers USA live training schedule", "assertedValue": "Red Lion Hotel, Harrisburg, Pennsylvania" },
+            { "sourceId": "source-jbei-pa-region-location-assertion", "sourceLabel": "Northeast Region event page and linked older organizer PDF", "assertedValue": "Camp Hill / Christian Life Assembly" }
+          ]
+        },
+        {
+          "fieldName": "endTime",
+          "reason": "The organizer PDF gives two different Saturday dismissal times.",
+          "assertions": [
+            { "sourceId": "source-jbei-pa-summary", "sourceLabel": "JBEI overview schedule", "assertedValue": "5:00 PM dismissal" },
+            { "sourceId": "source-jbei-pa-summary", "sourceLabel": "JBEI detailed schedule", "assertedValue": "4:15 PM dismissal" }
+          ]
+        }
+      ]
+    },
+    {
+      "candidateId": "event-nrmc-tn-2026",
+      "slug": "national-rangers-ministry-conference-tennessee-2026",
+      "title": "National Rangers Ministry Conference · Tennessee",
+      "summary": "A Royal Rangers USA adult-leader training conference at Camp BaYoCa in Tennessee.",
+      "checkedAt": "2026-08-13T00:00:00.000Z",
+      "details": {
+        "occurrenceId": "event-nrmc-tn-2026",
+        "series": { "id": "series-nrmc", "name": "National Rangers Ministry Conference" },
+        "category": "training",
+        "host": "Royal Rangers USA",
+        "scope": "national",
+        "relatedOrganizations": [{ "id": "rr-usa", "name": "Royal Rangers USA" }],
+        "startDate": "2026-10-23",
+        "endDate": "2026-10-25",
+        "startTime": null,
+        "endTime": null,
+        "timeZone": "America/New_York",
+        "allDay": true,
+        "locationStatus": "announced",
+        "location": "Camp BaYoCa, 2320 Happy Hollow Rd, Sevierville, Tennessee 37862",
+        "audience": ["Adult leaders"],
+        "registrationStatus": "open",
+        "registrationUrl": "https://brushfire.com/agusa/rangers/621146",
+        "registrationDeadline": "2026-08-23",
+        "deadlineExceptionNote": null,
+        "costStatus": "not-verified",
+        "costNote": null,
+        "lifecycleStatus": "accepting-registration",
+        "officialUrl": "https://royalrangers.com/training/events"
+      },
+      "sources": [
+        { "id": "source-nrmc-tn-organizer", "fieldName": "title", "label": "Royal Rangers USA live training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-nrmc-tn-summary", "fieldName": "summary", "label": "Royal Rangers USA NRMC information", "url": "https://royalrangers.com/-/media/RoyalRangers/Schedule-Component/PDFs/NRMC/2026/NRMC-TN-Event-Information.pdf", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-nrmc-tn-occurrence", "fieldName": "occurrenceId", "label": "Hub occurrence identity derived from organizer occurrence", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-nrmc-tn-series", "fieldName": "series", "label": "Royal Rangers USA recurring NRMC schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-nrmc-tn-category", "fieldName": "category", "label": "Royal Rangers USA national training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-nrmc-tn-host", "fieldName": "host", "label": "Royal Rangers USA national training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-nrmc-tn-scope", "fieldName": "scope", "label": "Royal Rangers USA national training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-nrmc-tn-org", "fieldName": "relatedOrganizations", "label": "Royal Rangers USA national training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-nrmc-tn-start", "fieldName": "startDate", "label": "Royal Rangers USA live training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-nrmc-tn-end", "fieldName": "endDate", "label": "Royal Rangers USA live training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-nrmc-tn-zone", "fieldName": "timeZone", "label": "IANA time zone derived from verified organizer venue", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-nrmc-tn-all-day", "fieldName": "allDay", "label": "No occurrence times asserted from organizer sources", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-nrmc-tn-location-status", "fieldName": "locationStatus", "label": "Royal Rangers USA live training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-nrmc-tn-location", "fieldName": "location", "label": "Royal Rangers USA NRMC information", "url": "https://royalrangers.com/-/media/RoyalRangers/Schedule-Component/PDFs/NRMC/2026/NRMC-TN-Event-Information.pdf", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-nrmc-tn-audience", "fieldName": "audience", "label": "Royal Rangers USA NRMC information", "url": "https://royalrangers.com/-/media/RoyalRangers/Schedule-Component/PDFs/NRMC/2026/NRMC-TN-Event-Information.pdf", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-nrmc-tn-registration-status", "fieldName": "registrationStatus", "label": "Royal Rangers USA live training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-nrmc-tn-registration-url", "fieldName": "registrationUrl", "label": "Registration link selected by Royal Rangers USA", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-nrmc-tn-deadline", "fieldName": "registrationDeadline", "label": "Royal Rangers USA minimum-registration deadline", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-nrmc-tn-cost", "fieldName": "costStatus", "label": "Cost not verified from reviewed organizer sources", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-nrmc-tn-lifecycle", "fieldName": "lifecycleStatus", "label": "Royal Rangers USA live training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" },
+        { "id": "source-nrmc-tn-official", "fieldName": "officialUrl", "label": "Royal Rangers USA live training schedule", "url": "https://royalrangers.com/training/events", "verifiedAt": "2026-08-13T00:00:00.000Z" }
+        ,{ "id": "source-nrmc-tn-district-end-assertion", "fieldName": "conflict.endDate", "label": "Kentucky Royal Rangers district calendar", "url": "https://www.kyroyalrangers.com/events-calendar/", "verifiedAt": "2026-08-13T00:00:00.000Z" }
+      ],
+      "conflicts": [
+        {
+          "fieldName": "endDate",
+          "reason": "The national organizer and Kentucky district calendar disagree about the occurrence end date.",
+          "assertions": [
+            { "sourceId": "source-nrmc-tn-end", "sourceLabel": "Royal Rangers USA live training schedule", "assertedValue": "2026-10-25" },
+            { "sourceId": "source-nrmc-tn-district-end-assertion", "sourceLabel": "Kentucky Royal Rangers district calendar", "assertedValue": "2026-10-26" }
+          ]
+        }
+      ]
+    }
+  ]
+}
