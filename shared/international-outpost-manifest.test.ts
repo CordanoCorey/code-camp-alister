@@ -13,5 +13,10 @@ describe('international manifest', () => {
     [{ ...valid, candidates: [{ ...valid.candidates[0], fieldSources: {} }] }, 'field-level provenance'],
     [{ ...valid, candidates: Array(5).fill(valid.candidates[0]).map((candidate, index) => ({ ...candidate, candidateKey: `intl-my-example-${index}` })) }, 'one to four'],
     [{ ...valid, candidates: [{ ...valid.candidates[0], activeFcf: true }] }, 'without verified availability'],
+    [{ ...valid, reviewedAt: '2026-02-31' }, 'valid ISO date'],
+    [{ ...valid, coverage: { ...valid.coverage, countryCode: 'ZZ' } }, 'unsupported'],
+    [{ ...valid, coverage: { ...valid.coverage, sources: [{ ...source, url: 'http://example.org' }] } }, 'HTTPS URL'],
+    [{ ...valid, candidates: [valid.candidates[0], valid.candidates[0]] }, 'unique in a batch'],
+    [{ ...valid, candidates: [{ ...valid.candidates[0], affiliations: [{ label: 'District', name: 'Example', scope: 'civil' }], fieldSources: { ...valid.candidates[0].fieldSources, affiliations: [source] } }] }, 'affiliation scope is unsupported'],
   ])('rejects invalid manifests', (value, message) => expect(() => parseInternationalManifest(value)).toThrow(message))
 })

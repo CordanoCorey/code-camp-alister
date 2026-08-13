@@ -4,7 +4,7 @@ Date: 2026-08-13
 
 ## Automated evidence
 
-- `npm run db:verify`: populated upgrade from 0014 through 0016 and fresh install through 0016; four migration assertions and zero foreign-key failures.
+- `npm run db:verify`: populated upgrade from 0014 through 0017 and fresh install through 0017; four migration assertions and zero foreign-key failures.
 - `npm run events:validate`: two Slice 18A review candidates validated without publication.
 - Repository/interface tests cover atomic idempotent add, bounded input, material/non-material classification, unchanged local entry after a public date change, explicit refresh, and stale optimistic writes.
 - Existing Slice 17 HTTP tests continue to cover anonymous, ordinary member, exact-Outpost editor, revocation-on-next-request, no-store headers, forged fields, and stale calendar versions.

@@ -25,9 +25,10 @@ export function createMigratedD1() {
     '0011_ordinary_adult_accounts.sql',
     '0012_ordinary_account_lifecycle.sql',
     '0013_international_directory_foundation.sql',
-    '0014_membership_and_permissions.sql',
-    '0015_outpost_workspace_calendar.sql',
-    '0016_reference_event_outpost_plans.sql',
+    '0014_international_candidate_review.sql',
+    '0015_membership_and_permissions.sql',
+    '0016_outpost_workspace_calendar.sql',
+    '0017_reference_event_outpost_plans.sql',
   ]) {
     sqlite.exec(readFileSync(new URL(`../migrations/${name}`, import.meta.url), 'utf8'))
   }

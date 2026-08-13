@@ -69,8 +69,8 @@ WHEN NOT EXISTS (SELECT 1 FROM event_occurrences event JOIN content_records cont
   WHERE event.content_id=NEW.reference_content_id AND event.occurrence_id=NEW.occurrence_id AND content.kind='event' AND content.status='published')
 BEGIN SELECT RAISE(ABORT,'reference occurrence unavailable'); END;
 
-CREATE TABLE migration_0016_assertions (name TEXT PRIMARY KEY, passed INTEGER NOT NULL CHECK (passed=1));
-INSERT INTO migration_0016_assertions(name,passed) VALUES
+CREATE TABLE migration_0017_assertions (name TEXT PRIMARY KEY, passed INTEGER NOT NULL CHECK (passed=1));
+INSERT INTO migration_0017_assertions(name,passed) VALUES
  ('reference-plan-tables',CASE WHEN (SELECT COUNT(*) FROM sqlite_schema WHERE type='table' AND name IN ('reference_event_plans','reference_event_plan_events'))=2 THEN 1 ELSE 0 END),
  ('reference-plan-review-index',CASE WHEN EXISTS(SELECT 1 FROM sqlite_schema WHERE type='index' AND name='reference_event_plans_review_queue') THEN 1 ELSE 0 END),
  ('reference-plan-event-index',CASE WHEN EXISTS(SELECT 1 FROM sqlite_schema WHERE type='index' AND name='reference_event_plans_event_change') THEN 1 ELSE 0 END),

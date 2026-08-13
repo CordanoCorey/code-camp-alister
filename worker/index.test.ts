@@ -469,7 +469,7 @@ describe('public API privacy contract at the Worker request seam', () => {
     expect(publicRecords[0].id).toBe('published-event')
     expect((publicRecords[0].details as Record<string, unknown>).location).toBeNull()
     expect(serialized).not.toMatch(/draft-page|archived-page|person@example|operator@example|private source|private place|private resolution|private note|private audit|private broken|private coverage|auditActor|submitter|brokenSource/i)
-    expect(database.queries.map((query) => query.sql).join('\n')).not.toMatch(/audit_events|broken_source_observations|coverage_gaps/i)
+    expect(database.queries.map((query) => query.sql).join('\n')).not.toMatch(/audit_events|broken_source_observations|coverage_gaps|staged_international|international_population_batches/i)
     expect(response.headers.get('cache-control')).toMatch(/^public,/)
   })
 
@@ -506,7 +506,7 @@ describe('public API privacy contract at the Worker request seam', () => {
 
 describe('production readiness at the Worker request seam', () => {
   it.each(['GET', 'HEAD'])('%s proves the current schema is available without leaking configuration', async (method) => {
-    const database = createDb({ latestMigration: '0013_international_directory_foundation.sql' })
+    const database = createDb({ latestMigration: '0017_reference_event_outpost_plans.sql' })
     const response = await request('https://hub.example/api/health', { method }, createEnv(database.db))
 
     expect(response.status).toBe(200)
@@ -514,9 +514,9 @@ describe('production readiness at the Worker request seam', () => {
     expect(response.headers.get('x-content-type-options')).toBe('nosniff')
     expect(database.queries).toHaveLength(1)
     expect(database.queries[0].sql).toContain('FROM d1_migrations')
-    expect(database.queries[0].bindings).toEqual(['0016_reference_event_outpost_plans.sql'])
+    expect(database.queries[0].bindings).toEqual(['0017_reference_event_outpost_plans.sql'])
     if (method === 'HEAD') expect(await response.text()).toBe('')
-    else expect(await response.json()).toEqual({ status: 'ok', schema: '0015' })
+    else expect(await response.json()).toEqual({ status: 'ok', schema: '0017' })
   })
 
   it.each([

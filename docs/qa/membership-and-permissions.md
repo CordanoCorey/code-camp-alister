@@ -2,7 +2,7 @@
 
 ## Automated evidence
 
-- `npm run db:verify`: populated upgrade from `0013` and fresh install through `0014` passed all four Slice 16 migration assertions with zero foreign-key failures.
+- `npm run db:verify`: populated upgrade from `0014` and fresh install through `0015` passed all four Slice 16 migration assertions with zero foreign-key failures.
 - `shared/membership-permissions.test.ts`: exact-scope grants do not inherit across scope types or IDs; expired grants, self-approval, self-grant, privilege amplification, and cross-scope delegation fail closed.
 - `worker/membership-permissions-db.test.ts`: the partial unique index rejects a competing second active Pastor; Account deletion cascades Membership and Permission Grants; public schemas contain none of the prohibited private fields.
 - `worker/account-profile-repository.test.ts`: selecting a Claimed Position creates zero Permission Grants. A Current Outpost change ends the old verified Membership, revokes membership-derived grants, and withdraws pending requests in the profile-update transaction.

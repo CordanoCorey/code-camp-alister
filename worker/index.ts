@@ -60,6 +60,12 @@ import {
   stageOutpostManifest,
 } from './outpost-population'
 import {
+  applyInternationalCandidate,
+  getInternationalPopulationReport,
+  listInternationalCandidates,
+  stageInternationalManifest,
+} from './international-population'
+import {
   getDirectorySubmission,
   listDirectorySubmissions,
   convertDirectorySubmissionToDraft,
@@ -165,7 +171,7 @@ type CoverageGapRow = {
 }
 
 const MAX_REQUEST_BYTES = 65_536
-const CURRENT_SCHEMA_MIGRATION = '0016_reference_event_outpost_plans.sql'
+const CURRENT_SCHEMA_MIGRATION = '0017_reference_event_outpost_plans.sql'
 const REAUTHENTICATION_COOKIE = 'ranger_operator_reauth'
 
 class RequestInputError extends Error {
@@ -741,7 +747,7 @@ async function handleApi(request: Request, env: Env, requestId: string): Promise
           },
         })
       }
-      return json({ status: 'ok', schema: '0015' })
+      return json({ status: 'ok', schema: '0017' })
     } catch {
       if (request.method === 'HEAD') {
         return new Response(null, {
@@ -1068,6 +1074,29 @@ async function handleApi(request: Request, env: Env, requestId: string): Promise
     } catch (stageError) {
       return respondToActionError(stageError, 'The reviewed population batch could not be staged.')
     }
+  }
+
+  if (request.method === 'GET' && path === '/api/operator/international-population/report') {
+    return json(await getInternationalPopulationReport(env.DB))
+  }
+  if (request.method === 'GET' && path === '/api/operator/international-population/candidates') {
+    try { return json(await listInternationalCandidates(env.DB, url.searchParams)) }
+    catch (listError) { return respondToActionError(listError, 'International candidates could not be loaded.') }
+  }
+  if (request.method === 'POST' && path === '/api/operator/international-population/stage') {
+    try {
+      const body = await readJsonBody<{ manifest?: unknown }>(request)
+      const result = await stageInternationalManifest(env.DB, body.manifest, actor, now.toISOString())
+      return json(result, { status: result.idempotent ? 200 : 201 })
+    } catch (stageError) { return respondToActionError(stageError, 'The international batch could not be staged.') }
+  }
+  const internationalApplyMatch = path.match(/^\/api\/operator\/international-population\/candidates\/([^/]+)\/apply$/)
+  if (internationalApplyMatch && request.method === 'POST') {
+    try {
+      const body = await readJsonBody<{ duplicateDecision?: 'no-match' | 'confirmed-correction' | null; targetOutpostId?: string | null; expectedVersion?: number | null; reason?: string }>(request)
+      const id = await applyInternationalCandidate(env.DB, { candidateId: decodeURIComponent(internationalApplyMatch[1]), duplicateDecision: body.duplicateDecision ?? null, targetOutpostId: body.targetOutpostId ?? null, expectedVersion: body.expectedVersion ?? null, reason: body.reason ?? '', actor, now: now.toISOString() })
+      return json({ id }, { status: 201 })
+    } catch (applyError) { return respondToActionError(applyError, 'The international candidate could not be converted.') }
   }
 
   const populationApplyMatch = path.match(/^\/api\/operator\/population\/candidates\/([^/]+)\/apply$/)

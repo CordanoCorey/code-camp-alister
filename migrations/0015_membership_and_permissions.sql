@@ -118,8 +118,8 @@ CREATE TABLE conflict_assignments (
 CREATE UNIQUE INDEX conflict_assignments_active ON conflict_assignments(conflict_id) WHERE ended_at IS NULL;
 CREATE INDEX conflict_assignments_resolver_queue ON conflict_assignments(scope_type, scope_id, review_state, created_at, id);
 
-CREATE TABLE migration_0014_assertions (name TEXT PRIMARY KEY, passed INTEGER NOT NULL CHECK (passed = 1));
-INSERT INTO migration_0014_assertions(name, passed) VALUES
+CREATE TABLE migration_0015_assertions (name TEXT PRIMARY KEY, passed INTEGER NOT NULL CHECK (passed = 1));
+INSERT INTO migration_0015_assertions(name, passed) VALUES
  ('private-authority-tables', CASE WHEN (SELECT COUNT(*) FROM sqlite_schema WHERE type='table' AND name IN ('membership_requests','outpost_memberships','position_verifications','pastor_appointments','permission_grants','permission_events','conflict_assignments')) = 7 THEN 1 ELSE 0 END),
  ('one-active-pastor-index', CASE WHEN EXISTS (SELECT 1 FROM sqlite_schema WHERE type='index' AND name='pastor_appointments_one_active' AND sql LIKE '%WHERE state = ''active''%') THEN 1 ELSE 0 END),
  ('exact-scope-authorization-index', CASE WHEN EXISTS (SELECT 1 FROM sqlite_schema WHERE type='index' AND name='permission_grants_authorization') THEN 1 ELSE 0 END),

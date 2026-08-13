@@ -110,6 +110,14 @@ export function fetchStagedOutpostCandidates(filters = new URLSearchParams()) {
   }>(`/api/operator/population/candidates?${filters.toString()}`, undefined, 'Could not load staged Outpost candidates.')
 }
 
+export function fetchStagedInternationalCandidates(filters = new URLSearchParams()) {
+  return requestJson<{ items: import('../../shared/domain').StagedInternationalCandidate[]; truncated: boolean }>(
+    `/api/operator/international-population/candidates?${filters.toString()}`,
+    undefined,
+    'Could not load staged International candidates.',
+  )
+}
+
 export function fetchOperatorSession() {
   return requestJson<OperatorSession>('/api/operator/account/status', undefined, 'Could not load the Operator Account.')
 }

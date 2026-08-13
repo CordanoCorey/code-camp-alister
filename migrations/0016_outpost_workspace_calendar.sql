@@ -1,7 +1,7 @@
 -- Slice 17: one private workspace and group calendar per canonical Outpost.
 PRAGMA defer_foreign_keys = ON;
 
-CREATE TABLE permission_grants_0015 (
+CREATE TABLE permission_grants_0016 (
   id TEXT PRIMARY KEY,
   auth_user_id TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
   capability TEXT NOT NULL CHECK (capability IN ('view-outpost-private','review-outpost-membership','manage-outpost-permissions','edit-outpost-draft','verify-outpost-facts','publish-outpost-facts','edit-scope-conflicts','resolve-scope-conflicts','manage-outpost-calendar')),
@@ -18,9 +18,9 @@ CREATE TABLE permission_grants_0015 (
   CHECK (source_membership_id IS NULL OR scope_type = 'outpost'),
   CHECK (capability IN ('edit-scope-conflicts','resolve-scope-conflicts') OR scope_type = 'outpost')
 );
-INSERT INTO permission_grants_0015 SELECT * FROM permission_grants;
+INSERT INTO permission_grants_0016 SELECT * FROM permission_grants;
 DROP TABLE permission_grants;
-ALTER TABLE permission_grants_0015 RENAME TO permission_grants;
+ALTER TABLE permission_grants_0016 RENAME TO permission_grants;
 CREATE UNIQUE INDEX permission_grants_one_active ON permission_grants(auth_user_id, capability, scope_type, scope_id) WHERE state = 'active';
 CREATE INDEX permission_grants_authorization ON permission_grants(auth_user_id, scope_type, scope_id, capability, state, ends_at);
 CREATE INDEX permission_grants_membership_cascade ON permission_grants(source_membership_id, state);
@@ -75,8 +75,8 @@ CREATE INDEX calendar_entry_events_history ON calendar_entry_events(outpost_id, 
 CREATE TRIGGER calendar_entry_events_no_update BEFORE UPDATE ON calendar_entry_events BEGIN SELECT RAISE(ABORT, 'calendar entry events are immutable'); END;
 CREATE TRIGGER calendar_entry_events_no_delete BEFORE DELETE ON calendar_entry_events BEGIN SELECT RAISE(ABORT, 'calendar entry events are immutable'); END;
 
-CREATE TABLE migration_0015_assertions (name TEXT PRIMARY KEY, passed INTEGER NOT NULL CHECK (passed = 1));
-INSERT INTO migration_0015_assertions(name, passed) VALUES
+CREATE TABLE migration_0016_assertions (name TEXT PRIMARY KEY, passed INTEGER NOT NULL CHECK (passed = 1));
+INSERT INTO migration_0016_assertions(name, passed) VALUES
  ('workspace-calendar-tables', CASE WHEN (SELECT COUNT(*) FROM sqlite_schema WHERE type='table' AND name IN ('outpost_workspaces','outpost_calendar_entries','calendar_entry_events')) = 3 THEN 1 ELSE 0 END),
  ('calendar-range-index', CASE WHEN EXISTS (SELECT 1 FROM sqlite_schema WHERE type='index' AND name='outpost_calendar_entries_range') THEN 1 ELSE 0 END),
  ('calendar-capability', CASE WHEN (SELECT sql FROM sqlite_schema WHERE type='table' AND name='permission_grants') LIKE '%manage-outpost-calendar%' THEN 1 ELSE 0 END),

@@ -20,9 +20,10 @@ const migrationNames = [
   '0011_ordinary_adult_accounts.sql',
   '0012_ordinary_account_lifecycle.sql',
   '0013_international_directory_foundation.sql',
-  '0014_membership_and_permissions.sql',
-  '0015_outpost_workspace_calendar.sql',
-  '0016_reference_event_outpost_plans.sql',
+  '0014_international_candidate_review.sql',
+  '0015_membership_and_permissions.sql',
+  '0016_outpost_workspace_calendar.sql',
+  '0017_reference_event_outpost_plans.sql',
 ]
 const temporary = await mkdtemp(join(tmpdir(), 'ranger-outpost-migrations-'))
 const npx = process.platform === 'win32' ? 'npx.cmd' : 'npx'
@@ -59,9 +60,10 @@ function assertDatabase(path, scenario) {
     const failedAccountAssertions = db.prepare('SELECT name FROM migration_0011_assertions WHERE passed <> 1').all()
     const failedOrdinaryLifecycleAssertions = db.prepare('SELECT name FROM migration_0012_assertions WHERE passed <> 1').all()
     const failedInternationalAssertions = db.prepare('SELECT name FROM migration_0013_assertions WHERE passed <> 1').all()
-    const failedMembershipAssertions = db.prepare('SELECT name FROM migration_0014_assertions WHERE passed <> 1').all()
-    const failedWorkspaceAssertions = db.prepare('SELECT name FROM migration_0015_assertions WHERE passed <> 1').all()
-    const failedReferencePlanAssertions = db.prepare('SELECT name FROM migration_0016_assertions WHERE passed <> 1').all()
+    const failedInternationalReviewAssertions = db.prepare('SELECT name FROM migration_0014_assertions WHERE passed <> 1').all()
+    const failedMembershipAssertions = db.prepare('SELECT name FROM migration_0015_assertions WHERE passed <> 1').all()
+    const failedWorkspaceAssertions = db.prepare('SELECT name FROM migration_0016_assertions WHERE passed <> 1').all()
+    const failedReferencePlanAssertions = db.prepare('SELECT name FROM migration_0017_assertions WHERE passed <> 1').all()
     const foreignKeys = db.prepare('PRAGMA foreign_key_check').all()
     const duplicateSlugs = Number(db.prepare('SELECT COUNT(*) count FROM (SELECT slug FROM content_records GROUP BY slug HAVING COUNT(*) > 1)').get().count)
     const parity = db.prepare(`SELECT
@@ -129,7 +131,7 @@ function assertDatabase(path, scenario) {
         WHERE schema.name LIKE 'public_%' AND lower(field.name) IN
           ('email', 'auth_user_id', 'profile', 'claimed_position', 'eligibility', 'session', 'token')) public_schema_is_private`).get()
     const accountFailures = Object.entries(accountInvariant).filter(([, passed]) => passed !== 1).map(([name]) => name)
-    if (scenario === 'upgrade-from-0011') {
+    if (scenario === 'upgrade-from-0014') {
       const preservedMaintenance = db.prepare(`SELECT
         EXISTS (SELECT 1 FROM automation_alerts WHERE id = 'migration-upgrade-alert') alert,
         EXISTS (SELECT 1 FROM system_maintenance_events WHERE id = 'migration-upgrade-event') event,
@@ -138,8 +140,8 @@ function assertDatabase(path, scenario) {
       accountFailures.push(...Object.entries(preservedMaintenance)
         .filter(([, preserved]) => preserved !== 1).map(([name]) => `maintenance_${name}_not_preserved`))
     }
-    if (failedAssertions.length || failedLifecycleAssertions.length || failedDirectoryAssertions.length || failedMaintenanceAssertions.length || failedAccountAssertions.length || failedOrdinaryLifecycleAssertions.length || failedInternationalAssertions.length || failedMembershipAssertions.length || failedWorkspaceAssertions.length || failedReferencePlanAssertions.length || foreignKeys.length || duplicateSlugs || failures.length || operatorFailures.length || accountFailures.length) {
-      throw new Error(`${scenario} integrity failed: ${JSON.stringify({ failedAssertions, failedLifecycleAssertions, failedDirectoryAssertions, failedMaintenanceAssertions, failedAccountAssertions, failedOrdinaryLifecycleAssertions, failedInternationalAssertions, failedMembershipAssertions, failedWorkspaceAssertions, failedReferencePlanAssertions, foreignKeys, duplicateSlugs, failures, operatorFailures, accountFailures })}`)
+    if (failedAssertions.length || failedLifecycleAssertions.length || failedDirectoryAssertions.length || failedMaintenanceAssertions.length || failedAccountAssertions.length || failedOrdinaryLifecycleAssertions.length || failedInternationalAssertions.length || failedInternationalReviewAssertions.length || failedMembershipAssertions.length || failedWorkspaceAssertions.length || failedReferencePlanAssertions.length || foreignKeys.length || duplicateSlugs || failures.length || operatorFailures.length || accountFailures.length) {
+      throw new Error(`${scenario} integrity failed: ${JSON.stringify({ failedAssertions, failedLifecycleAssertions, failedDirectoryAssertions, failedMaintenanceAssertions, failedAccountAssertions, failedOrdinaryLifecycleAssertions, failedInternationalAssertions, failedInternationalReviewAssertions, failedMembershipAssertions, failedWorkspaceAssertions, failedReferencePlanAssertions, foreignKeys, duplicateSlugs, failures, operatorFailures, accountFailures })}`)
     }
     return {
       scenario,
@@ -152,9 +154,10 @@ function assertDatabase(path, scenario) {
       accountAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0011_assertions').get().count),
       ordinaryLifecycleAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0012_assertions').get().count),
       internationalAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0013_assertions').get().count),
-      membershipAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0014_assertions').get().count),
-      workspaceAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0015_assertions').get().count),
-      referencePlanAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0016_assertions').get().count),
+      internationalReviewAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0014_assertions').get().count),
+      membershipAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0015_assertions').get().count),
+      workspaceAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0016_assertions').get().count),
+      referencePlanAssertions: Number(db.prepare('SELECT COUNT(*) count FROM migration_0017_assertions').get().count),
     }
   } finally {
     db.close()
@@ -182,7 +185,7 @@ async function scenario(name, staged) {
     const stagedDatabase = stagedCandidates.find((path) => {
       const candidate = new DatabaseSync(path, { readOnly: true })
       try {
-        return Boolean(candidate.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'migration_0011_assertions'").get())
+        return Boolean(candidate.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'migration_0014_assertions'").get())
       } finally {
         candidate.close()
       }
@@ -223,7 +226,7 @@ async function scenario(name, staged) {
   const sqlite = candidates.find((path) => {
     const candidate = new DatabaseSync(path, { readOnly: true })
     try {
-      return Boolean(candidate.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'migration_0013_assertions'").get())
+      return Boolean(candidate.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'migration_0017_assertions'").get())
     } finally {
       candidate.close()
     }
@@ -235,7 +238,7 @@ async function scenario(name, staged) {
 try {
   const results = [
     await scenario('upgrade-from-0014', true),
-    await scenario('fresh-through-0016', false),
+    await scenario('fresh-through-0017', false),
   ]
   console.log(JSON.stringify({ isolated: true, results }, null, 2))
 } finally {
