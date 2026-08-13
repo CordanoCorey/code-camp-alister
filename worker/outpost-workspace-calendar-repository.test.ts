@@ -42,13 +42,23 @@ describe('private Outpost Workspace repository interface',()=>{
     expect(()=>migrated.sqlite.prepare(`UPDATE calendar_entry_events SET summary='changed'`).run()).toThrow('immutable')
   })
 
+  it('rolls back an entry update when its immutable audit event cannot be appended',async()=>{
+    await setWorkspaceTimezone(migrated.db,'editor',{timeZone:'America/Chicago',expectedVersion:null},now)
+    const created=await createCalendarEntry(migrated.db,'editor',entry(),now) as {id:string;version:number}
+    migrated.sqlite.exec(`CREATE TRIGGER reject_updated_event BEFORE INSERT ON calendar_entry_events
+      WHEN NEW.event_type='updated' BEGIN SELECT RAISE(ABORT,'audit unavailable'); END`)
+    await expect(updateCalendarEntry(migrated.db,'editor',created.id,{...entry('atomic-request-123'),title:'Must roll back'},created.version,'2026-08-13T12:01:00.000Z')).rejects.toThrow('audit unavailable')
+    expect(await getCalendarEntry(migrated.db,'viewer',created.id,now)).toMatchObject({title:'Service project',version:1})
+  })
+
   it('fails closed for wrong-Outpost access, revoked grants, replayed create keys, invalid ranges, and archived workspaces',async()=>{
     await setWorkspaceTimezone(migrated.db,'editor',{timeZone:'America/Chicago',expectedVersion:null},now)
     const created=await createCalendarEntry(migrated.db,'editor',entry(),now) as {id:string}
     await expect(getCalendarEntry(migrated.db,'other',created.id,now)).rejects.toMatchObject({status:404})
     await expect(createCalendarEntry(migrated.db,'editor',entry(),now)).rejects.toMatchObject({status:409})
     await expect(listCalendarEntries(migrated.db,'viewer',new URLSearchParams({from:'2026-01-01',to:'2026-12-31'}),now)).rejects.toMatchObject({status:400})
-    migrated.sqlite.prepare(`UPDATE outpost_workspaces SET state='read-only' WHERE outpost_id=?`).run(outpost)
+    migrated.sqlite.prepare(`UPDATE content_records SET status='archived',version=version+1 WHERE id=?`).run(outpost)
+    expect((await getWorkspaceSummary(migrated.db,'viewer',now)).workspace).toMatchObject({state:'read-only'})
     await expect(createCalendarEntry(migrated.db,'editor',entry('archived-request'),now)).rejects.toMatchObject({status:423})
     migrated.sqlite.prepare(`UPDATE permission_grants SET state='revoked',ended_at=? WHERE id='view-viewer'`).run(now)
     await expect(getWorkspaceSummary(migrated.db,'viewer',now)).rejects.toMatchObject({status:404})

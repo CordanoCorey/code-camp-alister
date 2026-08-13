@@ -32,8 +32,11 @@ async function requireEditor(db: D1Database, authUserId: string, now: string) {
 
 export async function getWorkspaceSummary(db: D1Database, authUserId: string, now: string) {
   const allowed = await access(db, authUserId, now)
-  const workspace = await db.prepare(`SELECT outpost_id outpostId, time_zone timeZone, state,
-      created_at createdAt, updated_at updatedAt, version FROM outpost_workspaces WHERE outpost_id = ?`)
+  const workspace = await db.prepare(`SELECT workspace.outpost_id outpostId, workspace.time_zone timeZone,
+      CASE WHEN content.status = 'archived' THEN 'read-only' ELSE workspace.state END state,
+      workspace.created_at createdAt, workspace.updated_at updatedAt, workspace.version
+    FROM outpost_workspaces workspace JOIN content_records content ON content.id = workspace.outpost_id
+    WHERE workspace.outpost_id = ?`)
     .bind(allowed.outpostId).first()
   return { workspace, canManage: allowed.canManage }
 }
@@ -41,6 +44,8 @@ export async function getWorkspaceSummary(db: D1Database, authUserId: string, no
 export async function setWorkspaceTimezone(db: D1Database, authUserId: string, input: { timeZone: unknown; expectedVersion: unknown }, now: string) {
   const allowed = await requireEditor(db, authUserId, now)
   const timeZone = validateWorkspaceTimezone(input.timeZone)
+  const outpost = await db.prepare('SELECT status FROM content_records WHERE id = ?').bind(allowed.outpostId).first<{ status: string }>()
+  if (outpost?.status === 'archived') throw new WorkspaceCalendarError('Workspace is read-only.', 423)
   const current = await db.prepare('SELECT version, state FROM outpost_workspaces WHERE outpost_id = ?')
     .bind(allowed.outpostId).first<{ version: number; state: string }>()
   if (!current) {
@@ -90,7 +95,10 @@ export async function getCalendarEntry(db: D1Database, authUserId: string, entry
 }
 
 async function activeWorkspace(db: D1Database, outpostId: string) {
-  const workspace = await db.prepare(`SELECT time_zone timeZone,state FROM outpost_workspaces WHERE outpost_id=?`)
+  const workspace = await db.prepare(`SELECT workspace.time_zone timeZone,
+      CASE WHEN content.status = 'archived' THEN 'read-only' ELSE workspace.state END state
+    FROM outpost_workspaces workspace JOIN content_records content ON content.id=workspace.outpost_id
+    WHERE workspace.outpost_id=?`)
     .bind(outpostId).first<{ timeZone: string; state: string }>()
   if (!workspace) throw new WorkspaceCalendarError('Set the workspace timezone before creating entries.', 409)
   if (workspace.state !== 'active') throw new WorkspaceCalendarError('Workspace is read-only.', 423)
@@ -118,11 +126,16 @@ export async function updateCalendarEntry(db: D1Database, authUserId: string, en
   const workspace = await activeWorkspace(db, allowed.outpostId)
   const input = validateCalendarEntryInput(value)
   if (!Number.isInteger(expectedVersion)) throw new WorkspaceCalendarError('Calendar entry changed.', 409)
-  const result = await db.prepare(`UPDATE outpost_calendar_entries SET title=?,description=?,category=?,start_date=?,end_date=?,start_time=?,end_time=?,all_day=?,time_zone=?,location=?,status=?,updated_at=?,version=version+1
-    WHERE id=? AND outpost_id=? AND status<>'cancelled' AND version=?`).bind(input.title,input.description,input.category,input.startDate,input.endDate,input.startTime,input.endTime,input.allDay?1:0,workspace.timeZone,input.location,input.status,now,entryId,allowed.outpostId,expectedVersion).run()
-  if ((result.meta.changes ?? 0) !== 1) throw new WorkspaceCalendarError('Calendar entry changed.', 409)
-  await db.prepare(`INSERT INTO calendar_entry_events (id,entry_id,outpost_id,event_type,actor_label,summary,entry_version,created_at)
-    VALUES (?,?,?,'updated','Verified Outpost Editor','Group calendar entry updated.',?,?)`).bind(crypto.randomUUID(),entryId,allowed.outpostId,Number(expectedVersion)+1,now).run()
+  const eventId = crypto.randomUUID()
+  await db.batch([
+    db.prepare(`UPDATE outpost_calendar_entries SET title=?,description=?,category=?,start_date=?,end_date=?,start_time=?,end_time=?,all_day=?,time_zone=?,location=?,status=?,updated_at=?,version=version+1
+      WHERE id=? AND outpost_id=? AND status<>'cancelled' AND version=?`).bind(input.title,input.description,input.category,input.startDate,input.endDate,input.startTime,input.endTime,input.allDay?1:0,workspace.timeZone,input.location,input.status,now,entryId,allowed.outpostId,expectedVersion),
+    db.prepare(`INSERT INTO calendar_entry_events (id,entry_id,outpost_id,event_type,actor_label,summary,entry_version,created_at)
+      SELECT ?,id,outpost_id,'updated','Verified Outpost Editor','Group calendar entry updated.',version,?
+      FROM outpost_calendar_entries WHERE id=? AND outpost_id=? AND version=? AND updated_at=?`).bind(eventId,now,entryId,allowed.outpostId,Number(expectedVersion)+1,now),
+  ])
+  const event = await db.prepare('SELECT id FROM calendar_entry_events WHERE id=?').bind(eventId).first()
+  if (!event) throw new WorkspaceCalendarError('Calendar entry changed.', 409)
   return getCalendarEntry(db, authUserId, entryId, now)
 }
 
@@ -130,11 +143,16 @@ export async function cancelCalendarEntry(db: D1Database, authUserId: string, en
   const allowed = await requireEditor(db, authUserId, now)
   await activeWorkspace(db, allowed.outpostId)
   if (!Number.isInteger(expectedVersion)) throw new WorkspaceCalendarError('Calendar entry changed.', 409)
-  const result = await db.prepare(`UPDATE outpost_calendar_entries SET status='cancelled',cancelled_at=?,updated_at=?,version=version+1
-    WHERE id=? AND outpost_id=? AND status<>'cancelled' AND version=?`).bind(now,now,entryId,allowed.outpostId,expectedVersion).run()
-  if ((result.meta.changes ?? 0) !== 1) throw new WorkspaceCalendarError('Calendar entry changed.', 409)
-  await db.prepare(`INSERT INTO calendar_entry_events (id,entry_id,outpost_id,event_type,actor_label,summary,entry_version,created_at)
-    VALUES (?,?,?,'cancelled','Verified Outpost Editor','Group calendar entry cancelled.',?,?)`).bind(crypto.randomUUID(),entryId,allowed.outpostId,Number(expectedVersion)+1,now).run()
+  const eventId = crypto.randomUUID()
+  await db.batch([
+    db.prepare(`UPDATE outpost_calendar_entries SET status='cancelled',cancelled_at=?,updated_at=?,version=version+1
+      WHERE id=? AND outpost_id=? AND status<>'cancelled' AND version=?`).bind(now,now,entryId,allowed.outpostId,expectedVersion),
+    db.prepare(`INSERT INTO calendar_entry_events (id,entry_id,outpost_id,event_type,actor_label,summary,entry_version,created_at)
+      SELECT ?,id,outpost_id,'cancelled','Verified Outpost Editor','Group calendar entry cancelled.',version,?
+      FROM outpost_calendar_entries WHERE id=? AND outpost_id=? AND version=? AND cancelled_at=?`).bind(eventId,now,entryId,allowed.outpostId,Number(expectedVersion)+1,now),
+  ])
+  const event = await db.prepare('SELECT id FROM calendar_entry_events WHERE id=?').bind(eventId).first()
+  if (!event) throw new WorkspaceCalendarError('Calendar entry changed.', 409)
   return getCalendarEntry(db, authUserId, entryId, now)
 }
 
